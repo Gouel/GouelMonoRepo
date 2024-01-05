@@ -1,0 +1,74 @@
+{% extends 'base.j2' %}
+
+{% block title %}Gérer Événement{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+
+    {% include "components/retour.j2" %}
+    <h2 class="text-3xl font-bold mb-4">Gérer Événement: {{ event.title }}</h2>
+
+    <!-- Liens de Gestion transformés en boutons avec icônes -->
+    <div class="my-6 flex justify-start space-x-4">
+        <a href="{{ url_for('admin.manage_volunteers', event_id=event_id) }}"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                groups
+            </span> Gestion des bénévoles
+        </a>
+        <a href="{{ url_for('admin.manage_tickets', event_id=event_id) }}"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                confirmation_number
+            </span> Gestion des tickets
+        </a>
+    </div>
+
+
+    <!-- Formulaire de Modification de l'Événement -->
+    <form action="{{ url_for('admin.manage_event', event_id=event_id) }}" method="post" enctype="multipart/form-data"
+        class="rounded bg-gray-900 p-2">
+        <div class="mb-4">
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="title">Titre</label>
+            <input type="text" id="title" name="title" value="{{ event.title }}"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <!-- Champ Contact -->
+        <div class="mb-4">
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="contact">Contact</label>
+            <input type="text" id="contact" name="contact" value="{{ event.contact }}"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <!-- Champ Image -->
+        <div class="mb-4">
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="image">Image</label>
+            <input type="file" id="image" name="image"
+                class="bg-gray-800 shadow appearance-none border rounded w-full py-2 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <!-- Champ Localisation -->
+        <div class="mb-4">
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="location">Localisation</label>
+            <input type="text" id="location" name="location" value="{{ event.location }}"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <!-- Champ Visibilité -->
+        <div class="mb-4">
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="visibility">Visibilité</label>
+            <select id="visibility" name="visibility"
+                class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="public" {% if event.visibility=='public' %}selected{% endif %}>Public</option>
+                <option value="private" {% if event.visibility=='private' %}selected{% endif %}>Privé</option>
+            </select>
+        </div>
+
+        <button type="submit"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">Modifier</button>
+    </form>
+
+
+</div>
+{% endblock %}

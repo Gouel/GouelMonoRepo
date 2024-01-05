@@ -1,0 +1,252 @@
+{% extends 'base.j2' %}
+
+{% block title %}Acheter des Billets{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    <!-- Bouton Retour -->
+    {% include "components/retour.j2" %}
+    <h2 class="text-2xl font-bold mb-4">Choisissez vos billets</h2>
+
+    <div class="flex flex-col md:flex-row gap-4">
+        <!-- Section des tickets -->
+        <div class="md:flex-1 md:w-3/4">
+            <div id="tickets-list" class="space-y-4">
+                {% for ticket in event.tickets %}
+                {% with id = loop.index - 1 %}
+                {% include 'components/ticket.j2' %}
+                {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Side bar du panier -->
+        {% include 'components/cart.j2' %}
+    </div>
+    <!-- Section Informations -->
+    <div class="mt-4 bg-gray-900 p-4 rounded-lg shadow-2xl">
+        <p><strong>Informations :</strong></p>
+        <ul class="list-disc list-inside">
+            <li>L'identité du premier ticket sera utilisée comme identité par défaut sur la plateforme de paiement
+                (HelloAsso).</li>
+            <li>Les crédits sont une monnaie dématérialisée disponible uniquement pendant l'événement. (Système
+                Cashless 1 crédit = 1€)</li>
+            <li>Une fois le paiement effectué, les tickets seront envoyés accompagnés d'un lien pour voir le solde de
+                crédit et pour se faire rembourser les crédits restant après l'événement.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Modal pour les informations du billet -->
+{% include 'components/modal-ticket.j2' %}
+
+
+
+<script>
+    // Liste globale pour stocker les tickets
+    const event_id = {{ event_id }};
+
+    let ticketsInCart = JSON.parse(`{{ panier }}`);
+    updateCartDisplay();
+
+
+    function openModal(ticketId, price) {
+        document.getElementById('ticket-modal').classList.remove('hidden');
+        document.getElementById('ticket-id').value = ticketId;
+        document.getElementById('ticket-price').value = price;
+    }
+
+    function closeModal() {
+        document.getElementById('ticket-modal').classList.add('hidden');
+    }
+
+    function verifyPriceValid(price) {
+        let p = parseFloat(price) || 0
+        return p > 0 ? p : 0
+    }
+
+    function addToCart(ticketId) {
+        const lastName = document.getElementById('lastName').value;
+        const firstName = document.getElementById('firstName').value;
+        const email = document.getElementById('email').value;
+        const age = document.getElementById('age').value;
+        const credit = document.getElementById('credit-amount').value;
+        const price = document.getElementById('ticket-price').value;
+
+        // Création de l'objet ticket
+        const ticket = {
+            id: ticketId,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            age: age,
+            credit: verifyPriceValid(credit),
+            price: verifyPriceValid(price),
+        };
+
+        if (!verifyTicket(ticket)) {
+            return
+        }
+
+        // Ajoute le ticket à la liste
+        ticketsInCart.push(ticket);
+
+        // Mettre à jour l'affichage du panier
+        updateCartDisplay();
+
+        // Fermer le modal
+        closeModal();
+    }
+
+    function removeFromCart(index) {
+        // Supprime le ticket de la liste
+        ticketsInCart.splice(index, 1);
+
+        // Mettre à jour l'affichage du panier
+        updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+        const cartItems = document.getElementById('cart-items');
+        cartItems.innerHTML = ''; // Réinitialise l'affichage du panier
+
+        ticketsInCart.forEach((ticket, index) => {
+            const ticketElement = document.createElement('div');
+            ticketElement.classList.add('mb-4');
+            ticketElement.innerHTML = `
+                <span>${ticket.lastName} ${ticket.firstName}
+                    <span class="bg-gray-600 p-2 rounded inline-flex items-center">
+                        <span class="text-white-500">${ticket.price}</span>
+                        <i class="iconoir-euro"></i>
+                        <span class="text-white-500">${ticket.credit}</span>
+                        <i class="iconoir-coins"></i>
+                    </span>
+                </span>
+                <button onclick="removeFromCart(${index})" class="text-red-500"><i class="iconoir-xmark-circle"></i></button>
+            `;
+            cartItems.appendChild(ticketElement);
+        });
+
+        updateTotal();
+    }
+
+    function getTotal() {
+        let total = 0;
+        ticketsInCart.forEach((el) => {
+            total += el.price + el.credit;
+        })
+        return total;
+    }
+
+    function updateTotal() {
+        let total = getTotal();
+        // Calculez le total ici en fonction des tickets dans ticketsInCart
+        document.getElementById('cart-total').textContent = total + '€';
+        const checkBtn = document.getElementById('checkout-button');
+        if (total <= 0) {
+            checkBtn.classList.add("opacity-25", "cursor-not-allowed");
+            checkBtn.classList.remove("hover:bg-purple-500", "hover:border-purple-700");
+            checkBtn.disabled = true;
+        } else {
+            checkBtn.classList.remove("opacity-25", "cursor-not-allowed");
+            checkBtn.classList.add("hover:bg-purple-500", "hover:border-purple-700");
+            checkBtn.disabled = false;
+
+        }
+    }
+
+    function verifyName(name, key = "nom") {
+        const forbiddenNames = [
+            "firstname", "lastname", "unknown", "first_name", "last_name",
+            "anonyme", "user", "admin", "name", "nom", "prénom", "test"
+        ];
+
+        if (!name) {
+            return [false, `Le ${key} est vide`];
+        }
+        if (name.length > 255) {
+            return [false, `Le ${key} est trop long`];
+        }
+        if (name.match(/\d/)) {
+            return [false, `Le ${key} ne doit pas contenir de chiffres`];
+        }
+        if (name.length === 1) {
+            return [false, `Le ${key} ne doit pas être un seul caractère`];
+        }
+        if (forbiddenNames.includes(name.toLowerCase())) {
+            return [false, `Le ${key} est interdit`];
+        }
+        if (!name.match(/[aeiouyéèêëàâäôöûüç]/i)) {
+            return [false, `Le ${key} doit contenir au moins une voyelle`];
+        }
+        if (name.match(/(.)\1\1/)) {
+            return [false, `Le ${key} ne doit pas contenir de caractères répétitifs trois fois de suite`];
+        }
+        if (!name.match(/^[a-zA-Zéèêëàâäôöûüç' -]+$/i)) {
+            return [false, `Le ${key} contient des caractères non autorisés`];
+        }
+
+        return [true, `Le ${key} est valide`];
+    }
+
+    function verifyTicket(ticket) {
+
+        if (ticket.lastName == ticket.firstName) {
+            errorSwal("Le nom et le prénom doivent être différent");
+            return false
+        }
+
+        let [isValid, message] = verifyName(ticket.firstName, "prénom");
+        if (!isValid) {
+            errorSwal(message);
+            return false;
+        }
+
+        [isValid, message] = verifyName(ticket.lastName, "nom");
+        if (!isValid) {
+            errorSwal(message);
+            return false;
+        }
+
+        // Vérification du crédit
+        if (ticket.credit < 0) {
+            errorSwal("Le crédit doit être supérieur ou égal à 0");
+            return false;
+        }
+
+        // Vérification de l'email
+        if (!ticket.email.match(/[^@]+@[^@]+\.[^@]+\b/)) {
+            errorSwal("Email non conforme");
+            return false;
+        }
+
+        // Vérification de la date de naissance
+        if (!ticket.age.match(/^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/)) {
+            errorSwal("Date de naissance non conforme");
+            return false;
+        }
+
+        return true
+
+    }
+
+    function errorSwal(message) {
+        Swal.fire({
+            title: "Erreur",
+            text: message,
+            icon: "error"
+        });
+    }
+
+
+    document.getElementById('ticket-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const ticketId = document.getElementById('ticket-id').value;
+        addToCart(ticketId);
+    });
+
+    updateTotal();
+</script>
+
+
+{% endblock %}

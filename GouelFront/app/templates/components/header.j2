@@ -1,0 +1,29 @@
+<header class="bg-gray-700 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <!-- Espace pour le logo -->
+        <div class="logo">
+            <a href="/">
+                <img src="{{ url_for('static', filename='img/icon.svg') }}" alt="Logo Gouel"
+                    class="h-8 w-8 rounded-full">
+            </a>
+        </div>
+
+        <!-- Nom du projet -->
+        <div class="project-name text-xl font-bold">
+            Gouel Front
+        </div>
+
+        <!-- Icônes sociales -->
+        <div class="social-icons flex space-x-4">
+            <!-- Icône GitHub -->
+            <a href="https://github.com/gouel" target="_blank" title="GitHub"><i class="iconoir-github"></i></a>
+
+            <!-- Icône Discord -->
+            <a href="#" target="_blank" title="Discord"><i class="iconoir-discord"></i></a>
+
+            <!-- Icône placeholder pour "X" -->
+            <a href="#" target="_blank" title="X/Twitter"><i class="iconoir-x"></i></a>
+            <!-- Exemple d'icône placeholder -->
+        </div>
+    </div>
+</header>

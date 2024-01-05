@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "fr.iziram.gouel.app-mergeDebugResources-21:/values-night-v31/values-night-v31.xml",
+            "map": [
+                {
+                    "source": "/Users/iziram/Documents/Gouel/Solution/GouelMonoRepo/gouel/android/app/src/main/res/values-night-v31/styles.xml",
+                    "from": {
+                        "startLines": "3,15",
+                        "startColumns": "4,4",
+                        "startOffsets": "173,881",
+                        "endLines": "8,17",
+                        "endColumns": "12,12",
+                        "endOffsets": "530,1045"
+                    },
+                    "to": {
+                        "startLines": "2,8",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,417",
+                        "endLines": "7,10",
+                        "endColumns": "12,12",
+                        "endOffsets": "412,581"
+                    }
+                }
+            ]
+        }
+    ]
+}

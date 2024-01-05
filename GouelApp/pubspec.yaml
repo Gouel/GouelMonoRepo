@@ -1,0 +1,47 @@
+name: gouel
+description: Une application de gestion d'événements
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.1.3 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_native_splash: 2.3.7
+  hive_flutter: ^1.1.0
+  http: ^1.1.0
+  provider: ^6.1.1
+  qr_code_scanner: ^1.0.1
+  url_launcher: ^6.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: AROneSans
+      fonts:
+        - asset: public/fonts/AROneSans.ttf
+  assets:
+    - "public/assets/"
+    - "public/assets/icon.png"
+flutter_native_splash:
+  color: "#232c33"
+  image: "public/assets/icon.png"
+  android: true
+  ios: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+    image_path: "public/assets/icon.png"
+  image_path: "public/assets/icon.png"
+  remove_alpha_ios: true

@@ -1,0 +1,318 @@
+{% extends 'base.j2' %}
+
+{% block title %}Gestion des Bénévoles{% endblock %}
+
+{% block content %}
+
+<div class="container mx-auto p-4 text-white">
+    {% include "components/retour.j2" %}
+    <h2 class="text-3xl font-bold mb-4">Gestion des Bénévoles</h2>
+
+    <div class="flex flex-col justify-center">
+        <!-- Barre de recherche -->
+        <input type="text" id="searchVolunteer" placeholder="Rechercher un bénévole..."
+            class="shadow appearance-none border rounded w-full py-2 px-3 mb-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+
+        <!-- Liste des bénévoles -->
+        <div class="grid md:grid-cols-4 gap-4 mb-4">
+            {% for volunteer in volunteers %}
+            <div class="bg-gray-900 p-4 rounded shadow flex justify-between items-center">
+                <div>
+                    <p>{{ volunteer.nom }} {{ volunteer.prenom }}</p>
+                    <!-- Icônes des droits -->
+                    <div class="flex space-x-2 mt-2">
+                        <!-- Exemple d'icône de droit -->
+                        {% if 'buvette' in volunteer.droits %}
+                        <span class="material-symbols-outlined">
+                            sports_bar
+                        </span>
+                        {% endif %}
+                        {% if 'restauration' in volunteer.droits %}
+                        <span class="material-symbols-outlined">
+                            restaurant
+                        </span>
+                        {% endif %}
+                        {% if 'entrée' in volunteer.droits %}
+                        <span class="material-symbols-outlined">
+                            door_front
+                        </span>
+                        {% endif %}
+                        {% if 'vestiaire' in volunteer.droits %}
+                        <span class="material-symbols-outlined">
+                            inventory_2
+                        </span>
+                        {% endif %}
+                        {% if 'caisse' in volunteer.droits %}
+                        <span class="material-symbols-outlined">
+                            payments
+                        </span>
+                        {% endif %}
+                        {% if 'prevention' in volunteer.droits %}
+                        <span class="material-symbols-outlined">
+                            health_and_safety
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Boutons d'action -->
+                <div class="flex space-x-2">
+                    <!-- Bouton Éditer -->
+                    <button onclick="openEditVolunteerModal({{ volunteer.id }})"
+                        class="focus:outline-none text-blue-500 hover:text-blue-700">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+
+                    <!-- Bouton Supprimer -->
+                    <button onclick="openDeleteVolunteerModal({{ volunteer.id }})"
+                        class="focus:outline-none text-red-500 hover:text-red-700">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Bouton pour ajouter un bénévole -->
+        <button onclick="openAddVolunteerModal()"
+            class="md:w-1/5 border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+            Ajouter un Bénévole
+        </button>
+    </div>
+</div>
+
+<!-- Modal d'ajout de bénévole -->
+<div id="addVolunteerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center">
+        <div class="bg-white rounded-lg p-5 md:max-w-xl md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeAddVolunteerModal()" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Ajouter un Bénévole</h2>
+
+            <form id="addVolunteerForm">
+                <!-- Nom -->
+                <div class="mb-4">
+                    <label for="nom" class="block text-black text-sm font-bold mb-2">Nom:</label>
+                    <input type="text" id="nom" name="nom"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Prénom -->
+                <div class="mb-4">
+                    <label for="prenom" class="block text-black text-sm font-bold mb-2">Prénom:</label>
+                    <input type="text" id="prenom" name="prenom"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label for="email" class="block text-black text-sm font-bold mb-2">Email:</label>
+                    <input type="email" id="email" name="email"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Date de Naissance -->
+                <div class="mb-4">
+                    <label for="dob" class="block text-black text-sm font-bold mb-2">Date de Naissance:</label>
+                    <input type="date" id="dob" name="dob"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Droits -->
+                <div class="mb-6">
+                    <label class="block text-black text-sm font-bold mb-2">Droits:</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Chaque droit avec une icône -->
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="buvette">
+                                <span class="material-symbols-outlined">sports_bar</span> Buvette
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="restauration">
+                                <span class="material-symbols-outlined">restaurant</span> Restauration
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="entree">
+                                <span class="material-symbols-outlined">door_front</span> Entrée
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="vestiaire">
+                                <span class="material-symbols-outlined">inventory_2</span> Vestiaire
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="caisse">
+                                <span class="material-symbols-outlined">payments</span> Caisse
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="prevention">
+                                <span class="material-symbols-outlined">health_and_safety</span> Prévention
+                            </label>
+                        </div>
+                        <!-- Répétez pour chaque droit avec son icône -->
+                    </div>
+                </div>
+
+                <!-- Bouton Ajouter -->
+                <div class="flex justify-center">
+                    <button type="submit"
+                        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Ajouter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddVolunteerModal() {
+        document.getElementById('addVolunteerModal').classList.remove('hidden');
+    }
+
+    function closeAddVolunteerModal() {
+        document.getElementById('addVolunteerModal').classList.add('hidden');
+    }
+
+    // Ajoutez ici le script pour gérer la soumission du formulaire
+</script>
+
+<!-- Modal de modification des droits d'un bénévole -->
+<div id="editVolunteerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeEditVolunteerModal()" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Modifier les Droits du Bénévole</h2>
+
+            <form id="editVolunteerForm">
+                <!-- Droits -->
+                <div class="mb-6">
+                    <label class="block text-black text-sm font-bold mb-2">Droits:</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Chaque droit avec une icône -->
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="buvette">
+                                <span class="material-symbols-outlined">sports_bar</span> Buvette
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="restauration">
+                                <span class="material-symbols-outlined">restaurant</span> Restauration
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="entree">
+                                <span class="material-symbols-outlined">door_front</span> Entrée
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="vestiaire">
+                                <span class="material-symbols-outlined">inventory_2</span> Vestiaire
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="caisse">
+                                <span class="material-symbols-outlined">payments</span> Caisse
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" class="accent" name="droits" value="prevention">
+                                <span class="material-symbols-outlined">health_and_safety</span> Prévention
+                            </label>
+                        </div>
+                        <!-- Répétez pour chaque droit avec son icône -->
+                    </div>
+                </div>
+
+                <!-- Boutons Annuler et Valider -->
+                <div class="flex justify-center mt-4 space-x-2">
+                    <button type="submit"
+                        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Valider
+                    </button>
+                    <button onclick="closeEditVolunteerModal()" type="button"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditVolunteerModal(volunteerId) {
+        // Logique pour charger les données du bénévole et afficher le modal
+        document.getElementById('editVolunteerModal').classList.remove('hidden');
+    }
+
+    function closeEditVolunteerModal() {
+        document.getElementById('editVolunteerModal').classList.add('hidden');
+    }
+</script>
+
+<!-- Modal de suppression d'un bénévole -->
+<div id="deleteVolunteerModal"
+    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeDeleteVolunteerModal()" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Confirmer la Suppression</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce bénévole ? Cette action est irréversible.</p>
+
+            <div class="flex justify-center mt-4">
+                <button onclick="confirmDeleteVolunteer()"
+                    class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded mr-2">Supprimer</button>
+                <button onclick="closeDeleteVolunteerModal()"
+                    class="border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeleteVolunteerModal(volunteerId) {
+        // Logique pour identifier le bénévole à supprimer et afficher le modal
+        document.getElementById('deleteVolunteerModal').classList.remove('hidden');
+    }
+
+    function closeDeleteVolunteerModal() {
+        document.getElementById('deleteVolunteerModal').classList.add('hidden');
+    }
+
+    function confirmDeleteVolunteer() {
+        // Logique pour supprimer le bénévole
+    }
+</script>
+
+
+{% endblock %}

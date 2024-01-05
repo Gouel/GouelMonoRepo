@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "fr.iziram.gouel.app-mergeDebugResources-21:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "/Users/iziram/.gradle/caches/transforms-3/23f34eb679aa78d319ba4cd6be929827/transformed/appcompat-1.4.2/res/values-watch-v20/values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}

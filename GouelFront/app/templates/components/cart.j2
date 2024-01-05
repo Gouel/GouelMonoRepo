@@ -1,0 +1,119 @@
+<div class="md:w-1/4 bg-gray-700 p-4 rounded-lg flex flex-col">
+    <h3 class="text-xl font-bold mb-2 text-center">Votre Panier</h3>
+    <div id="cart-items" class="flex-grow overflow-auto h-full max-h-80 text-center">
+        <!-- Les éléments du panier seront listés ici -->
+    </div>
+
+    <!-- Encadré pour le total -->
+    <div class="mt-4 p-2 border-2 border-gray-500 rounded text-center mb-4 w-4/5 mx-auto">
+        <p>Total: <span id="cart-total">0€</span></p>
+    </div>
+
+    <!-- Bouton Payer -->
+    <button id="checkout-button" disabled
+        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded w-4/5 mx-auto"
+        onclick="paymentProvider()">
+        Payer
+    </button>
+
+</div>
+<style>
+    @keyframes bounce {
+
+        0%,
+        80%,
+        100% {
+            transform: scale(0);
+        }
+
+        40% {
+            transform: scale(1.0);
+        }
+    }
+
+    .loading-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+        background-color: white;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dot:nth-child(1) {
+        animation-delay: -0.32s;
+    }
+
+    .loading-dot:nth-child(2) {
+        animation-delay: -0.16s;
+    }
+</style>
+
+<script>
+
+    async function generateCheckOut() {
+        const checkoutButton = document.getElementById('checkout-button');
+        checkoutButton.innerHTML = `
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+        `;
+        let paymentUrl;
+
+        try {
+            const response = await fetch(`/api/checkout/${event_id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(ticketsInCart)
+            });
+
+            if (!response.ok) {
+                const res = await response.json();
+                Swal.fire({
+                    title: "Erreur",
+                    text: res.error,
+                    icon: "error"
+                });
+                throw new Error(`HTTP error! status: ${response.status} msg = ${res}`);
+
+            }
+
+            const data = await response.json();
+            console.warn(data);
+            paymentUrl = data.redirectUrl;
+        } catch (error) {
+            console.error("Error during checkout process:", error);
+            // Gérer l'erreur ici, par exemple en affichant un message à l'utilisateur
+        }
+
+        return paymentUrl;
+    }
+
+
+    async function paymentProvider() {
+        // Définir l'URL du service de paiement
+        let url = await generateCheckOut();
+        if (url) {
+            Swal.fire({
+                title: "Préparation du paiement",
+                text: "Vous allez être redirigé sur le site de paiement",
+                icon: "info",
+                button: "OK",
+                timer: 4000,
+                timerProgressBar: true,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then((value) => {
+                window.location = url;
+            });
+        }
+    }
+
+</script>

@@ -1,0 +1,39 @@
+{% extends 'base.j2' %}
+
+{% block title %}Tableau de Bord - Admin{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center">
+    <!-- Sidebar Component -->
+    <button onclick="logout()"
+        class="w-4/5 border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">Déconnecter</button>
+
+    <!-- Contenu principal -->
+    <div class="w-3/4 p-4">
+        <div class="grid md:grid-cols-3 gap-4">
+            {% if "superadmin" in user.sessions %}
+            {% for event in all_events %}
+            {% with event_id=loop.index - 1, role="Superadmin" %}
+            {% include 'components/event_block.j2' %}
+            {% endwith %}
+            {% endfor %}
+            {% else %}
+            {% for event_id, role in user.sessions.items() %}
+            {% if role == "admin" %}
+            {% with event=all_events[event_id | int] %}
+            {% include 'components/event_block.j2' %}
+            {% endwith %}
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function logout() {
+        // Logique de déconnexion
+        window.location.href = "/admin/deconnexion"
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ticket</title>
+    <meta name="pdfkit-orientation" content="Landscape" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @page {
+            size: A4 landscape;
+        }
+
+        html,
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Segoe UI Symbol";
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            color: #000;
+            width: 100%;
+            height: auto;
+            text-align: center;
+        }
+
+
+        .header,
+        .footer {
+            background-color: #4b5563;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            border-radius: 10px;
+
+        }
+
+        .body {
+            width: 100%;
+            overflow: hidden;
+            /* Pour contenir les éléments flottants */
+        }
+
+        .content {
+            width: 33.333%;
+            /* Divise l'espace en trois */
+            float: left;
+            /* Flotte à gauche */
+            box-sizing: border-box;
+            /* Pour inclure padding et border dans la largeur */
+        }
+
+        .content img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .part {
+            margin: auto 1;
+            padding: 10px;
+            color: #444;
+            background-color: #eee;
+            border-radius: 5px;
+
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .part h3 {
+            text-align: center;
+            text-decoration: underline;
+            text-decoration-color: #444;
+        }
+
+        .footer img {
+            height: 50px;
+            vertical-align: middle;
+        }
+
+
+        .footer {
+            margin: 0;
+        }
+
+        .qr-code {
+            width: 256px !important;
+            height: 256px !important;
+        }
+
+        .header,
+        .footer {
+            text-align: center;
+            height: 60px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <h1>{{ nom_evenement }}</h1>
+    </header>
+    <div class="ticket-container">
+        <div class="body">
+            <div class="content pre">
+                <div class="part ticket">
+                    <h3>Ticket</h3>
+                    <p class="ticket">{{ type_ticket }}</p>
+                    <div><span>{{ nom }}</span> <span>&MediumSpace;</span> <span>{{ prenom }}</span></div>
+                    <p class="email">{{email}}</p>
+                    <p class="date">{{ date_achat }}</p>
+                </div>
+            </div>
+            <div class="content img"><img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="qr-code"></div>
+            <div class="content aft">
+                <div class="part event">
+                    <h3>{{nom_evenement}}</h3>
+                    <p>{{ description }}</p>
+                    <p>{{ localisation }}</p>
+                    <p>{{ contact }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <footer class="footer">
+        Généré par Gouel
+        <img alt=""
+            src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjwhLS0gQ3JlYXRlZCB3aXRoIFZlY3Rvcm5hdG9yIChodHRwOi8vdmVjdG9ybmF0b3IuaW8vKSAtLT4KPHN2ZyBoZWlnaHQ9IjEwMCUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgc3R5bGU9ImZpbGwtcnVsZTpub256ZXJvO2NsaXAtcnVsZTpldmVub2RkO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDsiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgd2lkdGg9IjEwMCUiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6dmVjdG9ybmF0b3I9Imh0dHA6Ly92ZWN0b3JuYXRvci5pbyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgo8ZGVmcy8+CjxnIGlkPSJJY29uZSIgdmVjdG9ybmF0b3I6bGF5ZXJOYW1lPSJJY29uZSI+CjxwYXRoIGQ9Ik0wIDUxMkMwIDIyOS4yMyAyMjkuMjMgMCA1MTIgMEM3OTQuNzcgMCAxMDI0IDIyOS4yMyAxMDI0IDUxMkMxMDI0IDc5NC43NyA3OTQuNzcgMTAyNCA1MTIgMTAyNEMyMjkuMjMgMTAyNCAwIDc5NC43NyAwIDUxMloiIGZpbGw9IiM0YjVlNmQiIGZpbGwtcnVsZT0ibm9uemVybyIgb3BhY2l0eT0iMSIgc3Ryb2tlPSJub25lIiB2ZWN0b3JuYXRvcjpsYXllck5hbWU9ImJnIi8+CjxwYXRoIGQ9Ik00ODEuODE2IDg5LjQ4NjdDNzE5Ljc1IDYzLjE1NjkgODUxLjg0NCAyODAuMTE1IDg1MS44NDQgMjgwLjExNUM4NTEuODQ0IDI4MC4xMTUgODc2LjMxMiAzMjIuNTE4IDg4Ni4xMTcgMzc0LjMxQzg5MS4zODUgNDAyLjE0MyA4OTcuNDE4IDQ0OC4zMTkgODg3Ljc0NiA0ODcuODNDODc5LjQyIDUyMS44NDMgODU2LjYwNCA1NTAuMjYxIDg0NC44NzQgNTY1LjQxNEM4MTkuNTE3IDU5OC4xNzIgNzAyLjI4MSA3MDIuOTU2IDUzNC45NiA2ODguOTZDNDQ5LjYxIDY4MS44MiAzMzAuMzg2IDY1NS45OTQgMjY2LjYzNiA1OTguOTkzQzIwNC45MTYgNTQzLjgwNyAxNzAuMjUxIDQ4MS43MjYgMTcwLjI1MSA0ODEuNzI2TDEzMi41MDIgNDg4Ljk1NUMxMzIuNTAyIDQ4OC45NTUgMTEzLjExNCA0MDQuODUgMTUyLjcyNyAzMTguNzk1QzE5NC4xMTYgMjI4Ljg4MSAyNzYuMzYgMTEyLjIyMyA0ODEuODE2IDg5LjQ4NjdaIiBmaWxsPSIjZmZmZmZmIiBmaWxsLXJ1bGU9Im5vbnplcm8iIG9wYWNpdHk9IjEiIHN0cm9rZT0ibm9uZSIgdmVjdG9ybmF0b3I6bGF5ZXJOYW1lPSJ0w6p0ZSIvPgo8ZyBvcGFjaXR5PSIxIiB2ZWN0b3JuYXRvcjpsYXllck5hbWU9InlldXgiPgo8cGF0aCBkPSJNMzIwLjI3NSA0MTYuODQzQzMyMC4yNzUgMzgzLjU2NiAzNDcuNDIyIDM1Ni41OSAzODAuOTExIDM1Ni41OUM0MTQuMzk5IDM1Ni41OSA0NDEuNTQ3IDM4My41NjYgNDQxLjU0NyA0MTYuODQzQzQ0MS41NDcgNDUwLjEyIDQxNC4zOTkgNDc3LjA5NiAzODAuOTExIDQ3Ny4wOTZDMzQ3LjQyMiA0NzcuMDk2IDMyMC4yNzUgNDUwLjEyIDMyMC4yNzUgNDE2Ljg0M1oiIGZpbGw9IiM0YjVlNmQiIGZpbGwtcnVsZT0ibm9uemVybyIgb3BhY2l0eT0iMSIgc3Ryb2tlPSJub25lIiB2ZWN0b3JuYXRvcjpsYXllck5hbWU9ImdhdWNoZSIvPgo8cGF0aCBkPSJNNjM2LjkxMyA0MTYuODQzQzYzNi45MTMgMzgzLjU2NiA2NjQuMDYxIDM1Ni41OSA2OTcuNTQ5IDM1Ni41OUM3MzEuMDM4IDM1Ni41OSA3NTguMTg1IDM4My41NjYgNzU4LjE4NSA0MTYuODQzQzc1OC4xODUgNDUwLjEyIDczMS4wMzggNDc3LjA5NiA2OTcuNTQ5IDQ3Ny4wOTZDNjY0LjA2MSA0NzcuMDk2IDYzNi45MTMgNDUwLjEyIDYzNi45MTMgNDE2Ljg0M1oiIGZpbGw9IiM0YjVlNmQiIGZpbGwtcnVsZT0ibm9uemVybyIgb3BhY2l0eT0iMSIgc3Ryb2tlPSJub25lIiB2ZWN0b3JuYXRvcjpsYXllck5hbWU9ImRyb2l0Ii8+CjwvZz4KPHBhdGggZD0iTTQ0MS45NDEgNTA3LjY4NkM0NDEuOTQxIDUwNy42ODYgNDYyLjM5NSA0NDUuOTIgNTI2Ljc3OCA0NDUuNTIzQzU5OC4wOTQgNDQ1LjA4MyA2MTUuNTU2IDUwNi45MDUgNjE1LjU1NiA1MDYuOTA1QzYxNS41NTYgNTA2LjkwNSA1ODkuMjQ1IDUxMy43MDQgNTY3Ljc1NyA1MjcuNTU3QzU0Ni4yNjkgNTQxLjQxMSA1MjkuNjA0IDU2Mi4zMjEgNTI5LjYwNCA1NjIuMzIxQzUyOS42MDQgNTYyLjMyMSA1MTEuNjkyIDU0MC4yNDEgNDg5Ljc3NiA1MjYuNTgzQzQ2Ny44NiA1MTIuOTI0IDQ0MS45NDEgNTA3LjY4NiA0NDEuOTQxIDUwNy42ODZaIiBmaWxsPSIjZmZmMGIxIiBmaWxsLXJ1bGU9Im5vbnplcm8iIG9wYWNpdHk9IjEiIHN0cm9rZT0ibm9uZSIgdmVjdG9ybmF0b3I6bGF5ZXJOYW1lPSJCZWMiLz4KPHBhdGggZD0iTTg4Ny4yMTYgNDg0LjgzNUM5MTIuNjUgNDk3LjIyMiA5NDQuNjQzIDUxNC44OSA5NDQuNjgzIDU2OS45NDdDOTQ0LjcyNCA2MjUuMDA1IDg5My40NzMgNjk2LjE4MSA4ODcuMzc4IDcwNS4wNjVDODgyLjMzOCA3MTIuNDEzIDgyNS44NzEgODA3Ljk1NyA3NTguODk5IDg1NC4zNTlDNzIzLjU3NiA4NzguODMzIDY1Ny45ODUgOTAzLjc2IDU5NS45MzQgOTEzLjQyOUM1MzIuNDY5IDkyMy4zMTggNDcyLjU5NyA5MTcuNjMxIDQ0Mi42NTUgOTE0LjE0OEM0MTMuNjI4IDkxMC43NzIgMzA4Ljc2MiA4ODQuMjkyIDIzMy44NzcgODI0LjY2OUMxOTIuOTI5IDc5Mi4wNjYgMTE0LjA0NCA2OTQuOTc3IDc5Ljk3MjYgNjIwLjAxMUM0NS45MDE0IDU0NS4wNDQgMTQ0LjU5MiA0NTguOTM0IDE3MC45NTYgNDgyLjg3MkMxOTIuNTI1IDUwMi40NTcgMjE2LjA0NiA1NDUuNjczIDI1Mi4zMDUgNTc5LjMyNEMyOTYuMDc3IDYxOS45NDcgMzUzLjIzNyA2NTAuNDc0IDM4MC4zMDggNjU4Ljg2NkM0MjIuMDc1IDY3MS44MTQgNTg4LjQ4MyA2OTUuMzc5IDY5Ni44ODggNjYxLjU2NUM4MDIuMjMyIDYyOC43MDYgODUwLjE5NyA1MzguNjkzIDg1Mi42ODYgNTMzLjU5Qzg1Ni4zNTQgNTI2LjA2NyA4ODMuMzAxIDQ4Mi45MjggODg3LjIxNiA0ODQuODM1WiIgZmlsbD0iI2RkYmNmZiIgZmlsbC1ydWxlPSJub256ZXJvIiBvcGFjaXR5PSIxIiBzdHJva2U9Im5vbmUiIHZlY3Rvcm5hdG9yOmxheWVyTmFtZT0iQ291cmJlIDEiLz4KPHBhdGggZD0iTTUzOS4yMyA2OTguODc5TDUwOS40ODUgNzUwLjYwN0w0NTAuNzg1IDc2Mi43MzNMNDkxLjEwMSA4MDYuODI4TDQ4NC41NjggODY2LjA1TDUzOS4yMyA4NDEuNTc1TDU5My44OTIgODY2LjA1TDU4Ny4zNTggODA2LjgyOEw2MjcuNjc1IDc2Mi43MzNMNTY4Ljk3NSA3NTAuNjA3TDUzOS4yMyA2OTguODc5WiIgZmlsbD0iI2ZmZjBiMSIgZmlsbC1ydWxlPSJub256ZXJvIiBvcGFjaXR5PSIxIiBzdHJva2U9Im5vbmUiIHZlY3Rvcm5hdG9yOmxheWVyTmFtZT0iw4l0b2lsZSAxIi8+CjwvZz4KPC9zdmc+Cg==" />
+    </footer>
+</body>
+
+</html>

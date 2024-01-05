@@ -1,0 +1,10 @@
+<div class="bg-gray-200 p-4 rounded shadow">
+    <h4 class="font-bold mb-2">{{ event.title }}</h4>
+    <p>Rôle: {{ role | capitalize }}</p>
+    <button
+        class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 py-2 px-4 rounded">
+        <a href="{{ url_for('admin.manage_event', event_id=event_id) }}" class="text-gray-200">Gérer
+            l'événement</a>
+    </button>
+
+</div>

@@ -1,0 +1,129 @@
+{% extends 'base.j2' %}
+
+{% block title %}Solde / Transactions - Gouel Front{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    <div class="text-center mb-6">
+        <h2 class="text-5xl font-bold mb-4">Solde Actuel:</h2>
+        <h3 class="text-5xl font-bold mb-4 inline-flex items-center justify-center">{{ user.solde }} <i
+                class="iconoir-coins ml-2"></i></h3>
+        <div>
+            <button id="recharge-button"
+                class="border-b-4 bg-blue-600 border-blue-800 hover:bg-blue-500 hover:border-blue-700 text-white font-bold py-2 px-4 rounded mx-2"
+                onclick="recharge()">
+                Recharger
+            </button>
+            <button
+                class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded mx-2">
+                Rembourser
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 p-4 rounded-lg shadow-lg">
+        <h3 class="text-2xl font-bold mb-4">Transactions</h3>
+        <ul>
+            <li class="text-lg font-bold mb-4">Total dépensé : {{ total_depense }}€</li>
+            {% for transaction in user.transactions %}
+            {% set transaction_total = transaction.price * transaction.number %}
+            <li class="mb-2 bg-gray-700 p-2 rounded shadow">
+                <span class="font-semibold">{{ transaction.title }} (x{{ transaction.number }})</span>
+                - {{ transaction.price }}€ unité
+                - Total: {{ transaction_total }}€
+                - <span class="text-gray-400">{{ transaction.date | dateformat }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<script>
+    function recharge() {
+        Swal.fire({
+            title: 'Montant à créditer',
+            input: 'number',
+            inputAttributes: {
+                min: 1,
+                step: 1
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Recharger',
+            cancelButtonText: 'Annuler',
+
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            },
+            inputValidator: (value) => {
+                return new Promise((resolve) => {
+                    if (value >= 1) {
+                        resolve();
+                    } else {
+                        resolve('Le montant doit être d\'au moins 1€');
+                    }
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Traitement en cours...',
+                    text: 'Veuillez patienter',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    },
+                    didOpen: () => {
+                        Swal.showLoading();
+                        rechargeAccount(result.value);
+                    }
+                });
+            }
+        });
+    }
+
+    function rechargeAccount(amount) {
+        fetch(`/api/recharge/1`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ credit: parseInt(amount) })
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(response.json().error);
+                }
+            })
+            .then(data => {
+                Swal.fire({
+                    title: "Préparation du paiement",
+                    text: "Vous allez être redirigé sur le site de paiement",
+                    icon: "info",
+                    button: "OK",
+                    timer: 4000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                }).then((value) => {
+                    window.location.href = data.redirectUrl;
+                });
+            })
+            .catch(error => {
+                Swal.fire('Erreur', error.message, 'error');
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.j2' %}
+
+{% block title %}Page Introuvable{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    <div class="text-center">
+        <h2 class="text-5xl font-bold mb-4">404</h2>
+        <p class="text-xl">Oups! La page que vous cherchez n'existe pas.</p>
+        <a href="{{ url_for('main.index') }}"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 inline-block">Retour à
+            l'accueil</a>
+    </div>
+</div>
+{% endblock %}
