@@ -46,36 +46,58 @@ WIP
 
 #### GouelApp
 
-Page de connexion
+##### Page de connexion
+
 ![Alt text](Images/screenshots/GouelApp/ecran.login.png)
-Page choix de l'événement
+
+##### Page choix de l'événement
+
 ![Alt text](Images/screenshots/GouelApp/ecran.events.png)
-Page d'accueil de l’événement
+
+##### Page d'accueil de l’événement
+
 ![Alt text](Images/screenshots/GouelApp/ecran.accueil.png)
-Page Caisse
+
+##### Page Caisse
+
 ![Alt text](Images/screenshots/GouelApp/ecran.caisse.png)
-Page Entrée
+
+##### Page Entrée
+
 ![Alt text](Images/screenshots/GouelApp/ecran.entree.accueuil.png)
 ![Alt text](Images/screenshots/GouelApp/ecran.entree.infos.png)
 ![Alt text](Images/screenshots/GouelApp/ecran.entree.valide.png)
-Page Vestiaire
+
+##### Page Vestiaire
+
 ![Alt text](Images/screenshots/GouelApp/ecran.vestaire.accueil.png)
 ![Alt text](Images/screenshots/GouelApp/ecran.vestiaire.options.png)
 ![Alt text](Images/screenshots/GouelApp/ecran.vestiaire.options.png)
 
 #### GouelFront
 
-Page accueil
+##### Page accueil
+
 ![Alt text](Images/screenshots/GouelFront/accueil.png)
-Page choix billets
+
+##### Page choix billets
+
 ![Alt text](Images/screenshots/GouelFront/billets.png)
-Page Admin
+
+##### Page Admin
+
 ![Alt text](Images/screenshots/GouelFront/admin.png)
-Page gestion événement
+
+##### Page gestion événement
+
 ![Alt text](Images/screenshots/GouelFront/event.png)
-Page gestion bénévoles
+
+##### Page gestion bénévoles
+
 ![Alt text](Images/screenshots/GouelFront/benevoles.png)
-Page gestion tickets
+
+##### Page gestion tickets
+
 ![Alt text](Images/screenshots/GouelFront/event-billets.png)
 
 ## Technologies
