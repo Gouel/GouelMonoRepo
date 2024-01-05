@@ -134,11 +134,11 @@ WIP
 
 ## License
 
-Distribué sous la licence [MIT](https://github.com/gouel/GouelMonoRepo/blob/main/LICENSE.md).
+Distribué sous la licence [MIT](https://github.com/gouel/GouelMonoRepo/blob/main/LICENSE).
 
 ## Auteurs
 
-* **Matthias Hartmann** - *Développeur fullstack* - [Matthias Hartmann](https://github.com/Iziram) - *Création de la solution*
+* **Matthias Hartmann** - *Développeur fullstack* - [Iziram](https://github.com/Iziram) - *Création de la solution*
 
 ## Remerciements
 
