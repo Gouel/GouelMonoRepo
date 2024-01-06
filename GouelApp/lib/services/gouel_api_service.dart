@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gouel/models/event_model.dart';
 import 'package:gouel/models/ticket_model.dart';
+import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_session_service.dart';
 import 'package:gouel/services/gouel_request.dart';
 import 'package:gouel/utils/gouel_exception.dart';
@@ -198,6 +199,28 @@ class GouelApiService with ChangeNotifier {
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  // Users
+
+  Future<bool> addTransaction(String userId, Transaction transaction) async {
+    try {
+      await GouelRequest.post("/users/$userId/transaction")
+          .send(context, data: transaction.toJson());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<String?> addUser(Map<String, dynamic> user) async {
+    try {
+      Map<String, String> response =
+          await GouelRequest.post("/users").send(context, data: user);
+      return response["user_id"];
+    } catch (e) {
+      return null;
     }
   }
 }

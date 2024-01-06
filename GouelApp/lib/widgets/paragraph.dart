@@ -18,6 +18,8 @@ class Paragraph extends StatelessWidget {
   final String content;
   final List<String>? items;
   final Image? image;
+  final MaterialColor? color;
+  final TextAlign? textAlign;
 
   const Paragraph({
     Key? key,
@@ -25,6 +27,8 @@ class Paragraph extends StatelessWidget {
     this.content = '',
     this.items,
     this.image,
+    this.color,
+    this.textAlign = TextAlign.left,
   }) : super(key: key);
 
   static space() {
@@ -37,28 +41,30 @@ class Paragraph extends StatelessWidget {
       case ParagraphType.text:
         return Text(
           content,
-          style: const TextStyle(fontSize: 16),
-          textAlign: TextAlign.left,
+          style: TextStyle(fontSize: 16, color: color),
+          textAlign: textAlign,
         );
       case ParagraphType.hint:
         return Text(
           content,
-          style: const TextStyle(
-              fontSize: 12, fontStyle: FontStyle.italic, color: Colors.white60),
-          textAlign: TextAlign.left,
+          style: TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: color ?? Colors.white60),
+          textAlign: textAlign,
         );
       case ParagraphType.heading:
         return Text(
           content,
           style: Theme.of(context).textTheme.titleLarge,
-          textAlign: TextAlign.left,
+          textAlign: textAlign,
         );
       case ParagraphType.link:
         return InkWell(
           child: Text(
             content,
-            style: const TextStyle(fontSize: 16, color: Colors.blue),
-            textAlign: TextAlign.left,
+            style: TextStyle(fontSize: 16, color: color ?? Colors.blue),
+            textAlign: textAlign,
           ),
           onTap: () {
             try {
@@ -75,10 +81,18 @@ class Paragraph extends StatelessWidget {
               .map((item) => Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('• ', style: TextStyle(fontSize: 16)),
+                      Text(
+                        '• ',
+                        style: TextStyle(fontSize: 16, color: color),
+                        textAlign: textAlign,
+                      ),
                       Expanded(
-                          child:
-                              Text(item, style: const TextStyle(fontSize: 16))),
+                        child: Text(
+                          item,
+                          style: TextStyle(fontSize: 16, color: color),
+                          textAlign: textAlign,
+                        ),
+                      ),
                     ],
                   ))
               .toList(),
@@ -92,11 +106,18 @@ class Paragraph extends StatelessWidget {
               .map((entry) => Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${entry.key + 1}. ',
-                          style: const TextStyle(fontSize: 16)),
+                      Text(
+                        '${entry.key + 1}. ',
+                        style: TextStyle(fontSize: 16, color: color),
+                        textAlign: textAlign,
+                      ),
                       Expanded(
-                          child: Text(entry.value,
-                              style: const TextStyle(fontSize: 16))),
+                        child: Text(
+                          entry.value,
+                          style: TextStyle(fontSize: 16, color: color),
+                          textAlign: textAlign,
+                        ),
+                      ),
                     ],
                   ))
               .toList(),

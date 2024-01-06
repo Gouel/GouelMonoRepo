@@ -140,8 +140,8 @@ func processPurchase(event_id string, userID string, items models.PurchaseItems)
 			return 0, fmt.Errorf("le produit %s n'est plus en vente", item.ProductCode)
 		}
 
-		if product.Is_Adult && !isUserAdult(user["DOB"].(string)) {
-			return 0, fmt.Errorf("l'utilisateur n'a pas l'âge requis pour acheter le produit %s", item.ProductCode)
+		if product.Is_Adult && !isUserAdult(user["DOB"].(string), user["isSam"].(bool)) {
+			return 0, fmt.Errorf("l'utilisateur n'a pas le droit d'acheter le produit %s", item.ProductCode)
 		}
 
 		totalCost += product.Price * float64(item.Amount)
@@ -149,7 +149,12 @@ func processPurchase(event_id string, userID string, items models.PurchaseItems)
 	return totalCost, nil
 }
 
-func isUserAdult(dob string) bool {
+func isUserAdult(dob string, isSam bool) bool {
+
+	if isSam {
+		return false
+	}
+
 	// Convertir la chaîne de date de naissance en time.Time
 	dobTime, err := time.Parse("2006-01-02", dob)
 	if err != nil {

@@ -83,8 +83,14 @@ class GouelStepBuilderState extends State<GouelStepBuilder> {
                   : _currentStep == widget.steps.length - 1
                       ? IconButton(
                           onPressed: _validate,
-                          icon: const Icon(Icons.check,
-                              color: Colors.blue, size: 32),
+                          icon: Icon(
+                              widget.formData["validate"]
+                                  ? Icons.check
+                                  : Icons.error,
+                              color: widget.formData["validate"]
+                                  ? Colors.blue
+                                  : Colors.red,
+                              size: 32),
                         )
                       : const SizedBox(width: 32), // Maintenir l'alignement
             ],

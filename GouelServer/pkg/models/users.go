@@ -26,9 +26,10 @@ type PurchaseItems []struct {
 }
 
 type Transaction struct {
-	Type    string        `bson:"type,omitempty"` // ex: "credit", "debit" , "refund"
-	Date    string        `bson:"date,omitempty"` // Format: "YYYY-MM-DDTHH:MM"
-	EventID string        `bson:"event_id,omitempty"`
-	Cart    PurchaseItems `bson:"cart,omitempty"`
-	Amount  float64       `bson:"amount,omitempty"`
+	Type         string        `bson:"type,omitempty"` // ex: "credit", "debit" , "refund"
+	Date         string        `bson:"date,omitempty"` // Format: "YYYY-MM-DDTHH:MM"
+	EventID      string        `bson:"event_id,omitempty"`
+	Cart         PurchaseItems `bson:"cart,omitempty"`
+	Amount       float64       `bson:"amount,omitempty"`
+	PayementType string        `bson:"payement_type,omitempty"` // "espece", "carte", "helloasso" ...
 }
