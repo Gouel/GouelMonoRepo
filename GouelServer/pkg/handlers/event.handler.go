@@ -11,18 +11,18 @@ import (
 
 // GET
 
-func GetAllEventsIDsHandler(c *gin.Context) {
+func GetAllEventsIdsHandler(c *gin.Context) {
 	// Logique pour obtenir tous les IDs d'événements
-	eventIDs, err := database.GetAllEventsIDs()
+	eventIds, err := database.GetAllEventsIds()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, eventIDs)
+	c.JSON(http.StatusOK, eventIds)
 }
 
 func GetAccessibleEventsHandler(c *gin.Context) {
-	userID, exists := c.Get("userID")
+	userId, exists := c.Get("userId")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Identifiant utilisateur non trouvé"})
 		return
@@ -34,7 +34,7 @@ func GetAccessibleEventsHandler(c *gin.Context) {
 		return
 	}
 
-	events, err := database.GetAccessibleEvents(userID.(string), userRole.(string))
+	events, err := database.GetAccessibleEvents(userId.(string), userRole.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,9 +43,9 @@ func GetAccessibleEventsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, events)
 }
 
-func GetEventByIDHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	event, err := database.GetEventByID(eventID)
+func GetEventByIdHandler(c *gin.Context) {
+	eventId := c.Param("event_id")
+	event, err := database.GetEventById(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -53,8 +53,8 @@ func GetEventByIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, event)
 }
 func GetSimpleEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	event, err := database.GetSimpleEvent(eventID)
+	eventId := c.Param("event_id")
+	event, err := database.GetSimpleEvent(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -62,8 +62,8 @@ func GetSimpleEventHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, event)
 }
 func GetEventProductsHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	products, err := database.GetEventProducts(eventID)
+	eventId := c.Param("event_id")
+	products, err := database.GetEventProducts(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,9 +71,9 @@ func GetEventProductsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, products)
 }
 func GetEventProductsCodeHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	product_code := c.Param("product_code")
-	products, err := database.GetEventProductsByCode(eventID, product_code)
+	products, err := database.GetEventProductsByCode(eventId, product_code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -81,8 +81,8 @@ func GetEventProductsCodeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, products)
 }
 func GetEventAdminsHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	admins, err := database.GetEventAdmins(eventID)
+	eventId := c.Param("event_id")
+	admins, err := database.GetEventAdmins(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,8 +90,8 @@ func GetEventAdminsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, admins)
 }
 func GetEventVolunteersHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	volunteers, err := database.GetEventVolunteers(eventID)
+	eventId := c.Param("event_id")
+	volunteers, err := database.GetEventVolunteers(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -100,8 +100,8 @@ func GetEventVolunteersHandler(c *gin.Context) {
 }
 
 func GetEventLockersHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	lockers, err := database.GetEventLockers(eventID)
+	eventId := c.Param("event_id")
+	lockers, err := database.GetEventLockers(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -110,8 +110,8 @@ func GetEventLockersHandler(c *gin.Context) {
 }
 
 func GetEventTicketsHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	tickets, err := database.GetEventTickets(eventID)
+	eventId := c.Param("event_id")
+	tickets, err := database.GetEventTickets(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -128,33 +128,16 @@ func AddEventHandler(c *gin.Context) {
 		return
 	}
 
-	eventID, err := database.AddEvent(newEvent)
+	eventId, err := database.AddEvent(newEvent)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"event_id": eventID})
+	c.JSON(http.StatusOK, gin.H{"event_id": eventId})
 }
-func AddAdminToEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
 
-	var adminData struct {
-		AdminID string `json:"admin_id"`
-	}
-	if err := c.ShouldBindJSON(&adminData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
-		return
-	}
-
-	err := database.AddAdminToEvent(eventID, adminData.AdminID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Admin ajouté avec succès"})
-}
 func AddTicketToEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var ticketData models.EventTicket
 	if err := c.ShouldBindJSON(&ticketData); err != nil {
@@ -162,10 +145,7 @@ func AddTicketToEventHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.AddTicketToEvent(eventID, bson.M{
-		"title": ticketData.Title,
-		"price": ticketData.Price,
-	})
+	err := database.AddEventTicketToEvent(eventId, ticketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -173,7 +153,7 @@ func AddTicketToEventHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Ticket ajouté avec succès"})
 }
 func AddLockerToEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var lockerData models.Locker
 	if err := c.ShouldBindJSON(&lockerData); err != nil {
@@ -181,10 +161,7 @@ func AddLockerToEventHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.AddLockerToEvent(eventID, bson.M{
-		"code": lockerData.Code,
-		"user": lockerData.User,
-	})
+	err := database.AddLockerToEvent(eventId, lockerData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -193,7 +170,7 @@ func AddLockerToEventHandler(c *gin.Context) {
 }
 
 func AddRangeOfLockersHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var lockerRangeData struct {
 		Start  int    `json:"start"`
@@ -206,7 +183,7 @@ func AddRangeOfLockersHandler(c *gin.Context) {
 		return
 	}
 
-	lockers, err := database.AddRangeOfLockersToEvent(eventID, lockerRangeData.Start, lockerRangeData.End, lockerRangeData.Prefix, lockerRangeData.Suffix)
+	lockers, err := database.AddRangeOfLockersToEvent(eventId, lockerRangeData.Start, lockerRangeData.End, lockerRangeData.Prefix, lockerRangeData.Suffix)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -215,7 +192,7 @@ func AddRangeOfLockersHandler(c *gin.Context) {
 }
 
 func AddVolunteerToEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var volunteerData models.Volunteer
 	if err := c.ShouldBindJSON(&volunteerData); err != nil {
@@ -223,10 +200,7 @@ func AddVolunteerToEventHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.AddVolunteerToEvent(eventID, bson.M{
-		"user_id":     volunteerData.User_ID,
-		"permissions": volunteerData.Permissions,
-	})
+	err := database.AddVolunteerToEvent(eventId, volunteerData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -235,7 +209,7 @@ func AddVolunteerToEventHandler(c *gin.Context) {
 }
 
 func AddProductToEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var productData models.Product
 	if err := c.ShouldBindJSON(&productData); err != nil {
@@ -243,13 +217,7 @@ func AddProductToEventHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.AddProductToEvent(eventID, bson.M{
-		"icon":        productData.Icon,
-		"end_of_sale": productData.End_Of_Sale,
-		"label":       productData.Label,
-		"price":       productData.Price,
-		"adult":       productData.Is_Adult,
-	})
+	err := database.AddProductToEvent(eventId, productData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -260,7 +228,7 @@ func AddProductToEventHandler(c *gin.Context) {
 // PUT
 
 func UpdateEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var eventData bson.M
 	if err := c.ShouldBindJSON(&eventData); err != nil {
@@ -268,7 +236,7 @@ func UpdateEventHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.UpdateEvent(eventID, eventData)
+	err := database.UpdateEvent(eventId, eventData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -277,7 +245,7 @@ func UpdateEventHandler(c *gin.Context) {
 }
 
 func UpdateLockerHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
 	var lockerData models.Locker
 	if err := c.ShouldBindJSON(&lockerData); err != nil {
@@ -285,7 +253,7 @@ func UpdateLockerHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.UpdateLocker(eventID, lockerData.Code, &lockerData.User)
+	err := database.UpdateLocker(eventId, lockerData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -294,7 +262,7 @@ func UpdateLockerHandler(c *gin.Context) {
 }
 
 func UpdateProductHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	product_code := c.Param("product_code")
 
 	var productData bson.M
@@ -303,7 +271,7 @@ func UpdateProductHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.UpdateProduct(eventID, product_code, productData)
+	err := database.UpdateProduct(eventId, product_code, productData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -311,18 +279,15 @@ func UpdateProductHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Produit mis à jour avec succès"})
 }
 
-func UpdateVolunteerPermissionsHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	userID := c.Param("user_id")
+func UpdateVolunteerHandler(c *gin.Context) {
+	eventId := c.Param("event_id")
 
-	var permissionsData struct {
-		Permissions []string `json:"permissions"`
-	}
-	if err := c.ShouldBindJSON(&permissionsData); err != nil {
+	var volunteer models.Volunteer
+	if err := c.ShouldBindJSON(&volunteer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
-	err := database.UpdateVolunteerPermissions(eventID, userID, permissionsData.Permissions)
+	err := database.UpdateVolunteer(eventId, volunteer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -331,7 +296,7 @@ func UpdateVolunteerPermissionsHandler(c *gin.Context) {
 }
 
 func UpdateTicketHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	ticketCode := c.Param("ticket_code")
 
 	var ticketData bson.M
@@ -340,7 +305,7 @@ func UpdateTicketHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.UpdateTicket(eventID, ticketCode, ticketData)
+	err := database.UpdateEventTicket(eventId, ticketCode, ticketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -351,9 +316,9 @@ func UpdateTicketHandler(c *gin.Context) {
 // DELETE
 
 func DeleteEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
-	err := database.DeleteEvent(eventID)
+	err := database.DeleteEvent(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -361,10 +326,10 @@ func DeleteEventHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé avec succès"})
 }
 func DeleteEventTicketHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	ticketCode := c.Param("ticket_code")
 
-	err := database.DeleteEventTicket(eventID, ticketCode)
+	err := database.DeleteEventTicket(eventId, ticketCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -372,10 +337,10 @@ func DeleteEventTicketHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Ticket supprimé avec succès"})
 }
 func DeleteLockerHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	lockerCode := c.Param("locker_code")
 
-	err := database.DeleteLocker(eventID, lockerCode)
+	err := database.DeleteLocker(eventId, lockerCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -383,9 +348,9 @@ func DeleteLockerHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Casier supprimé avec succès"})
 }
 func DeleteAllLockersHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
-	err := database.DeleteAllLockers(eventID)
+	err := database.DeleteAllLockers(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -393,10 +358,10 @@ func DeleteAllLockersHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Tous les casiers ont été supprimés avec succès"})
 }
 func DeleteVolunteerHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	userID := c.Param("user_id")
+	eventId := c.Param("event_id")
+	userId := c.Param("user_id")
 
-	err := database.DeleteVolunteer(eventID, userID)
+	err := database.DeleteVolunteer(eventId, userId)
 	if err != nil {
 		// Intercepter l'erreur spécifique et renvoyer un code d'erreur approprié
 		if err.Error() == "impossible de supprimer un bénévole qui est également administrateur" {
@@ -410,24 +375,13 @@ func DeleteVolunteerHandler(c *gin.Context) {
 }
 
 func DeleteProductHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	productCode := c.Param("product_code")
 
-	err := database.DeleteProduct(eventID, productCode)
+	err := database.DeleteProduct(eventId, productCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Produit supprimé avec succès"})
-}
-func DeleteAdminHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
-	adminID := c.Param("admin_id")
-
-	err := database.DeleteAdmin(eventID, adminID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Administrateur supprimé avec succès"})
 }

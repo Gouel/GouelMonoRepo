@@ -14,7 +14,7 @@ import (
 
 // <=== Lecture de la BDD ===>
 
-func GetAllEventsIDs() ([]string, error) {
+func GetAllEventsIds() ([]string, error) {
 	var ids []string
 	collection := Database.Collection("events")
 
@@ -39,7 +39,7 @@ func GetAllEventsIDs() ([]string, error) {
 	return ids, nil
 }
 
-func GetAccessibleEvents(userID, userRole string) ([]models.Event, error) {
+func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 	var events []models.Event
 	collection := Database.Collection("events")
 
@@ -53,7 +53,7 @@ func GetAccessibleEvents(userID, userRole string) ([]models.Event, error) {
 		filter = bson.M{
 			"$or": []bson.M{
 				{"public": true},
-				{"admins": userID},
+				{"volunteers": bson.M{"$elemMatch": bson.M{"userId": userId, "isAdmin": true}}},
 			},
 		}
 	}
@@ -74,15 +74,15 @@ func GetAccessibleEvents(userID, userRole string) ([]models.Event, error) {
 	return events, nil
 }
 
-func GetEventByID(eventID string) (bson.M, error) {
+func GetEventById(eventId string) (bson.M, error) {
 	var event bson.M
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
@@ -90,15 +90,15 @@ func GetEventByID(eventID string) (bson.M, error) {
 	return event, nil
 }
 
-func GetSimpleEvent(eventID string) (bson.M, error) {
+func GetSimpleEvent(eventId string) (bson.M, error) {
 	var event bson.M
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}, options.FindOne().SetProjection(bson.M{"title": 1, "public": 1, "description": 1, "location": 1, "contact": 1, "image_url": 1})).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}, options.FindOne().SetProjection(bson.M{"title": 1, "public": 1, "description": 1, "location": 1, "contact": 1})).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
@@ -106,42 +106,42 @@ func GetSimpleEvent(eventID string) (bson.M, error) {
 	return event, nil
 }
 
-func GetEventProducts(eventID string) (interface{}, error) {
+func GetEventProducts(eventId string) (interface{}, error) {
 	var event bson.M
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
 	return event["products"], nil
 }
 
-func GetEventProductsByCode(eventID, productCode string) (*models.Product, error) {
+func GetEventProductsByCode(eventId, productCode string) (*models.Product, error) {
 	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, err := primitive.ObjectIDFromHex(eventID)
+	objId, err := primitive.ObjectIDFromHex(eventId)
 	if err != nil {
 		return nil, err
 	}
 
 	// Récupérer l'événement spécifique
-	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	err = collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
 
 	// Rechercher le produit par son code dans la liste des produits de l'événement
 	for _, product := range event.Products {
-		if product.Code == productCode {
+		if product.ProductCode == productCode {
 			return &product, nil
 		}
 	}
@@ -149,83 +149,88 @@ func GetEventProductsByCode(eventID, productCode string) (*models.Product, error
 	return nil, fmt.Errorf("produit avec le code %s non trouvé dans l'événement", productCode)
 }
 
-func GetEventAdmins(eventID string) (interface{}, error) {
-	var event bson.M
+func GetEventAdmins(eventId string) (interface{}, error) {
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
 
-	return event["admins"], nil
+	admins := []models.Volunteer{}
+
+	for _, volunteer := range event.Volunteers {
+		if volunteer.IsAdmin {
+			admins = append(admins, volunteer)
+		}
+	}
+
+	return admins, nil
 }
 
-func GetEventVolunteers(eventID string) (interface{}, error) {
-	var event bson.M
+func GetEventVolunteers(eventId string) (interface{}, error) {
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
 
-	return event["volunteers"], nil
+	return event.Volunteers, nil
 }
 
-func GetEventLockers(eventID string) (interface{}, error) {
-	var event bson.M
+func GetEventLockers(eventId string) (interface{}, error) {
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
 
-	return event["lockers"], nil
+	return event.Lockers, nil
 }
 
-func GetEventTickets(eventID string) (interface{}, error) {
-	var event bson.M
+func GetEventTickets(eventId string) (interface{}, error) {
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
 		return nil, err
 	}
 
-	return event["tickets"], nil
+	return event.EventTickets, nil
 }
 
 // pour token
 
-func GetUserEventsRoles(userID string) ([]models.EventRole, error) {
+func GetUserEventsRoles(userId string) ([]models.EventRole, error) {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	filter := bson.M{
-		"$or": []bson.M{
-			{"volunteers.user": userID},
-			{"admins": userID},
-		},
+		"volunteers": bson.M{"$elemMatch": bson.M{"userId": userId}},
 	}
 
 	cursor, err := collection.Find(ctx, filter)
@@ -244,39 +249,30 @@ func GetUserEventsRoles(userID string) ([]models.EventRole, error) {
 		var role string
 		var permissions []string
 
-		if isUserInAdmins(event.Admins, userID) {
-			role = "Admin"
-			permissions = make([]string, 0)
-		} else {
+		volunteer, found := getVolunteerFromEvent(event.Volunteers, userId)
+		if found {
+			permissions = volunteer.Permissions
 			role = "Volunteer"
-			volunteer, found := getVolunteerFromEvent(event.Volunteers, userID)
-			if found {
-				permissions = volunteer.Permissions
+			if volunteer.IsAdmin {
+				role = "Admin"
 			}
+		} else {
+			role = "User"
 		}
 
 		eventsRoles = append(eventsRoles, models.EventRole{
-			EventID: event.ID.Hex(),
-			Role:    role,
-			Rights:  permissions,
+			EventId:     event.ID.Hex(),
+			Role:        role,
+			Permissions: permissions,
 		})
 	}
 
 	return eventsRoles, nil
 }
 
-func isUserInAdmins(admins []string, userID string) bool {
-	for _, admin := range admins {
-		if admin == userID {
-			return true
-		}
-	}
-	return false
-}
-
-func getVolunteerFromEvent(volunteers []models.Volunteer, userID string) (models.Volunteer, bool) {
+func getVolunteerFromEvent(volunteers []models.Volunteer, userId string) (models.Volunteer, bool) {
 	for _, volunteer := range volunteers {
-		if volunteer.User_ID == userID {
+		if volunteer.UserId == userId {
 			return volunteer, true
 		}
 	}
@@ -292,11 +288,10 @@ func AddEvent(event models.Event) (string, error) {
 	defer cancel()
 
 	// Initialiser les champs à des valeurs par défaut
-	event.Admins = []string{}
 	event.Volunteers = make([]models.Volunteer, 0)
 	event.Lockers = make([]models.Locker, 0)
 	event.Products = make([]models.Product, 0)
-	event.Tickets = make([]models.EventTicket, 0)
+	event.EventTickets = make([]models.EventTicket, 0)
 
 	result, err := collection.InsertOne(ctx, event)
 	id := ""
@@ -308,63 +303,50 @@ func AddEvent(event models.Event) (string, error) {
 	return id, err
 }
 
-func AddAdminToEvent(eventID string, admin string) error {
+func AddEventTicketToEvent(eventId string, eventTicket models.EventTicket) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	update := bson.M{"$push": bson.M{"admins": admin}}
-
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
-	return err
-}
-
-func AddTicketToEvent(eventID string, ticket bson.M) error {
-	collection := Database.Collection("events")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
 	code := uuid.New().String()
-	ticket["code"] = code
+	eventTicket.EventTicketCode = code
 
-	update := bson.M{"$push": bson.M{"tickets": ticket}}
+	update := bson.M{"$push": bson.M{"eventTickets": eventTicket}}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
 }
 
-func AddVolunteerToEvent(eventID string, volunteer bson.M) error {
+func AddVolunteerToEvent(eventId string, volunteer models.Volunteer) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 	update := bson.M{"$push": bson.M{"volunteers": volunteer}}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
 }
 
-func AddLockerToEvent(eventID string, locker bson.M) error {
+func AddLockerToEvent(eventId string, locker models.Locker) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 	update := bson.M{"$push": bson.M{"lockers": locker}}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
 }
 
-func AddRangeOfLockersToEvent(eventID string, start, end int, prefix, suffix string) ([]models.Locker, error) {
+func AddRangeOfLockersToEvent(eventId string, start, end int, prefix, suffix string) ([]models.Locker, error) {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -378,7 +360,7 @@ func AddRangeOfLockersToEvent(eventID string, start, end int, prefix, suffix str
 	for i := start; i <= end; i++ {
 		// Générer le code avec le nombre de chiffres constants
 		lockerCode := fmt.Sprintf("%s%0*d%s", prefix, digitCount, i, suffix)
-		lockers = append(lockers, models.Locker{Code: lockerCode, User: ""})
+		lockers = append(lockers, models.Locker{LockerCode: lockerCode, UserId: ""})
 	}
 
 	// Préparer la mise à jour pour ajouter les casiers
@@ -386,13 +368,13 @@ func AddRangeOfLockersToEvent(eventID string, start, end int, prefix, suffix str
 		"$push": bson.M{"lockers": bson.M{"$each": lockers}},
 	}
 
-	objID, err := primitive.ObjectIDFromHex(eventID)
+	objId, err := primitive.ObjectIDFromHex(eventId)
 	if err != nil {
 		return nil, err
 	}
 
 	// Exécuter la mise à jour
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	if err != nil {
 		return nil, err
 	}
@@ -400,62 +382,57 @@ func AddRangeOfLockersToEvent(eventID string, start, end int, prefix, suffix str
 	return lockers, nil
 }
 
-func AddProductToEvent(eventID string, product bson.M) error {
+func AddProductToEvent(eventId string, product models.Product) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
 	code := uuid.New().String()
-	product["code"] = code
+	product.ProductCode = code
 
 	update := bson.M{"$push": bson.M{"products": product}}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
 }
 
 // <=== Modif dans la BDD ===>
 
-func UpdateEvent(eventID string, updateData bson.M) error {
+func UpdateEvent(eventId string, updateData bson.M) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": updateData})
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": updateData})
 	return err
 }
 
-func UpdateLocker(eventID string, lockerCode string, userID *string) error {
+func UpdateLocker(eventId string, locker models.Locker) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	var update bson.M
-	if userID != nil {
-		update = bson.M{"$set": bson.M{"lockers.$.user": *userID}}
-	} else {
-		update = bson.M{"$set": bson.M{"lockers.$.user": nil}}
-	}
+	update := bson.M{"$set": bson.M{"lockers.$.user": locker.UserId}}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID, "lockers.code": lockerCode}, update)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "lockers.lockerCode": locker.LockerCode}, update)
 	return err
 }
 
-func UpdateProduct(eventID, productCode string, updateData bson.M) error {
+func UpdateProduct(eventId, productCode string, updateData bson.M) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
 	// Créer un nouveau bson.M pour la mise à jour avec l'opérateur $.
 	setUpdateData := bson.M{}
@@ -463,28 +440,36 @@ func UpdateProduct(eventID, productCode string, updateData bson.M) error {
 		setUpdateData["products.$."+key] = value
 	}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID, "products.code": productCode}, bson.M{"$set": setUpdateData})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "products.code": productCode}, bson.M{"$set": setUpdateData})
 	return err
 }
 
-func UpdateVolunteerPermissions(eventID string, userID string, permissions []string) error {
+func UpdateVolunteer(eventId string, volunteer models.Volunteer) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID, "volunteers.user_id": userID}, bson.M{"$set": bson.M{"volunteers.$.permissions": permissions}})
+	objId, _ := primitive.ObjectIDFromHex(eventId)
+	_, err := collection.UpdateOne(ctx, bson.M{
+		"_id":                objId,
+		"volunteers.user_id": volunteer.UserId},
+		bson.M{"$set": bson.M{
+			"volunteers.$.permissions": volunteer.Permissions,
+			"volunteers.$.isAdmin":     volunteer.IsAdmin,
+		},
+		},
+	)
 	return err
 }
 
-func UpdateTicket(eventID, ticketCode string, updateData bson.M) error {
+func UpdateEventTicket(eventId, eventTicketCode string, updateData bson.M) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
 	// Créer un nouveau bson.M pour la mise à jour avec l'opérateur $.
 	setUpdateData := bson.M{}
@@ -492,56 +477,56 @@ func UpdateTicket(eventID, ticketCode string, updateData bson.M) error {
 		setUpdateData["tickets.$."+key] = value
 	}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID, "tickets.code": ticketCode}, bson.M{"$set": setUpdateData})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "eventTickets.EventTicketCode": eventTicketCode}, bson.M{"$set": setUpdateData})
 	return err
 }
 
 // <=== Suppression dans la BDD ===>
 
-func DeleteEvent(eventID string) error {
+func DeleteEvent(eventId string) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": objId})
 	return err
 }
 
-func DeleteEventTicket(eventID, ticketCode string) error {
+func DeleteEventTicket(eventId, eventTicketCode string) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$pull": bson.M{"tickets": bson.M{"code": ticketCode}}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"eventTickets": bson.M{"eventTicketCode": eventTicketCode}}})
 	return err
 }
 
-func DeleteLocker(eventID, lockerCode string) error {
+func DeleteLocker(eventId, lockerCode string) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$pull": bson.M{"lockers": bson.M{"code": lockerCode}}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"lockers": bson.M{"lockerCode": lockerCode}}})
 	return err
 }
 
-func DeleteAllLockers(eventID string) error {
+func DeleteAllLockers(eventId string) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// Convertir l'ID de l'événement en ObjectID
-	objID, err := primitive.ObjectIDFromHex(eventID)
+	objId, err := primitive.ObjectIDFromHex(eventId)
 	if err != nil {
 		return err
 	}
@@ -551,7 +536,7 @@ func DeleteAllLockers(eventID string) error {
 		"$set": bson.M{"lockers": []models.Locker{}}, // Définir les casiers à une liste vide
 	}
 
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	if err != nil {
 		return err
 	}
@@ -559,54 +544,42 @@ func DeleteAllLockers(eventID string) error {
 	return nil
 }
 
-func DeleteVolunteer(eventID, userID string) error {
+func DeleteVolunteer(eventId, userId string) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, err := primitive.ObjectIDFromHex(eventID)
+	objId, err := primitive.ObjectIDFromHex(eventId)
 	if err != nil {
 		return err
 	}
 
 	// Vérifier si l'utilisateur est un administrateur de l'événement
 	var event models.Event
-	if err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&event); err != nil {
+	if err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event); err != nil {
 		return err
 	}
 
-	for _, adminID := range event.Admins {
-		if adminID == userID {
+	for _, volunteer := range event.Volunteers {
+		if volunteer.UserId == userId && volunteer.IsAdmin {
 			return fmt.Errorf("impossible de supprimer un bénévole qui est également administrateur")
 		}
 	}
 
 	// Supprimer le bénévole si ce n'est pas un administrateur
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$pull": bson.M{"volunteers": bson.M{"user_id": userID}}})
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"volunteers": bson.M{"userId": userId}}})
 	return err
 }
 
-func DeleteProduct(eventID, productCode string) error {
+func DeleteProduct(eventId, productCode string) error {
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(eventID)
+	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$pull": bson.M{"products": bson.M{"code": productCode}}})
-	return err
-}
-
-func DeleteAdmin(eventID, adminID string) error {
-	collection := Database.Collection("events")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objID, _ := primitive.ObjectIDFromHex(eventID)
-
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$pull": bson.M{"admins": adminID}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"products": bson.M{"code": productCode}}})
 	return err
 }

@@ -5,25 +5,22 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gouel/gouel_serveur/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func CreateTicket(userID, eventID, ticketCode string, isSpecial bool) (string, error) {
+func CreateTicket(userId, eventId, eventTicketCode string, wasPurchased bool) (string, error) {
 	collection := Database.Collection("tickets")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	newTicket := bson.M{
-		"user": userID,
-		"event": bson.M{
-			"event_id":    eventID,
-			"ticket_code": ticketCode,
-		},
-		"valid":   false,
-		"SAM":     false,
-		"special": isSpecial,
+	newTicket := models.Ticket{
+		EventId:      eventId,
+		IsSam:        false,
+		IsUsed:       false,
+		WasPurchased: wasPurchased,
 	}
 
 	result, err := collection.InsertOne(ctx, newTicket)
@@ -32,32 +29,32 @@ func CreateTicket(userID, eventID, ticketCode string, isSpecial bool) (string, e
 	}
 
 	// Obtenez l'ID du nouveau ticket
-	newTicketID := result.InsertedID.(primitive.ObjectID)
-	return newTicketID.Hex(), nil
+	newTicketId := result.InsertedID.(primitive.ObjectID)
+	return newTicketId.Hex(), nil
 }
 
-func ValidateTicket(ticketID, eventID string) (int, error) {
+func ValidateTicket(ticketId, eventId string) (int, error) {
 	collection := Database.Collection("tickets")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(ticketID)
+	objId, _ := primitive.ObjectIDFromHex(ticketId)
 
 	// Trouver le ticket et vérifier s'il est déjà validé
-	var ticket bson.M
-	err := collection.FindOne(ctx, bson.M{"_id": objID, "event.event_id": eventID}).Decode(&ticket)
+	var ticket models.Ticket
+	err := collection.FindOne(ctx, bson.M{"_id": objId, "eventId": eventId}).Decode(&ticket)
 	if err != nil {
 		return 1, err // Retourne l'erreur si le ticket n'est pas trouvé
 	}
 
 	// Vérifier si le ticket est déjà validé
-	if ticket["valid"].(bool) {
-		return 2, fmt.Errorf("le ticket avec l'ID %s est déjà validé", ticketID)
+	if ticket.IsUsed {
+		return 2, fmt.Errorf("le ticket avec l'ID %s est déjà validé", ticketId)
 	}
 
 	// Mettre à jour le ticket pour le valider
-	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.M{"$set": bson.M{"valid": true}})
+	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"isUsed": true}})
 	if result.Err() != nil {
 		return 3, result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
 	}
@@ -65,47 +62,47 @@ func ValidateTicket(ticketID, eventID string) (int, error) {
 	return 0, nil
 }
 
-func SetSAM(ticketID, eventID string, isSAM bool) error {
+func SetSAM(ticketId, eventId string, isSam bool) error {
 	collection := Database.Collection("tickets")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	objID, _ := primitive.ObjectIDFromHex(ticketID)
+	objId, _ := primitive.ObjectIDFromHex(ticketId)
 	// Mettre à jour le ticket pour le valider
-	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objID, "event.event_id": eventID}, bson.M{"$set": bson.M{"SAM": isSAM}})
+	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId, "eventId": eventId}, bson.M{"$set": bson.M{"isSam": isSam}})
 	if result.Err() != nil {
 		return result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
 	}
 	return nil
 }
 
-func DeleteTicket(ticketID string) error {
+func DeleteTicket(ticketId string) error {
 	collection := Database.Collection("tickets")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(ticketID)
+	objId, _ := primitive.ObjectIDFromHex(ticketId)
 
-	_, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": objId})
 	return err
 }
 
-func GetTicketInfo(ticketID string, eventID *string) (bson.M, error) {
+func GetTicketInfo(ticketId string, eventId *string) (*models.Ticket, error) {
 	collection := Database.Collection("tickets")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objID, _ := primitive.ObjectIDFromHex(ticketID)
+	objId, _ := primitive.ObjectIDFromHex(ticketId)
 
-	var ticket bson.M
+	var ticket models.Ticket
 
 	var filter bson.M
 
-	if eventID != nil {
-		filter = bson.M{"_id": objID, "event.event_id": eventID}
+	if eventId != nil {
+		filter = bson.M{"_id": objId, "eventId": eventId}
 	} else {
-		filter = bson.M{"_id": objID}
+		filter = bson.M{"_id": objId}
 	}
 
 	err := collection.FindOne(ctx, filter).Decode(&ticket)
@@ -113,33 +110,25 @@ func GetTicketInfo(ticketID string, eventID *string) (bson.M, error) {
 		return nil, err
 	}
 
-	user, err := userFromTicker(ctx, ticket)
+	user, err := userFromTicket(ctx, ticket)
 	if err != nil {
 		return nil, err
 	}
-	ticket["user"] = user
-	return ticket, nil
+	ticket.User = user
+	return &ticket, nil
 }
 
-func userFromTicker(ctx context.Context, ticket primitive.M) (bson.M, error) {
-	var user bson.M
-	userId, _ := primitive.ObjectIDFromHex(ticket["user"].(string))
+func userFromTicket(ctx context.Context, ticket models.Ticket) (*models.User, error) {
+	var user models.User
+	userId, _ := primitive.ObjectIDFromHex(ticket.UserId)
 	err := Database.Collection("users").FindOne(ctx, bson.M{"_id": userId}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
-	userReturn := bson.M{
-		"firstName": user["firstName"],
-		"lastName":  user["lastName"],
-		"email":     user["email"],
-		"dob":       user["dob"],
-		"user_id":   user["_id"].(primitive.ObjectID).Hex(),
-	}
-
-	return userReturn, nil
+	return &user, nil
 }
 
-func GetAllTicketsFromEvent(eventID string) (bson.A, error) {
+func GetAllTicketsFromEvent(eventId string) (bson.A, error) {
 	collection := Database.Collection("tickets")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -154,15 +143,15 @@ func GetAllTicketsFromEvent(eventID string) (bson.A, error) {
 	tickets := make(bson.A, 0)
 
 	for cursor.Next(ctx) {
-		var ticket bson.M
+		var ticket models.Ticket
 		if err := cursor.Decode(&ticket); err != nil {
 			continue
 		}
-		user, err := userFromTicker(ctx, ticket)
+		user, err := userFromTicket(ctx, ticket)
 		if err != nil {
 			continue
 		}
-		ticket["user"] = user
+		ticket.User = user
 		tickets = append(tickets, ticket)
 	}
 	return tickets, nil

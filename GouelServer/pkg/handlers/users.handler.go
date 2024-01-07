@@ -23,9 +23,9 @@ func FindUsersByEmailStartsWithHandler(c *gin.Context) {
 }
 
 // GetUserByIDHandler gère la récupération d'un utilisateur par son ID
-func GetUserByIDHandler(c *gin.Context) {
-	userID := c.Param("user_id")
-	user, err := database.GetUserByID(userID)
+func GetUserByIdHandler(c *gin.Context) {
+	userId := c.Param("user_id")
+	user, err := database.GetUserById(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -40,16 +40,16 @@ func CreateUserHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	userID, err := database.CreateUser(newUser)
+	userId, err := database.CreateUser(newUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user_id": userID})
+	c.JSON(http.StatusOK, gin.H{"user_id": userId})
 }
 
 func UpdateUserHandler(c *gin.Context) {
-	userID := c.Param("user_id")
+	userId := c.Param("user_id")
 
 	var updateData bson.M
 	if err := c.ShouldBindJSON(&updateData); err != nil {
@@ -58,7 +58,7 @@ func UpdateUserHandler(c *gin.Context) {
 	}
 
 	// Mettre à jour l'utilisateur dans la base de données
-	err := database.UpdateUser(userID, updateData)
+	err := database.UpdateUser(userId, updateData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -67,7 +67,7 @@ func UpdateUserHandler(c *gin.Context) {
 }
 
 func AddUserTransactionHandler(c *gin.Context) {
-	userID := c.Param("user_id")
+	userId := c.Param("user_id")
 
 	var transaction models.Transaction
 	if err := c.ShouldBindJSON(&transaction); err != nil {
@@ -75,7 +75,7 @@ func AddUserTransactionHandler(c *gin.Context) {
 		return
 	}
 
-	err := database.AddUserTransaction(userID, transaction)
+	err := database.AddUserTransaction(userId, transaction)
 	if err != nil {
 		// Gérer les erreurs spécifiques retournées par AddUserTransaction
 		if err.Error() == "solde insuffisant" {
@@ -93,24 +93,24 @@ func AddUserTransactionHandler(c *gin.Context) {
 }
 
 func UserPayHandler(c *gin.Context) {
-	userID := c.Param("user_id")
-	event_id := c.Param("event_id")
+	ticketId := c.Param("ticket_id")
+	eventId := c.Param("event_id")
 
-	var purchaseItems models.PurchaseItems
+	var purchaseItems []models.PurchaseProduct
 	if err := c.ShouldBindJSON(&purchaseItems); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
 
 	// Logique pour traiter l'achat
-	totalCost, err := processPurchase(event_id, userID, purchaseItems)
+	totalCost, err := processPurchase(eventId, ticketId, purchaseItems)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Générer une transaction de débit
-	err = addDebitTransaction(userID, totalCost, purchaseItems)
+	err = addDebitTransaction(ticketId, totalCost, purchaseItems)
 	if err != nil {
 		if err.Error() == "solde insuffisant" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -123,40 +123,40 @@ func UserPayHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Achat effectué avec succès", "total_cost": totalCost})
 }
 
-func processPurchase(event_id string, userID string, items models.PurchaseItems) (float64, error) {
-	var totalCost float64
-	user, err := database.GetUserByID(userID)
+func processPurchase(eventId, ticketId string, items []models.PurchaseProduct) (float32, error) {
+	var totalCost float32
+	ticket, err := database.GetTicketInfo(ticketId, &eventId)
 	if err != nil {
 		return 0, err
 	}
 
 	for _, item := range items {
-		product, err := database.GetEventProductsByCode(event_id, item.ProductCode)
+		product, err := database.GetEventProductsByCode(eventId, item.ProductCode)
 		if err != nil {
 			return 0, err
 		}
 
-		if hasEnded(product.End_Of_Sale) {
+		if hasEnded(product.EndOfSale) {
 			return 0, fmt.Errorf("le produit %s n'est plus en vente", item.ProductCode)
 		}
 
-		if product.Is_Adult && !isUserAdult(user["DOB"].(string), user["isSam"].(bool)) {
+		if product.HasAlcohol && !isUserAdult(*ticket) {
 			return 0, fmt.Errorf("l'utilisateur n'a pas le droit d'acheter le produit %s", item.ProductCode)
 		}
 
-		totalCost += product.Price * float64(item.Amount)
+		totalCost += product.Price * float32(item.Amount)
 	}
 	return totalCost, nil
 }
 
-func isUserAdult(dob string, isSam bool) bool {
+func isUserAdult(ticket models.Ticket) bool {
 
-	if isSam {
+	if ticket.IsSam {
 		return false
 	}
 
 	// Convertir la chaîne de date de naissance en time.Time
-	dobTime, err := time.Parse("2006-01-02", dob)
+	dobTime, err := time.Parse("2006-01-02", ticket.User.DOB)
 	if err != nil {
 		fmt.Println("Erreur lors de la conversion de la date de naissance :", err)
 		return false // Retourner false si la date de naissance n'est pas valide
@@ -179,7 +179,7 @@ func hasEnded(endOfSale string) bool {
 	return time.Now().After(endOfSaleTime)
 }
 
-func addDebitTransaction(userID string, amount float64, cart models.PurchaseItems) error {
+func addDebitTransaction(userId string, amount float32, cart []models.PurchaseProduct) error {
 	// Créer une transaction de débit
 	debitTransaction := models.Transaction{
 		Type:   "debit",
@@ -189,7 +189,7 @@ func addDebitTransaction(userID string, amount float64, cart models.PurchaseItem
 	}
 
 	// Utiliser AddUserTransaction pour mettre à jour le solde de l'utilisateur et enregistrer la transaction
-	err := database.AddUserTransaction(userID, debitTransaction)
+	err := database.AddUserTransaction(userId, debitTransaction)
 	if err != nil {
 		return err // Gérer les erreurs, par exemple, solde insuffisant
 	}

@@ -37,7 +37,7 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			c.Set("userID", claims["user_id"])
+			c.Set("userId", claims["userId"])
 			c.Set("role", claims["role"])
 			c.Set("events", claims["events"])
 		} else {
@@ -67,7 +67,7 @@ func RoleAuthorizationMiddleware(requiredRoles ...string) gin.HandlerFunc {
 
 		// Si c'est une requête avec un event On peut regarder si on a le droit admin
 
-		eventID := c.Param("event_id")
+		eventId := c.Param("event_id")
 		eventsValue, eventsExists := c.Get("events")
 
 		var events []interface{}
@@ -75,10 +75,10 @@ func RoleAuthorizationMiddleware(requiredRoles ...string) gin.HandlerFunc {
 			events = eventsValue.([]interface{})
 		}
 
-		if eventID != "" {
+		if eventId != "" {
 			for _, e := range events {
 				event := e.(map[string]interface{})
-				if event["event_id"] == eventID {
+				if event["event_id"] == eventId {
 					if event["role"] == "ADMIN" {
 						c.Next() // Le rôle correspond, continue avec le prochain handler
 						return
@@ -112,7 +112,7 @@ func EventAuthorizationMiddleware(requiredRights ...string) gin.HandlerFunc {
 			return
 		}
 
-		eventID := c.Param("event_id")
+		eventId := c.Param("event_id")
 		hasAccess := false
 
 		var events []interface{}
@@ -122,7 +122,7 @@ func EventAuthorizationMiddleware(requiredRights ...string) gin.HandlerFunc {
 
 		for _, e := range events {
 			event := e.(map[string]interface{})
-			if event["event_id"] == eventID {
+			if event["event_id"] == eventId {
 				if event["role"] == "ADMIN" {
 					hasAccess = true
 					break
@@ -179,13 +179,13 @@ func EventAccessMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		eventID := c.Param("event_id")
+		eventId := c.Param("event_id")
 		hasAccess := false
 
 		// Vérifier si l'utilisateur est Administrateur ou Volunteer de l'event
 		for _, e := range events {
 			event := e.(map[string]interface{})
-			if event["event_id"] == eventID {
+			if event["event_id"] == eventId {
 				if event["role"] == "ADMIN" || event["role"] == "Volunteer" {
 					hasAccess = true
 					break

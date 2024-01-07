@@ -69,6 +69,7 @@ func setupSuperAdmin(cfg config.Config) {
 		DOB:       dob,
 		Password:  password,
 		Role:      "SUPERADMIN",
+		Solde:     0,
 	}
 
 	_, err := database.CreateUser(superAdmin)
@@ -89,6 +90,7 @@ func setupAPI(cfg config.Config) {
 		DOB:       "2000-01-01",
 		Password:  password,
 		Role:      "API",
+		Solde:     0,
 	}
 
 	_, err := database.CreateUser(userAPI)

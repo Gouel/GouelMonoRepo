@@ -12,7 +12,6 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/gouel/gouel_serveur/pkg/config"
 	"github.com/gouel/gouel_serveur/pkg/database"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func AuthRoute(c *gin.Context) {
@@ -40,6 +39,8 @@ func AuthRoute(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(user)
+
 	// Générer le token JWT
 	token, err := createToken(user.ID.Hex(), user.Role, cfg.JWTSecretKey, int64(cfg.JWTExpiration))
 	if err != nil {
@@ -59,7 +60,7 @@ func AuthRouteTicket(c *gin.Context) {
 
 	// Récupération de l'user_id depuis la requête
 	var loginInfo struct {
-		TicketID string `json:"ticket_id"` // Modifié pour commencer par une majuscule
+		TicketId string `json:"ticketId"` // Modifié pour commencer par une majuscule
 	}
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
@@ -67,22 +68,22 @@ func AuthRouteTicket(c *gin.Context) {
 	}
 
 	// Vérifier le ticket
-	ticketInfo, err := database.GetTicketInfo(loginInfo.TicketID, nil)
+	ticketInfo, err := database.GetTicketInfo(loginInfo.TicketId, nil)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "ticket invalid"})
 		return
 	}
 
-	userID := ticketInfo["user"].(bson.M)["user_id"].(string)
+	userId := ticketInfo.UserId
 	// Vérifier l'user
-	user, err := database.GetUserByID(userID)
+	user, err := database.GetUserById(userId)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user invalid"})
 		return
 	}
 
 	// Générer le token JWT
-	token, err := createToken(userID, user["role"].(string), cfg.JWTSecretKey, int64(cfg.JWTExpiration))
+	token, err := createToken(userId, user.Role, cfg.JWTSecretKey, int64(cfg.JWTExpiration))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création du token"})
 		return
@@ -98,10 +99,12 @@ func RefreshRoute(c *gin.Context) {
 		log.Fatalf("Erreur lors du chargement de la configuration: %v", err)
 	}
 
-	userID, _ := c.Get("userID")
+	userId, _ := c.Get("userId")
 	role, _ := c.Get("role")
 
-	token, err := createToken(userID.(string), role.(string), cfg.JWTSecretKey, int64(cfg.JWTExpiration))
+	fmt.Println(userId, role)
+
+	token, err := createToken(userId.(string), role.(string), cfg.JWTSecretKey, int64(cfg.JWTExpiration))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création du token"})
 		return
@@ -110,20 +113,22 @@ func RefreshRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-func createToken(userID, role, secretKey string, expirationMinutes int64) (string, error) {
+func createToken(userId, role, secretKey string, expirationMinutes int64) (string, error) {
 	expirationTime := time.Now().Add(time.Duration(expirationMinutes) * time.Minute)
 
-	eventsRoles, err := database.GetUserEventsRoles(userID)
+	eventsRoles, err := database.GetUserEventsRoles(userId)
 	if err != nil {
 		return "", err
 	}
 
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"role":    role,
-		"exp":     expirationTime.Unix(),
-		"events":  eventsRoles,
+		"userId": userId,
+		"role":   role,
+		"exp":    expirationTime.Unix(),
+		"events": eventsRoles,
 	}
+
+	fmt.Println(claims)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secretKey))

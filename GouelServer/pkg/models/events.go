@@ -3,45 +3,47 @@ package models
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Event struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	Title       string             `bson:"title,omitempty"`
-	Public      bool               `bson:"public,omitempty"`
-	Description string             `bson:"description,omitempty"`
-	Location    string             `bson:"location,omitempty"`
-	Contact     string             `bson:"contact,omitempty"`
-	ImageURL    string             `bson:"image_url,omitempty"`
-	Tickets     []EventTicket      `bson:"tickets,omitempty"`
-	Volunteers  []Volunteer        `bson:"volunteers,omitempty"`
-	Admins      []string           `bson:"admins,omitempty"`
-	Products    []Product          `bson:"products,omitempty"`
-	Lockers     []Locker           `bson:"lockers,omitempty"`
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Title        string             `bson:"title,omitempty"`
+	IsPublic     bool               `bson:"isPublic,omitempty"`
+	Description  string             `bson:"description,omitempty"`
+	Location     string             `bson:"location,omitempty"`
+	Contact      string             `bson:"contact,omitempty"`
+	EventTickets []EventTicket      `bson:"eventTickets,omitempty"`
+	Volunteers   []Volunteer        `bson:"volunteers,omitempty"`
+	Products     []Product          `bson:"products,omitempty"`
+	Lockers      []Locker           `bson:"lockers,omitempty"`
 }
 
 type EventTicket struct {
-	Code  string  `bson:"code,omitempty"`
-	Title string  `bson:"title,omitempty"`
-	Price float64 `bson:"price,omitempty"`
+	EventTicketCode string  `bson:"EventTicketCode,omitempty"`
+	Title           string  `bson:"title,omitempty"`
+	Price           float64 `bson:"price,omitempty"`
 }
 
 type Volunteer struct {
-	User_ID     string   `bson:"user,omitempty"`        // ID de l'utilisateur
+	UserId      string   `bson:"userId,omitempty"`      // ID de l'utilisateur
 	Permissions []string `bson:"permissions,omitempty"` // Liste des permissions
+	IsAdmin     bool     `bson:"isAdmin, omitempty"`
 }
 type Product struct {
-	Code        string  `bson:"code,omitempty"`
+	ProductCode string  `bson:"productCode,omitempty"`
 	Label       string  `bson:"label,omitempty"`
-	Price       float64 `bson:"price,omitempty"`
-	Is_Adult    bool    `bson:"adult,omitempty"` // Indique si le produit est pour adultes
+	Price       float32 `bson:"price,omitempty"`
+	HasAlcohol  bool    `bson:"hasAlcohol,omitempty"` // Indique si le produit est pour adultes
 	Icon        string  `bson:"icon,omitempty"`
-	End_Of_Sale string  `bson:"end_of_sale,omitempty"` // Date/Heure de fin de vente
+	EndOfSale   string  `bson:"endOfSale,omitempty"` // Date/Heure de fin de vente
+	Amount      *int    `bson:"amount,omitempty"`
+	Purchased   int     `bson:"purchased,omitempty"`
 }
+
 type Locker struct {
-	Code string `bson:"code,omitempty"`
-	User string `bson:"user"`
+	LockerCode string `bson:"lockerCode,omitempty"`
+	UserId     string `bson:"userId"`
 }
 
 type EventRole struct {
-	EventID string   `json:"event_id"`
-	Role    string   `json:"role"`
-	Rights  []string `json:"rights"`
+	EventId     string   `bson:"eventId"`
+	Role        string   `bson:"role"`
+	Permissions []string `bson:"permissions,omitempty"`
 }

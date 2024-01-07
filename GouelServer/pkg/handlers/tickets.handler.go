@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	// ... autres imports
-
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,12 +9,12 @@ import (
 
 // CreateTicketHandler crée un nouveau ticket
 func CreateTicketHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	ticketCode := c.Param("ticket_code")
 
 	var requestData struct {
-		UserID    string `json:"user_id"`
-		IsSpecial *bool  `json:"is_special,omitempty"`
+		UserId       string `json:"userId"`
+		WasPurchased *bool  `json:"wasPurchased,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&requestData); err != nil {
@@ -24,24 +22,24 @@ func CreateTicketHandler(c *gin.Context) {
 		return
 	}
 
-	if requestData.IsSpecial == nil {
-		requestData.IsSpecial = new(bool)
-		*requestData.IsSpecial = false
+	if requestData.WasPurchased == nil {
+		requestData.WasPurchased = new(bool)
+		*requestData.WasPurchased = true
 	}
 
-	ticketID, err := database.CreateTicket(requestData.UserID, eventID, ticketCode, *requestData.IsSpecial)
+	ticketId, err := database.CreateTicket(requestData.UserId, eventId, ticketCode, *requestData.WasPurchased)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"ticket_id": ticketID})
+	c.JSON(http.StatusOK, gin.H{"ticket_id": ticketId})
 }
 
 // DeleteTicketHandler supprime un ticket
 func DeleteTicketHandler(c *gin.Context) {
-	ticketID := c.Param("ticket_id")
+	ticketId := c.Param("ticket_id")
 
-	err := database.DeleteTicket(ticketID)
+	err := database.DeleteTicket(ticketId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -50,16 +48,16 @@ func DeleteTicketHandler(c *gin.Context) {
 }
 
 func ValidateTicketHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	var requestData struct {
-		TicketID string `json:"ticket_id"`
+		TicketId string `json:"ticketId"`
 	}
 	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
 
-	code, err := database.ValidateTicket(requestData.TicketID, eventID)
+	code, err := database.ValidateTicket(requestData.TicketId, eventId)
 	if err != nil {
 		// Vérifier si l'erreur est due à un ticket déjà validé
 		if code == 2 {
@@ -74,17 +72,17 @@ func ValidateTicketHandler(c *gin.Context) {
 }
 
 func SetSamHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 	var requestData struct {
-		TicketID string `json:"ticket_id"`
-		IsSam    bool   `json:"is_sam"`
+		TicketId string `json:"ticketId"`
+		IsSam    bool   `json:"isSam"`
 	}
 	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
 
-	err := database.SetSAM(requestData.TicketID, eventID, requestData.IsSam)
+	err := database.SetSAM(requestData.TicketId, eventId, requestData.IsSam)
 	if err != nil {
 		// Autres erreurs
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -96,10 +94,10 @@ func SetSamHandler(c *gin.Context) {
 
 // GetTicketInfoHandler gère la récupération des informations d'un ticket
 func GetTicketInfoHandler(c *gin.Context) {
-	ticketID := c.Param("ticket_id")
-	eventID := c.Param("event_id")
+	ticketId := c.Param("ticket_id")
+	eventId := c.Param("event_id")
 
-	ticketInfo, err := database.GetTicketInfo(ticketID, &eventID)
+	ticketInfo, err := database.GetTicketInfo(ticketId, &eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -108,9 +106,9 @@ func GetTicketInfoHandler(c *gin.Context) {
 }
 
 func GetAllTicketsFromEventHandler(c *gin.Context) {
-	eventID := c.Param("event_id")
+	eventId := c.Param("event_id")
 
-	tickets, err := database.GetAllTicketsFromEvent(eventID)
+	tickets, err := database.GetAllTicketsFromEvent(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
