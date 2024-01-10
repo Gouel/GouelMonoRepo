@@ -13,8 +13,8 @@ func CreateTicketHandler(c *gin.Context) {
 	ticketCode := c.Param("ticket_code")
 
 	var requestData struct {
-		UserId       string `json:"userId"`
-		WasPurchased *bool  `json:"wasPurchased,omitempty"`
+		UserId       string `json:"UserId"`
+		WasPurchased *bool  `json:"WasPurchased,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&requestData); err != nil {
@@ -32,7 +32,7 @@ func CreateTicketHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"ticket_id": ticketId})
+	c.JSON(http.StatusOK, gin.H{"TicketId": ticketId})
 }
 
 // DeleteTicketHandler supprime un ticket
@@ -50,7 +50,7 @@ func DeleteTicketHandler(c *gin.Context) {
 func ValidateTicketHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	var requestData struct {
-		TicketId string `json:"ticketId"`
+		TicketId string `json:"TicketId"`
 	}
 	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
@@ -74,8 +74,8 @@ func ValidateTicketHandler(c *gin.Context) {
 func SetSamHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	var requestData struct {
-		TicketId string `json:"ticketId"`
-		IsSam    bool   `json:"isSam"`
+		TicketId string `json:"TicketId"`
+		IsSam    bool   `json:"IsSam"`
 	}
 	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})

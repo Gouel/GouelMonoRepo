@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
@@ -10,16 +11,6 @@ import (
 )
 
 // GET
-
-func GetAllEventsIdsHandler(c *gin.Context) {
-	// Logique pour obtenir tous les IDs d'événements
-	eventIds, err := database.GetAllEventsIds()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, eventIds)
-}
 
 func GetAccessibleEventsHandler(c *gin.Context) {
 	userId, exists := c.Get("userId")
@@ -235,6 +226,7 @@ func UpdateEventHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+	fmt.Println(eventData)
 
 	err := database.UpdateEvent(eventId, eventData)
 	if err != nil {

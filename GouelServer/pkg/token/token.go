@@ -24,8 +24,8 @@ func AuthRoute(c *gin.Context) {
 
 	// Récupération de l'email et du mot de passe depuis la requête
 	var loginInfo struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email    string `json:"Email"`
+		Password string `json:"Password"`
 	}
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})

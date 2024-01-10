@@ -6,13 +6,13 @@ import (
 
 type Ticket struct {
 	ID              primitive.ObjectID `bson:"_id,omitempty"`
-	EventId         string             `bson:"eventId"`
-	UserId          string             `bson:"userId"`
-	EventTicketCode string             `bson:"eventTicketCode"`
-	IsSam           bool               `bson:"isSam,omitempty"`
-	IsUsed          bool               `bson:"isUsed,omitempty"`
-	WasPurchased    bool               `bson:"wasPurchased"`
+	EventId         string             `bson:"EventId"`
+	UserId          string             `bson:"UserId"`
+	EventTicketCode string             `bson:"EventTicketCode"`
+	IsSam           bool               `bson:"IsSam,omitempty"`
+	IsUsed          bool               `bson:"IsUsed,omitempty"`
+	WasPurchased    bool               `bson:"WasPurchased"`
 
 	//Pour les informations simple sur un utilisateur
-	User *User `bson:"user,omitempty"`
+	User *User `bson:"User,omitempty"`
 }

@@ -14,31 +14,6 @@ import (
 
 // <=== Lecture de la BDD ===>
 
-func GetAllEventsIds() ([]string, error) {
-	var ids []string
-	collection := Database.Collection("events")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	cursor, err := collection.Find(ctx, bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	for cursor.Next(ctx) {
-		var event bson.M
-		if err := cursor.Decode(&event); err != nil {
-			return nil, err
-		}
-		id := event["_id"].(primitive.ObjectID).Hex()
-		ids = append(ids, id)
-	}
-
-	return ids, nil
-}
-
 func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 	var events []models.Event
 	collection := Database.Collection("events")
@@ -52,8 +27,8 @@ func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 		// Filtre pour les utilisateurs qui ne sont ni SUPERADMIN ni API
 		filter = bson.M{
 			"$or": []bson.M{
-				{"public": true},
-				{"volunteers": bson.M{"$elemMatch": bson.M{"userId": userId, "isAdmin": true}}},
+				{"IsPublic": true},
+				{"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": userId, "IsAdmin": true}}},
 			},
 		}
 	}
@@ -63,19 +38,13 @@ func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 		return nil, err
 	}
 
-	for cursor.Next(ctx) {
-		var event models.Event
-		if err := cursor.Decode(&event); err != nil {
-			continue
-		}
-		events = append(events, event)
-	}
+	cursor.All(ctx, &events)
 
 	return events, nil
 }
 
-func GetEventById(eventId string) (bson.M, error) {
-	var event bson.M
+func GetEventById(eventId string) (models.Event, error) {
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -84,30 +53,30 @@ func GetEventById(eventId string) (bson.M, error) {
 	objId, _ := primitive.ObjectIDFromHex(eventId)
 	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&event)
 	if err != nil {
-		return nil, err
+		return models.Event{}, err
 	}
 
 	return event, nil
 }
 
-func GetSimpleEvent(eventId string) (bson.M, error) {
-	var event bson.M
+func GetSimpleEvent(eventId string) (models.Event, error) {
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
-	err := collection.FindOne(ctx, bson.M{"_id": objId}, options.FindOne().SetProjection(bson.M{"title": 1, "public": 1, "description": 1, "location": 1, "contact": 1})).Decode(&event)
+	err := collection.FindOne(ctx, bson.M{"_id": objId}, options.FindOne().SetProjection(bson.M{"Title": 1, "Public": 1, "Description": 1, "Location": 1, "Contact": 1})).Decode(&event)
 	if err != nil {
-		return nil, err
+		return models.Event{}, err
 	}
 
 	return event, nil
 }
 
 func GetEventProducts(eventId string) (interface{}, error) {
-	var event bson.M
+	var event models.Event
 	collection := Database.Collection("events")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -118,7 +87,7 @@ func GetEventProducts(eventId string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return event["products"], nil
+	return event.Products, nil
 }
 
 func GetEventProductsByCode(eventId, productCode string) (*models.Product, error) {
@@ -230,7 +199,7 @@ func GetUserEventsRoles(userId string) ([]models.EventRole, error) {
 	defer cancel()
 
 	filter := bson.M{
-		"volunteers": bson.M{"$elemMatch": bson.M{"userId": userId}},
+		"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": userId}},
 	}
 
 	cursor, err := collection.Find(ctx, filter)
@@ -314,7 +283,7 @@ func AddEventTicketToEvent(eventId string, eventTicket models.EventTicket) error
 	code := uuid.New().String()
 	eventTicket.EventTicketCode = code
 
-	update := bson.M{"$push": bson.M{"eventTickets": eventTicket}}
+	update := bson.M{"$push": bson.M{"EventTickets": eventTicket}}
 
 	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
@@ -327,7 +296,7 @@ func AddVolunteerToEvent(eventId string, volunteer models.Volunteer) error {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
-	update := bson.M{"$push": bson.M{"volunteers": volunteer}}
+	update := bson.M{"$push": bson.M{"Volunteers": volunteer}}
 
 	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
@@ -340,7 +309,7 @@ func AddLockerToEvent(eventId string, locker models.Locker) error {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
-	update := bson.M{"$push": bson.M{"lockers": locker}}
+	update := bson.M{"$push": bson.M{"Lockers": locker}}
 
 	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
@@ -365,7 +334,7 @@ func AddRangeOfLockersToEvent(eventId string, start, end int, prefix, suffix str
 
 	// Préparer la mise à jour pour ajouter les casiers
 	update := bson.M{
-		"$push": bson.M{"lockers": bson.M{"$each": lockers}},
+		"$push": bson.M{"Lockers": bson.M{"$each": lockers}},
 	}
 
 	objId, err := primitive.ObjectIDFromHex(eventId)
@@ -393,7 +362,7 @@ func AddProductToEvent(eventId string, product models.Product) error {
 	code := uuid.New().String()
 	product.ProductCode = code
 
-	update := bson.M{"$push": bson.M{"products": product}}
+	update := bson.M{"$push": bson.M{"Products": product}}
 
 	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
@@ -408,7 +377,8 @@ func UpdateEvent(eventId string, updateData bson.M) error {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": updateData})
+	a, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": updateData})
+	fmt.Println(a)
 	return err
 }
 
@@ -420,9 +390,9 @@ func UpdateLocker(eventId string, locker models.Locker) error {
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	update := bson.M{"$set": bson.M{"lockers.$.user": locker.UserId}}
+	update := bson.M{"$set": bson.M{"Lockers.$.UserId": locker.UserId}}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "lockers.lockerCode": locker.LockerCode}, update)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "Lockers.LockerCode": locker.LockerCode}, update)
 	return err
 }
 
@@ -437,10 +407,10 @@ func UpdateProduct(eventId, productCode string, updateData bson.M) error {
 	// Créer un nouveau bson.M pour la mise à jour avec l'opérateur $.
 	setUpdateData := bson.M{}
 	for key, value := range updateData {
-		setUpdateData["products.$."+key] = value
+		setUpdateData["Products.$."+key] = value
 	}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "products.code": productCode}, bson.M{"$set": setUpdateData})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "Products.ProductCode": productCode}, bson.M{"$set": setUpdateData})
 	return err
 }
 
@@ -451,12 +421,13 @@ func UpdateVolunteer(eventId string, volunteer models.Volunteer) error {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
+	fmt.Println(volunteer)
 	_, err := collection.UpdateOne(ctx, bson.M{
-		"_id":                objId,
-		"volunteers.user_id": volunteer.UserId},
+		"_id":               objId,
+		"Volunteers.UserId": volunteer.UserId},
 		bson.M{"$set": bson.M{
-			"volunteers.$.permissions": volunteer.Permissions,
-			"volunteers.$.isAdmin":     volunteer.IsAdmin,
+			"Volunteers.$.Permissions": volunteer.Permissions,
+			"Volunteers.$.IsAdmin":     volunteer.IsAdmin,
 		},
 		},
 	)
@@ -474,10 +445,10 @@ func UpdateEventTicket(eventId, eventTicketCode string, updateData bson.M) error
 	// Créer un nouveau bson.M pour la mise à jour avec l'opérateur $.
 	setUpdateData := bson.M{}
 	for key, value := range updateData {
-		setUpdateData["tickets.$."+key] = value
+		setUpdateData["EventTickets.$."+key] = value
 	}
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "eventTickets.EventTicketCode": eventTicketCode}, bson.M{"$set": setUpdateData})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId, "EventTickets.EventTicketCode": eventTicketCode}, bson.M{"$set": setUpdateData})
 	return err
 }
 
@@ -503,7 +474,7 @@ func DeleteEventTicket(eventId, eventTicketCode string) error {
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"eventTickets": bson.M{"eventTicketCode": eventTicketCode}}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"EventTickets": bson.M{"EventTicketCode": eventTicketCode}}})
 	return err
 }
 
@@ -515,7 +486,7 @@ func DeleteLocker(eventId, lockerCode string) error {
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"lockers": bson.M{"lockerCode": lockerCode}}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"Lockers": bson.M{"LockerCode": lockerCode}}})
 	return err
 }
 
@@ -533,7 +504,7 @@ func DeleteAllLockers(eventId string) error {
 
 	// Mise à jour pour supprimer tous les casiers
 	update := bson.M{
-		"$set": bson.M{"lockers": []models.Locker{}}, // Définir les casiers à une liste vide
+		"$set": bson.M{"Lockers": []models.Locker{}}, // Définir les casiers à une liste vide
 	}
 
 	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
@@ -568,7 +539,7 @@ func DeleteVolunteer(eventId, userId string) error {
 	}
 
 	// Supprimer le bénévole si ce n'est pas un administrateur
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"volunteers": bson.M{"userId": userId}}})
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"Volunteers": bson.M{"UserId": userId}}})
 	return err
 }
 
@@ -580,6 +551,6 @@ func DeleteProduct(eventId, productCode string) error {
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"products": bson.M{"code": productCode}}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"Products": bson.M{"ProductCode": productCode}}})
 	return err
 }

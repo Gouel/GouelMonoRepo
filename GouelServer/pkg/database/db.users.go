@@ -40,7 +40,7 @@ func VerifyUser(email, password string) (models.User, error) {
 	defer cancel()
 
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"Email": email}).Decode(&user)
 	if err != nil {
 		return models.User{}, fmt.Errorf("couple email/password invalide") // Utilisateur non trouvé ou erreur
 	}
@@ -59,7 +59,7 @@ func UpdateUser(userId string, updateData bson.M) error {
 	defer cancel()
 
 	// Vérifier si le mot de passe est présent dans les données de mise à jour
-	if password, ok := updateData["password"].(string); ok && password != "" {
+	if password, ok := updateData["Password"].(string); ok && password != "" {
 
 		updateData["password"] = HashPassword(password)
 	}
@@ -77,7 +77,7 @@ func UpdateUserBalance(userId string, amount float64) error {
 
 	objId, _ := primitive.ObjectIDFromHex(userId)
 
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"solde": amount}})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"Solde": amount}})
 	return err
 }
 
@@ -112,8 +112,8 @@ func AddUserTransaction(userId string, transaction models.Transaction) error {
 
 	// Mettre à jour le solde de l'utilisateur
 	update := bson.M{
-		"$set":  bson.M{"solde": newBalance},
-		"$push": bson.M{"transactions": transaction},
+		"$set":  bson.M{"Solde": newBalance},
+		"$push": bson.M{"Transactions": transaction},
 	}
 	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, update)
 	return err
@@ -142,7 +142,7 @@ func FindUsersByEmailStartsWith(emailStart string) ([]models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	filter := bson.M{"email": bson.M{"$regex": "^" + emailStart, "$options": "i"}}
+	filter := bson.M{"Email": bson.M{"$regex": "^" + emailStart, "$options": "i"}}
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err

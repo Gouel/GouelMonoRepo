@@ -8,6 +8,7 @@ import (
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateTicket(userId, eventId, eventTicketCode string, wasPurchased bool) (string, error) {
@@ -17,11 +18,15 @@ func CreateTicket(userId, eventId, eventTicketCode string, wasPurchased bool) (s
 	defer cancel()
 
 	newTicket := models.Ticket{
-		EventId:      eventId,
-		IsSam:        false,
-		IsUsed:       false,
-		WasPurchased: wasPurchased,
+		EventId:         eventId,
+		EventTicketCode: eventTicketCode,
+		IsSam:           false,
+		IsUsed:          false,
+		WasPurchased:    wasPurchased,
+		UserId:          userId,
 	}
+
+	fmt.Println(newTicket)
 
 	result, err := collection.InsertOne(ctx, newTicket)
 	if err != nil {
@@ -43,7 +48,7 @@ func ValidateTicket(ticketId, eventId string) (int, error) {
 
 	// Trouver le ticket et vérifier s'il est déjà validé
 	var ticket models.Ticket
-	err := collection.FindOne(ctx, bson.M{"_id": objId, "eventId": eventId}).Decode(&ticket)
+	err := collection.FindOne(ctx, bson.M{"_id": objId, "EventId": eventId}).Decode(&ticket)
 	if err != nil {
 		return 1, err // Retourne l'erreur si le ticket n'est pas trouvé
 	}
@@ -54,7 +59,7 @@ func ValidateTicket(ticketId, eventId string) (int, error) {
 	}
 
 	// Mettre à jour le ticket pour le valider
-	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"isUsed": true}})
+	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"IsUsed": true}})
 	if result.Err() != nil {
 		return 3, result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
 	}
@@ -68,7 +73,7 @@ func SetSAM(ticketId, eventId string, isSam bool) error {
 	defer cancel()
 	objId, _ := primitive.ObjectIDFromHex(ticketId)
 	// Mettre à jour le ticket pour le valider
-	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId, "eventId": eventId}, bson.M{"$set": bson.M{"isSam": isSam}})
+	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId, "EventId": eventId}, bson.M{"$set": bson.M{"IsSam": isSam}})
 	if result.Err() != nil {
 		return result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
 	}
@@ -100,7 +105,7 @@ func GetTicketInfo(ticketId string, eventId *string) (*models.Ticket, error) {
 	var filter bson.M
 
 	if eventId != nil {
-		filter = bson.M{"_id": objId, "eventId": eventId}
+		filter = bson.M{"_id": objId, "EventId": eventId}
 	} else {
 		filter = bson.M{"_id": objId}
 	}
@@ -121,7 +126,16 @@ func GetTicketInfo(ticketId string, eventId *string) (*models.Ticket, error) {
 func userFromTicket(ctx context.Context, ticket models.Ticket) (*models.User, error) {
 	var user models.User
 	userId, _ := primitive.ObjectIDFromHex(ticket.UserId)
-	err := Database.Collection("users").FindOne(ctx, bson.M{"_id": userId}).Decode(&user)
+
+	err := Database.Collection("users").FindOne(
+		ctx, bson.M{"_id": userId},
+		options.FindOne().SetProjection(bson.M{
+			"FirstName": 1,
+			"LastName":  1,
+			"DOB":       1,
+			"Email":     1,
+		}),
+	).Decode(&user)
 	if err != nil {
 		return nil, err
 	}

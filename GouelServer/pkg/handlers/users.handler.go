@@ -25,6 +25,7 @@ func FindUsersByEmailStartsWithHandler(c *gin.Context) {
 // GetUserByIDHandler gère la récupération d'un utilisateur par son ID
 func GetUserByIdHandler(c *gin.Context) {
 	userId := c.Param("user_id")
+	fmt.Println(userId)
 	user, err := database.GetUserById(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
