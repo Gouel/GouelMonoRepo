@@ -50,14 +50,14 @@ class EntryScreenState extends State<EntryScreen> {
   @override
   Widget build(BuildContext context) {
     List<TicketInfos> filteredTickets = tickets.where((ticket) {
-      var email = ticket.user["email"] as String;
+      var email = ticket.user["Email"] as String;
       return email.startsWith(filterTickets);
     }).toList();
 
     filteredTickets.sort(
       (a, b) {
-        var A = "${a.user["lastName"]} ${a.user["firstName"]}";
-        var B = "${b.user["lastName"]} ${b.user["firstName"]}";
+        var A = "${a.user["LastName"]} ${a.user["FirstName"]}";
+        var B = "${b.user["LastName"]} ${b.user["FirstName"]}";
         return A.compareTo(B);
       },
     );
@@ -131,8 +131,8 @@ class EntryScreenState extends State<EntryScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                                "${ticket.user['lastName']} ${ticket.user['firstName']}"),
-                            Text("${ticket.user['email']}")
+                                "${ticket.user['LastName']} ${ticket.user['FirstName']}"),
+                            Text("${ticket.user['Email']}")
                           ],
                         ),
                       ],
@@ -140,7 +140,7 @@ class EntryScreenState extends State<EntryScreen> {
                   ),
                   Container(
                       padding: const EdgeInsets.all(8),
-                      child: ticket.valid
+                      child: ticket.isUsed
                           ? const Icon(
                               Icons.check,
                               size: 40,
@@ -188,8 +188,8 @@ class EntryScreenState extends State<EntryScreen> {
       message = "Ce ticket n'existe pas / n'est pas bon";
     } else {
       nameSurname =
-          "${(ticketInfo.user['lastName'] as String).toUpperCase()} ${ticketInfo.user['firstName']}";
-      ageStatus = getMajeurMineur(ticketInfo.user["dob"] as String);
+          "${(ticketInfo.user['LastName'] as String).toUpperCase()} ${ticketInfo.user['FirstName']}";
+      ageStatus = getMajeurMineur(ticketInfo.user["DOB"] as String);
 
       if (state == ValidateState.alreadyValidated) {
         icon = Icons.warning;
@@ -322,10 +322,10 @@ class EntryScreenState extends State<EntryScreen> {
   }
 
   void _showTicketInfo(TicketInfos ticketInfos, BuildContext context) async {
-    String nom = ticketInfos.user['lastName'] as String;
-    String prenom = ticketInfos.user['firstName'] as String;
-    String email = ticketInfos.user['email'] as String;
-    String? dob = ticketInfos.user['dob'] as String?;
+    String nom = ticketInfos.user['LastName'] as String;
+    String prenom = ticketInfos.user['FirstName'] as String;
+    String email = ticketInfos.user['Email'] as String;
+    String? dob = ticketInfos.user['DOB'] as String?;
     bool isSam = ticketInfos.isSam;
 
     if (dob != null) {
@@ -371,7 +371,7 @@ class EntryScreenState extends State<EntryScreen> {
                       Paragraph(
                         type: ParagraphType.hint,
                         content:
-                            getMajeurMineur(ticketInfos.user['dob'] as String),
+                            getMajeurMineur(ticketInfos.user['DOB'] as String),
                       ),
                     ],
                   ),
@@ -433,7 +433,7 @@ class EntryScreenState extends State<EntryScreen> {
                       })
                 ],
                 Paragraph.space(),
-                if (!ticketInfos.valid)
+                if (!ticketInfos.isUsed)
                   GouelButton(
                       text: "Valider le ticket",
                       color: Colors.green,

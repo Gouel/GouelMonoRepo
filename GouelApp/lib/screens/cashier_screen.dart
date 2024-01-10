@@ -360,7 +360,7 @@ class CashierScreenState extends State<CashierScreen> {
         // Logique après avoir scanné le QR Code
         TicketInfos? ticketInfos = await getTicketInfos(context, result);
         if (ticketInfos == null) return;
-        String userID = ticketInfos.user["user_id"];
+        String userID = ticketInfos.user["UserId"];
 
         _finalizeTransaction(
           userID,

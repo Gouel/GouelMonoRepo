@@ -24,7 +24,7 @@ class GouelApiService with ChangeNotifier {
   Future<void> authenticateWithTicket(String ticketID) async {
     try {
       var result = await GouelRequest.post("/token/auth/ticket")
-          .send(context, data: {'ticket_id': ticketID}, noHeaders: true);
+          .send(context, data: {'TicketId': ticketID}, noHeaders: true);
 
       await _saveToken(result);
       isLogged = true;
@@ -136,8 +136,8 @@ class GouelApiService with ChangeNotifier {
       final Event event = GouelSession().retrieve("event") as Event;
       await GouelRequest.put("/events/${event.id}/lockers")
           .send(context, data: {
-        "code": locker.code,
-        "user": locker.user,
+        "LockerCode": locker.lockerCode,
+        "UserId": locker.userId,
       });
     } catch (e) {
       if (e is GouelException) {
@@ -178,7 +178,7 @@ class GouelApiService with ChangeNotifier {
     try {
       final Event event = GouelSession().retrieve("event") as Event;
       await GouelRequest.post("/tickets/${event.id}/validate")
-          .send(context, data: {"ticket_id": ticketID}) as Map<String, dynamic>;
+          .send(context, data: {"TicketId": ticketID}) as Map<String, dynamic>;
 
       return ValidateState.ok;
     } catch (e) {
@@ -193,9 +193,8 @@ class GouelApiService with ChangeNotifier {
   Future<bool> setTicketSAM(String ticketID, {bool isSAM = true}) async {
     try {
       final Event event = GouelSession().retrieve("event") as Event;
-      await GouelRequest.put("/tickets/${event.id}/sam")
-              .send(context, data: {"ticket_id": ticketID, "is_sam": isSAM})
-          as Map<String, dynamic>;
+      await GouelRequest.put("/tickets/${event.id}/sam").send(context,
+          data: {"TicketId": ticketID, "IsSam": isSAM}) as Map<String, dynamic>;
       return true;
     } catch (e) {
       return false;
@@ -218,7 +217,7 @@ class GouelApiService with ChangeNotifier {
     try {
       Map<String, String> response =
           await GouelRequest.post("/users").send(context, data: user);
-      return response["user_id"];
+      return response["UserId"];
     } catch (e) {
       return null;
     }

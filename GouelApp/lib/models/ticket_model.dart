@@ -1,24 +1,27 @@
 class TicketInfos {
   final String id;
-  final Map<String, dynamic> event;
+  final String eventId;
+  final String eventTicketCode;
   final Map<String, dynamic> user;
-  final bool valid;
+  final bool isUsed;
   final bool isSam;
 
   TicketInfos(
       {required this.id,
-      required this.event,
+      required this.eventId,
+      required this.eventTicketCode,
       required this.user,
-      required this.valid,
+      required this.isUsed,
       required this.isSam});
 
   factory TicketInfos.fromJson(Map<String, dynamic> json) {
     return TicketInfos(
-      id: json["_id"],
-      event: json["event"] as Map<String, dynamic>,
-      user: json["user"] as Map<String, dynamic>,
-      valid: json["valid"],
-      isSam: json["SAM"] ?? false,
+      id: json["ID"],
+      eventId: json["EventId"],
+      eventTicketCode: json["EventTicketCode"],
+      user: json["User"] as Map<String, dynamic>,
+      isUsed: json["IsUsed"],
+      isSam: json["IsSam"] ?? false,
     );
   }
 }

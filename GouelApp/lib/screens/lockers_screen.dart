@@ -46,11 +46,11 @@ class LockersScreenState extends State<LockersScreen> {
   Widget build(BuildContext context) {
     List<Locker> filteredLockers = showTakenLockers
         ? lockers
-        : lockers.where((locker) => locker.user == '').toList();
+        : lockers.where((locker) => locker.userId == '').toList();
 
     if (filterLockers != null) {
       filteredLockers = filteredLockers
-          .where((locker) => locker.user == filterLockers)
+          .where((locker) => locker.userId == filterLockers)
           .toList();
     }
 
@@ -84,7 +84,7 @@ class LockersScreenState extends State<LockersScreen> {
                 itemCount: filteredLockers.length,
                 itemBuilder: (context, index) {
                   var locker = filteredLockers[index];
-                  bool isTaken = locker.user != '';
+                  bool isTaken = locker.userId != '';
                   if (!showTakenLockers && isTaken) {
                     return const SizedBox.shrink();
                   }
@@ -124,7 +124,9 @@ class LockersScreenState extends State<LockersScreen> {
         if (context.mounted && ticketInfos != null) {
           await Provider.of<GouelApiService>(context, listen: false)
               .setEventLocker(
-                  context, Locker(code: locker.code, user: ticketInfos.id));
+                  context,
+                  Locker(
+                      lockerCode: locker.lockerCode, userId: ticketInfos.id));
 
           _loadLockers();
         }
@@ -134,7 +136,7 @@ class LockersScreenState extends State<LockersScreen> {
   }
 
   void _showLockerInfo(Locker locker) async {
-    TicketInfos? ticketsInfos = await getTicketInfos(context, locker.user);
+    TicketInfos? ticketsInfos = await getTicketInfos(context, locker.userId);
     if (!(context.mounted && ticketsInfos != null)) {
       return;
     }
@@ -143,7 +145,7 @@ class LockersScreenState extends State<LockersScreen> {
         isScrollControlled: true,
         context: context,
         builder: ((context) => GouelBottomSheet(
-            title: "Vestiaire ${locker.code}",
+            title: "Vestiaire ${locker.lockerCode}",
             child: Column(
               children: [
                 Paragraph.space(),
@@ -154,15 +156,15 @@ class LockersScreenState extends State<LockersScreen> {
                 Paragraph.space(),
                 Paragraph(
                   type: ParagraphType.text,
-                  content: "Nom : ${ticketsInfos.user['lastName']}",
+                  content: "Nom : ${ticketsInfos.user['LastName']}",
                 ),
                 Paragraph(
                   type: ParagraphType.text,
-                  content: "Prénom : ${ticketsInfos.user['firstName']}",
+                  content: "Prénom : ${ticketsInfos.user['FirstName']}",
                 ),
                 Paragraph(
                   type: ParagraphType.text,
-                  content: "Email : ${ticketsInfos.user['email']}",
+                  content: "Email : ${ticketsInfos.user['Email']}",
                 ),
                 Paragraph.space(),
                 GouelButton(
@@ -171,7 +173,9 @@ class LockersScreenState extends State<LockersScreen> {
                     onTap: () async {
                       await Provider.of<GouelApiService>(context, listen: false)
                           .setEventLocker(
-                              context, Locker(code: locker.code, user: ""));
+                              context,
+                              Locker(
+                                  lockerCode: locker.lockerCode, userId: ""));
 
                       _loadLockers();
                       if (context.mounted) {
@@ -187,14 +191,13 @@ class LockersScreenState extends State<LockersScreen> {
     List<Locker> providedLockers =
         await Provider.of<GouelApiService>(context, listen: false)
             .getEventLockers(context, event.id);
-
     setState(() {
       lockers = providedLockers;
     });
   }
 
   Widget _buildLockerItem(Locker locker) {
-    bool isTaken = locker.user != '';
+    bool isTaken = locker.userId != '';
     return ClipRRect(
       borderRadius: BorderRadius.circular(16), // Rayon de bordure arrondie
       child: Container(
@@ -205,7 +208,7 @@ class LockersScreenState extends State<LockersScreen> {
             onTap: () =>
                 isTaken ? _showLockerInfo(locker) : _assignLocker(locker),
             child: Center(
-              child: Text(locker.code,
+              child: Text(locker.lockerCode,
                   style: Theme.of(context).textTheme.titleLarge),
             ),
           ),

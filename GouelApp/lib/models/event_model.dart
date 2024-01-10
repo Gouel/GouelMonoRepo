@@ -13,15 +13,15 @@ class Event {
 }
 
 class Locker {
-  final String code;
-  final String user;
+  final String lockerCode;
+  final String userId;
 
-  Locker({required this.code, required this.user});
+  Locker({required this.lockerCode, required this.userId});
 
   factory Locker.fromJson(Map<String, dynamic> json) {
     return Locker(
-      code: json['code'] as String,
-      user: json['user'] as String,
+      lockerCode: json['LockerCode'] as String,
+      userId: json['UserId'] as String? ?? "",
     );
   }
 }

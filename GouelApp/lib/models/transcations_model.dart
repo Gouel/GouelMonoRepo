@@ -16,19 +16,19 @@ class Transaction {
       this.paymentMethod});
 
   factory Transaction.fromJson(Map<String, dynamic> data) {
-    TransactionType type = data["type"] == "credit"
+    TransactionType type = data["Type"] == "credit"
         ? TransactionType.credit
         : TransactionType.debit;
-    DateTime dateTime = DateTime.parse(data["date"] as String);
-    String eventID = data["eventID"] as String;
-    double amount = data["amount"] as double;
+    DateTime dateTime = DateTime.parse(data["Date"] as String);
+    String eventID = data["EventID"] as String;
+    double amount = data["Amount"] as double;
     PaymentMethod? paymentMethod;
 
-    if (data.containsKey("payement_type")) {
-      paymentMethod = PaymentMethod.fromString(data["payement_type"] as String);
+    if (data.containsKey("PayementType")) {
+      paymentMethod = PaymentMethod.fromString(data["PayementType"] as String);
     }
 
-    List<dynamic> preprocessedCart = data["cart"] as List;
+    List<dynamic> preprocessedCart = data["Cart"] as List;
 
     List<PurchasedItem> cart = preprocessedCart.map(
       (e) {
@@ -49,19 +49,19 @@ class Transaction {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = {
-      "type": transactionType.name,
-      "date": dateTime.toIso8601String(),
-      "eventId": eventID,
-      "cart": cart
+      "Type": transactionType.name,
+      "Date": dateTime.toIso8601String(),
+      "EventId": eventID,
+      "Cart": cart
           .map(
             (e) => e.toJson(),
           )
           .toList(),
-      "amount": amount,
+      "Amount": amount,
     };
 
     if (paymentMethod != null) {
-      data["payementType"] = paymentMethod!.name;
+      data["PayementType"] = paymentMethod!.name;
     }
 
     return data;
@@ -79,15 +79,15 @@ class PurchasedItem {
 
   factory PurchasedItem.fromJson(Map<String, dynamic> data) {
     return PurchasedItem(
-      productCode: data["productCode"] as String,
-      amount: data["amount"] as int,
+      productCode: data["ProductCode"] as String,
+      amount: data["Amount"] as int,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "productCode": productCode,
-      "amount": amount,
+      "ProductCode": productCode,
+      "Amount": amount,
     };
   }
 }
