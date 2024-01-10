@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/gouel/gouel_serveur/pkg/config"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

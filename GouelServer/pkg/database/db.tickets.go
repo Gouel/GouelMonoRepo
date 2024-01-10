@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gouel/gouel_serveur/pkg/models"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

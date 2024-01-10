@@ -1,4 +1,4 @@
-module github.com/gouel/gouel_serveur
+module github.com/Gouel/GouelMonoRepo/tree/main/GouelServer
 
 go 1.21.4
 

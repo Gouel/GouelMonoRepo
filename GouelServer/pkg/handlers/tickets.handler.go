@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
 	"github.com/gin-gonic/gin"
-	"github.com/gouel/gouel_serveur/pkg/database"
 )
 
 // CreateTicketHandler crée un nouveau ticket

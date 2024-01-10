@@ -1,11 +1,11 @@
 package routes
 
 import (
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/handlers"
+	middlewares "github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/middleware"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/token"
 	"github.com/gin-gonic/gin"
-	"github.com/gouel/gouel_serveur/pkg/config"
-	"github.com/gouel/gouel_serveur/pkg/handlers"
-	middlewares "github.com/gouel/gouel_serveur/pkg/middleware"
-	"github.com/gouel/gouel_serveur/pkg/token"
 )
 
 /*-> == à vérifier*/

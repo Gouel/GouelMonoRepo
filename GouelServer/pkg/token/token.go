@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/gouel/gouel_serveur/pkg/config"
-	"github.com/gouel/gouel_serveur/pkg/database"
 )
 
 func AuthRoute(c *gin.Context) {

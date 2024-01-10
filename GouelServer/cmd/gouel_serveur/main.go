@@ -7,11 +7,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
+	routes "github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/router"
 	"github.com/gin-gonic/gin"
-	"github.com/gouel/gouel_serveur/pkg/config"
-	"github.com/gouel/gouel_serveur/pkg/database"
-	"github.com/gouel/gouel_serveur/pkg/models"
-	routes "github.com/gouel/gouel_serveur/pkg/router"
 )
 
 func main() {
