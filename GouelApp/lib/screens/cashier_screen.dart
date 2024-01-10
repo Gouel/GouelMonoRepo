@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gouel/models/event_model.dart';
 import 'package:gouel/models/ticket_model.dart';
 import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_api_service.dart';
@@ -9,10 +10,13 @@ import 'package:gouel/widgets/gouel_bottom_sheet.dart';
 import 'package:gouel/widgets/gouel_button.dart';
 import 'package:gouel/widgets/gouel_modal.dart';
 import 'package:gouel/widgets/gouel_scaffold.dart';
+import 'package:gouel/widgets/gouel_select.dart';
 import 'package:gouel/widgets/gouel_step_builder.dart';
+import 'package:gouel/widgets/gouel_switch.dart';
 import 'package:gouel/widgets/numeric_keypad.dart';
 import 'package:gouel/widgets/paragraph.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class CashierScreen extends StatefulWidget {
   const CashierScreen({super.key});
@@ -148,10 +152,10 @@ class CashierScreenState extends State<CashierScreen> {
             onValidate: (form) async {
               // transforme en identite
               Map<String, dynamic> user = {
-                "firstName": form["prenom"],
-                "lastName": form["nom"],
-                "email": form["email"],
-                "dob": form["dateDeNaissance"].split("/").reversed.join("-")
+                "FirstName": form["prenom"],
+                "LastName": form["nom"],
+                "Email": form["email"],
+                "DOB": form["dateDeNaissance"].split("/").reversed.join("-")
               };
 
               if (!mounted) return;
@@ -166,9 +170,46 @@ class CashierScreenState extends State<CashierScreen> {
               }
 
               // On génère une transaction
-              _finalizeTransaction(userId, (p0) => print(p0));
+              _finalizeTransaction(userId, (result) async {
+                if (!result) {
+                  // XXX message
+                  return;
+                }
+
+                // On génère le nouveau ticket
+                Map<String, dynamic> ticket = {
+                  "EventTicketCode":
+                      (form["EventTicketCode"] as GouelSelectItem).value,
+                  "UserId": userId,
+                  "IsSam": form["IsSam"],
+                  "IsUsed": true
+                };
+
+                // On envoie le ticket au serveur
+                if (!mounted) return;
+                String? ticketId =
+                    await Provider.of<GouelApiService>(context, listen: false)
+                        .createTicket(context, ticket);
+
+                if (ticketId == null) {
+                  // XXX message
+
+                  return;
+                }
+
+                if (!mounted) return;
+
+                // On affiche un bottomSheet avec QRCode + ticketId
+                Navigator.pop(context);
+                _showQRBottomSheet(ticketId);
+              });
             },
-            steps: [_buildStepOne, _buildStepTwo, _buildStepThree],
+            steps: [
+              _buildStepOne,
+              _buildStepTwo,
+              _buildStepThree,
+              _buildStepFour
+            ],
           )),
     );
   }
@@ -216,6 +257,47 @@ class CashierScreenState extends State<CashierScreen> {
   }
 
   Widget _buildStepThree(Map<String, dynamic> formData) {
+    String initialValue = "";
+    if (formData.containsKey("EventTicketCode")) {
+      var event = formData["EventTicketCode"] as GouelSelectItem;
+      initialValue = event.value;
+    }
+    Event event = GouelSession().retrieve("event");
+
+    if (!formData.containsKey("IsSam")) {
+      formData["IsSam"] = false;
+    }
+
+    return Column(
+      children: [
+        //Select eventTicket
+        GouelSelect(
+            title: "Sélectionner Ticket",
+            items: event.eventTickets
+                .map((e) =>
+                    GouelSelectItem(value: e.eventTicketCode, label: e.title))
+                .toList(),
+            initialValue: initialValue,
+            onChange: (v) => formData["EventTicketCode"] = v),
+        const SizedBox(
+          height: 10,
+        ),
+        //IsSam
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50.0),
+          child: GouelSwitch(
+            initialValue: formData["IsSam"],
+            onChange: (value) {
+              formData["IsSam"] = value;
+            },
+            label: "SAM",
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildStepFour(Map<String, dynamic> formData) {
     // Vérification des données
     List<(bool, String)> errors = [];
 
@@ -224,11 +306,19 @@ class CashierScreenState extends State<CashierScreen> {
       _verifyName(formData["prenom"] ?? "", key: "prenom"),
       _verifyEmail(formData["email"] ?? ""),
       _verifyDate(formData["dateDeNaissance"] ?? ""),
+      _verifyTicket(formData["EventTicketCode"]),
     ]);
 
     errors = errors.where(((e) => !e.$1)).toList();
 
     formData["validate"] = errors.isEmpty;
+
+    String ticket = "Non renseigné";
+
+    if (formData.containsKey("EventTicketCode")) {
+      GouelSelectItem item = formData["EventTicketCode"] as GouelSelectItem;
+      ticket = item.label;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,6 +342,16 @@ class CashierScreenState extends State<CashierScreen> {
           type: ParagraphType.text,
           content:
               "Date de naissance : ${formData['dateDeNaissance'] ?? 'Non renseigné'}",
+        ),
+        Paragraph.space(),
+        Paragraph(
+          type: ParagraphType.text,
+          content: "Ticket sélectionné: $ticket",
+        ),
+        Paragraph.space(),
+        Paragraph(
+          type: ParagraphType.text,
+          content: "Désigné comme SAM: ${formData['IsSam'] ? 'Oui' : 'Non'}",
         ),
         Paragraph.space(),
         if (errors.isNotEmpty)
@@ -351,6 +451,12 @@ class CashierScreenState extends State<CashierScreen> {
     return (true, "La date est valide");
   }
 
+  (bool, String) _verifyTicket(GouelSelectItem? eventTicketCode) {
+    return eventTicketCode != null && eventTicketCode.value.isNotEmpty
+        ? (true, "Ticket Valide")
+        : (false, "Aucun ticket sélectionné");
+  }
+
   void _handleQrCodePayment() {
     // Utiliser le service QRScanner pour scanner un QR Code
     QRScannerService().scanQR(
@@ -360,7 +466,7 @@ class CashierScreenState extends State<CashierScreen> {
         // Logique après avoir scanné le QR Code
         TicketInfos? ticketInfos = await getTicketInfos(context, result);
         if (ticketInfos == null) return;
-        String userID = ticketInfos.user["UserId"];
+        String userID = ticketInfos.userId;
 
         _finalizeTransaction(
           userID,
@@ -442,6 +548,31 @@ class CashierScreenState extends State<CashierScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showQRBottomSheet(String ticketId) {
+    GouelBottomSheet.launch(
+      context: context,
+      bottomSheet: GouelBottomSheet(
+        title: "Ticket",
+        child: Column(
+          children: [
+            QrImageView(
+              backgroundColor: Colors.white,
+              embeddedImage: const AssetImage("public/assets/icon.png"),
+              data: ticketId,
+              version: QrVersions.auto,
+              size: 200.0,
+            ),
+            Paragraph.space(),
+            Paragraph(
+              type: ParagraphType.text,
+              content: "TicketId : $ticketId",
+            )
+          ],
         ),
       ),
     );

@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func CreateTicket(userId, eventId, eventTicketCode string, wasPurchased bool) (string, error) {
+func CreateTicket(userId, eventId, eventTicketCode string, ticketRequestData models.TicketRequestData) (string, error) {
 	collection := Database.Collection("tickets")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -20,9 +20,9 @@ func CreateTicket(userId, eventId, eventTicketCode string, wasPurchased bool) (s
 	newTicket := models.Ticket{
 		EventId:         eventId,
 		EventTicketCode: eventTicketCode,
-		IsSam:           false,
-		IsUsed:          false,
-		WasPurchased:    wasPurchased,
+		IsSam:           ticketRequestData.IsSam,
+		IsUsed:          ticketRequestData.IsUsed,
+		WasPurchased:    *ticketRequestData.WasPurchased,
 		UserId:          userId,
 	}
 

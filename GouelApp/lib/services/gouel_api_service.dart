@@ -3,7 +3,7 @@ import 'package:gouel/models/event_model.dart';
 import 'package:gouel/models/ticket_model.dart';
 import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_session_service.dart';
-import 'package:gouel/services/gouel_request.dart';
+import 'package:gouel/utils/gouel_request.dart';
 import 'package:gouel/utils/gouel_exception.dart';
 import 'package:http/http.dart';
 
@@ -148,6 +148,20 @@ class GouelApiService with ChangeNotifier {
 
   // Tickets
 
+  Future<String?> createTicket(context, Map<String, dynamic> ticket) async {
+    try {
+      Event event = GouelSession().retrieve("event");
+
+      Map<String, dynamic> response = await GouelRequest.post(
+              "/tickets/${event.id}/${ticket['EventTicketCode']}")
+          .send(context, data: ticket) as Map<String, dynamic>;
+
+      return response["TicketId"] as String;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<TicketInfos?> getTicketInfos(context, String ticketId) async {
     try {
       final Event event = GouelSession().retrieve("event") as Event;
@@ -215,8 +229,10 @@ class GouelApiService with ChangeNotifier {
 
   Future<String?> addUser(Map<String, dynamic> user) async {
     try {
-      Map<String, String> response =
-          await GouelRequest.post("/users").send(context, data: user);
+      final Event event = GouelSession().retrieve("event") as Event;
+      Map<String, dynamic> response =
+          await GouelRequest.post("/users/event/${event.id}")
+              .send(context, data: user);
       return response["UserId"];
     } catch (e) {
       return null;

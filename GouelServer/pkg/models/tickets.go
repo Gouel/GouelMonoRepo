@@ -16,3 +16,10 @@ type Ticket struct {
 	//Pour les informations simple sur un utilisateur
 	User *User `bson:"User,omitempty"`
 }
+
+type TicketRequestData struct {
+	UserId       string `json:"UserId"`
+	WasPurchased *bool  `json:"WasPurchased,omitempty"`
+	IsSam        bool   `json:"IsSam,omitempty"`
+	IsUsed       bool   `json:"IsUsed,omitempty"`
+}

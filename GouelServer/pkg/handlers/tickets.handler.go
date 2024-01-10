@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,23 +12,18 @@ import (
 func CreateTicketHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	ticketCode := c.Param("ticket_code")
-
-	var requestData struct {
-		UserId       string `json:"UserId"`
-		WasPurchased *bool  `json:"WasPurchased,omitempty"`
-	}
-
-	if err := c.ShouldBindJSON(&requestData); err != nil {
+	var TicketRequestData models.TicketRequestData
+	if err := c.ShouldBindJSON(&TicketRequestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
 
-	if requestData.WasPurchased == nil {
-		requestData.WasPurchased = new(bool)
-		*requestData.WasPurchased = true
+	if TicketRequestData.WasPurchased == nil {
+		TicketRequestData.WasPurchased = new(bool)
+		*TicketRequestData.WasPurchased = true
 	}
 
-	ticketId, err := database.CreateTicket(requestData.UserId, eventId, ticketCode, *requestData.WasPurchased)
+	ticketId, err := database.CreateTicket(TicketRequestData.UserId, eventId, ticketCode, TicketRequestData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

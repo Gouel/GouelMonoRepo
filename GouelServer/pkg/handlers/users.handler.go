@@ -46,7 +46,7 @@ func CreateUserHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user_id": userId})
+	c.JSON(http.StatusOK, gin.H{"UserId": userId})
 }
 
 func UpdateUserHandler(c *gin.Context) {
