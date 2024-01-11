@@ -4,6 +4,7 @@ import 'package:gouel/models/ticket_model.dart';
 import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_api_service.dart';
 import 'package:gouel/services/gouel_session_service.dart';
+import 'package:gouel/services/mail_service.dart';
 import 'package:gouel/services/qr_scanner_service.dart';
 import 'package:gouel/utils/gouel_getter.dart';
 import 'package:gouel/widgets/gouel_bottom_sheet.dart';
@@ -11,12 +12,27 @@ import 'package:gouel/widgets/gouel_button.dart';
 import 'package:gouel/widgets/gouel_modal.dart';
 import 'package:gouel/widgets/gouel_scaffold.dart';
 import 'package:gouel/widgets/gouel_select.dart';
+import 'package:gouel/widgets/gouel_snackbar.dart';
 import 'package:gouel/widgets/gouel_step_builder.dart';
 import 'package:gouel/widgets/gouel_switch.dart';
 import 'package:gouel/widgets/numeric_keypad.dart';
 import 'package:gouel/widgets/paragraph.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:flutter/rendering.dart';
+
+GlobalKey repaintBoundaryKey = GlobalKey();
+
+Future<Uint8List> captureQrCodeAsImageData() async {
+  RenderRepaintBoundary boundary = repaintBoundaryKey.currentContext!
+      .findRenderObject() as RenderRepaintBoundary;
+  ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+  ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  return byteData!.buffer.asUint8List();
+}
 
 class CashierScreen extends StatefulWidget {
   const CashierScreen({super.key});
@@ -201,7 +217,7 @@ class CashierScreenState extends State<CashierScreen> {
 
                 // On affiche un bottomSheet avec QRCode + ticketId
                 Navigator.pop(context);
-                _showQRBottomSheet(ticketId);
+                _showQRBottomSheet(ticketId, form["email"]);
               });
             },
             steps: [
@@ -553,28 +569,80 @@ class CashierScreenState extends State<CashierScreen> {
     );
   }
 
-  void _showQRBottomSheet(String ticketId) {
+  void _showQRBottomSheet(String ticketId, String email) {
     GouelBottomSheet.launch(
       context: context,
       bottomSheet: GouelBottomSheet(
         title: "Ticket",
         child: Column(
           children: [
-            QrImageView(
-              backgroundColor: Colors.white,
-              embeddedImage: const AssetImage("public/assets/icon.png"),
-              data: ticketId,
-              version: QrVersions.auto,
-              size: 200.0,
+            RepaintBoundary(
+              key: repaintBoundaryKey,
+              child: QrImageView(
+                backgroundColor: Colors.white,
+                embeddedImage: const AssetImage("public/assets/icon.png"),
+                data: ticketId,
+                version: QrVersions.auto,
+                size: 200.0,
+              ),
             ),
             Paragraph.space(),
             Paragraph(
               type: ParagraphType.text,
               content: "TicketId : $ticketId",
-            )
+            ),
+            Paragraph.space(),
+            GouelButton(
+                text: "Envoyer par email",
+                onTap: () => _sendByEMail(ticketId, email)),
           ],
         ),
       ),
     );
+  }
+
+  void _sendByEMail(String ticketId, String email) async {
+    // Récupérer les paramètres mails
+    EmailService? emailService =
+        GouelSession().retrieve("emailService") as EmailService?;
+
+    emailService ??= await Provider.of<GouelApiService>(context, listen: false)
+        .getEmailService(context);
+
+    GouelSession().store("emailService", emailService);
+
+    if (emailService == null) {
+      if (!mounted) return;
+      showGouelSnackbar(context, "Service Email indisponible", Colors.red);
+      return;
+    }
+
+    Event event = GouelSession().retrieve("event");
+
+    // TODO Utiliser un template html
+    String content =
+        '''Merci d'avoir acheté un ticket pour l'événement ${event.title}
+    Vous retrouverez en pièce joint le QRCode qui vous permettra d'utiliser toutes les fonctionnalités de l'événement.
+    Et voici l'identifiant de votre ticket : $ticketId
+    ''';
+
+    try {
+      await emailService.sendEmailWithMemoryAttachment(
+        recipient: email,
+        sender: emailService.username,
+        subject: "Ticket ${event.title} - GOUEL",
+        attachmentName: "$ticketId.png",
+        attachmentData: await captureQrCodeAsImageData(),
+        content: content,
+      );
+      if (!mounted) return;
+      showGouelSnackbar(context, "L'email a bien été envoyé", Colors.green);
+
+      _resetAmount();
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      showGouelSnackbar(context, "L'email n'a pas pu être envoyé", Colors.red);
+    }
   }
 }

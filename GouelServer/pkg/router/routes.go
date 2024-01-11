@@ -42,7 +42,7 @@ func Routes(router *gin.Engine, cfg config.Config) {
 	router.DELETE("/tickets/:ticket_id", middlewares.RoleAuthorizationMiddleware("API"), handlers.DeleteTicketHandler)
 
 	//Routes EVENTS
-
+	router.GET("/events/:event_id/smtp", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("caisse"), handlers.GetSMTPConfiguration)
 	router.GET("/events", handlers.GetAccessibleEventsHandler)
 	router.GET("/events/:event_id", middlewares.EventAccessMiddleware(), handlers.GetEventByIdHandler)
 	router.GET("/events/:event_id/simple", handlers.GetSimpleEventHandler)

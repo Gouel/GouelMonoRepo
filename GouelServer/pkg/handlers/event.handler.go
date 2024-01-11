@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,23 @@ import (
 )
 
 // GET
+
+func GetSMTPConfiguration(c *gin.Context) {
+	// Charger la configuration
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne du serveur"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"Email":         cfg.Email,
+		"EmailPassword": cfg.EmailPassword,
+		"SMTPServer":    cfg.SMTPServer,
+		"SMTPPort":      cfg.SMTPPort,
+		"SMTPSSL":       cfg.SMTPUseSSL,
+	})
+}
 
 func GetAccessibleEventsHandler(c *gin.Context) {
 	userId, exists := c.Get("userId")

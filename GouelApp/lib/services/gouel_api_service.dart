@@ -3,6 +3,7 @@ import 'package:gouel/models/event_model.dart';
 import 'package:gouel/models/ticket_model.dart';
 import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_session_service.dart';
+import 'package:gouel/services/mail_service.dart';
 import 'package:gouel/utils/gouel_request.dart';
 import 'package:gouel/utils/gouel_exception.dart';
 import 'package:http/http.dart';
@@ -101,6 +102,25 @@ class GouelApiService with ChangeNotifier {
   }
 
   // EVENTS
+
+  Future<EmailService?> getEmailService(context) async {
+    try {
+      Event event = GouelSession().retrieve('event');
+      var response = await GouelRequest.get("/events/${event.id}/smtp")
+          .send(context) as Map<String, dynamic>;
+
+      int port = int.parse(response["SMTPPort"]);
+
+      return EmailService(
+          host: response["SMTPServer"] as String,
+          port: port,
+          username: response["Email"] as String,
+          password: response["EmailPassword"] as String,
+          isSecure: response["SMTPSSL"] as bool);
+    } catch (e) {
+      return null;
+    }
+  }
 
   Future<List<Event>> getEvents(context) async {
     try {

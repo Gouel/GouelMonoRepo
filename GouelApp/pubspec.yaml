@@ -17,6 +17,7 @@ dependencies:
   url_launcher: ^6.2.2
   qr_flutter: ^4.1.0
   mailer: ^6.0.1
+  logging: ^1.2.0
 
 dev_dependencies:
   flutter_test:

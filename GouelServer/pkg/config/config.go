@@ -19,6 +19,13 @@ type Config struct {
 	ServerHost     string
 	DebugMode      bool
 	TrustedProxies []string
+
+	//config SMTP
+	SMTPServer    string
+	SMTPPort      string
+	Email         string
+	EmailPassword string
+	SMTPUseSSL    bool
 }
 
 // LoadConfig charge la configuration à partir des variables d'environnement
@@ -51,6 +58,17 @@ func LoadConfig() (Config, error) {
 		log.Fatalf("Error JWTExpiration : %v", err)
 	}
 
+	// Config SMTP
+
+	useSSL, err := strconv.ParseBool(os.Getenv("USE_SSL"))
+	if err != nil {
+		debugMode = false // Valeur par défaut si non définie ou invalide
+	}
+	smtpServer := os.Getenv("SMTP_SERVER")
+	smtpPort := os.Getenv("SMTP_PORT")
+	smtpEmail := os.Getenv("EMAIL")
+	smtpPassword := os.Getenv("EMAIL_PASSWORD")
+
 	return Config{
 		MongoDBURI:     os.Getenv("MONGODB_URI"),
 		MongoDBName:    os.Getenv("MONGODB_DB_NAME"),
@@ -60,5 +78,11 @@ func LoadConfig() (Config, error) {
 		ServerHost:     serverHost,
 		DebugMode:      debugMode,
 		TrustedProxies: trustedProxies,
+
+		SMTPServer:    smtpServer,
+		SMTPPort:      smtpPort,
+		SMTPUseSSL:    useSSL,
+		Email:         smtpEmail,
+		EmailPassword: smtpPassword,
 	}, nil
 }
