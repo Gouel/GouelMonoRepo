@@ -103,20 +103,27 @@ func UserPayHandler(c *gin.Context) {
 		return
 	}
 
+	ticket, err := database.GetTicketInfo(ticketId, &eventId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ticket invalide"})
+		return
+	}
+
 	// Logique pour traiter l'achat
-	totalCost, err := processPurchase(eventId, ticketId, purchaseItems)
+	totalCost, err := processPurchase(eventId, ticket, purchaseItems)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Générer une transaction de débit
-	err = addDebitTransaction(ticketId, totalCost, purchaseItems)
+	err = addDebitTransaction(ticket.UserId, totalCost, purchaseItems)
 	if err != nil {
 		if err.Error() == "solde insuffisant" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -124,12 +131,8 @@ func UserPayHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Achat effectué avec succès", "total_cost": totalCost})
 }
 
-func processPurchase(eventId, ticketId string, items []models.PurchaseProduct) (float32, error) {
+func processPurchase(eventId string, ticket *models.Ticket, items []models.PurchaseProduct) (float32, error) {
 	var totalCost float32
-	ticket, err := database.GetTicketInfo(ticketId, &eventId)
-	if err != nil {
-		return 0, err
-	}
 
 	for _, item := range items {
 		product, err := database.GetEventProductsByCode(eventId, item.ProductCode)
@@ -169,6 +172,11 @@ func isUserAdult(ticket models.Ticket) bool {
 }
 
 func hasEnded(endOfSale string) bool {
+
+	if endOfSale == "" {
+		return false
+	}
+
 	// Convertir la chaîne de date en time.Time
 	endOfSaleTime, err := time.Parse("2006-01-02T15:04", endOfSale)
 	if err != nil {

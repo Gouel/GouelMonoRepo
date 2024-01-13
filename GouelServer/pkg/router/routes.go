@@ -29,8 +29,8 @@ func Routes(router *gin.Engine, cfg config.Config) {
 	router.GET("/users/:user_id", handlers.GetUserByIdHandler)
 	router.POST("/users/", middlewares.RoleAuthorizationMiddleware("API"), handlers.CreateUserHandler)
 	router.POST("/users/event/:event_id", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("caisse"), handlers.CreateUserHandler)
-	router.POST("/users/:user_id/transaction", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("buvette", "caisse"), handlers.AddUserTransactionHandler)
-	// TODO faire une route /users/:user_id/pay on donne une liste de {product_code: "", amount}. (verifie age aussi)
+	router.POST("/users/transaction/:event_id/:user_id", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("buvette", "caisse"), handlers.AddUserTransactionHandler)
+	router.POST("/users/pay/:event_id/:ticket_id", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("buvette"), handlers.UserPayHandler)
 	router.PUT("/users/:user_id", middlewares.RoleAuthorizationMiddleware("API"), handlers.UpdateUserHandler)
 
 	//Routes TICKETS
