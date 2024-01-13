@@ -12,7 +12,7 @@ app.secret_key = os.getenv("APP_SECRET", default="BAD_SECRET_KEY")
 
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = True
-app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 30
+app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 30  # 30 minutes
 app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_REDIS"] = redis.from_url("redis://" + os.getenv("REDIS_URL"))
 

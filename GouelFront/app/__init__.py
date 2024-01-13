@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from .hello_asso import HelloAssoAPI
+from .gouel_server import GouelApi
 import os
 from dotenv import load_dotenv
 from datetime import datetime
@@ -14,6 +15,12 @@ ha = HelloAssoAPI(
 )
 
 
+ga = GouelApi(
+    username=os.environ["GOUEL_API_USERNAME"],
+    password=os.environ["GOUEL_API_PASSWORD"],
+)
+
+
 def create_app():
     app = Flask(__name__)
 
@@ -23,7 +30,6 @@ def create_app():
             return datetime.fromisoformat(value).strftime(format)
         return value
 
-    # Importer et enregistrer les vues ici
     from .views import main
     from .api import api
     from .admin import admin
@@ -34,7 +40,10 @@ def create_app():
 
     @app.errorhandler(404)
     def page_not_found(e):
-        # notez que nous définissons la réponse 404 explicitement
         return render_template("404.j2"), 404
+
+    from .helper import GouelHelper
+
+    app.jinja_env.globals.update(gh=GouelHelper)
 
     return app

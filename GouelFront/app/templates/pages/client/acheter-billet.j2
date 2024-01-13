@@ -12,8 +12,8 @@
         <!-- Section des tickets -->
         <div class="md:flex-1 md:w-3/4">
             <div id="tickets-list" class="space-y-4">
-                {% for ticket in event.tickets %}
-                {% with id = loop.index - 1 %}
+                {% for ticket in event.EventTickets %}
+                {% with id = ticket.EventTicketCode %}
                 {% include 'components/ticket.j2' %}
                 {% endwith %}
                 {% endfor %}
@@ -44,7 +44,7 @@
 
 <script>
     // Liste globale pour stocker les tickets
-    const event_id = {{ event_id }};
+    const event_id = "{{ event_id }}";
 
     let ticketsInCart = JSON.parse(`{{ panier }}`);
     updateCartDisplay();

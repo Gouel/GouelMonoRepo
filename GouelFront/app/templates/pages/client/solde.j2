@@ -6,7 +6,7 @@
 <div class="container mx-auto p-4 text-white">
     <div class="text-center mb-6">
         <h2 class="text-5xl font-bold mb-4">Solde Actuel:</h2>
-        <h3 class="text-5xl font-bold mb-4 inline-flex items-center justify-center">{{ user.solde }} <i
+        <h3 class="text-5xl font-bold mb-4 inline-flex items-center justify-center">{{ user.Solde }} <i
                 class="iconoir-coins ml-2"></i></h3>
         <div>
             <button id="recharge-button"
@@ -14,10 +14,11 @@
                 onclick="recharge()">
                 Recharger
             </button>
-            <button
+            {# TODO ajouter fonctionnaliter en option #}
+            {# <button
                 class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded mx-2">
                 Rembourser
-            </button>
+            </button> #}
         </div>
     </div>
 
@@ -25,15 +26,28 @@
         <h3 class="text-2xl font-bold mb-4">Transactions</h3>
         <ul>
             <li class="text-lg font-bold mb-4">Total dépensé : {{ total_depense }}€</li>
-            {% for transaction in user.transactions %}
-            {% set transaction_total = transaction.price * transaction.number %}
-            <li class="mb-2 bg-gray-700 p-2 rounded shadow">
-                <span class="font-semibold">{{ transaction.title }} (x{{ transaction.number }})</span>
-                - {{ transaction.price }}€ unité
-                - Total: {{ transaction_total }}€
-                - <span class="text-gray-400">{{ transaction.date | dateformat }}</span>
+            {% for transaction in user.Transactions %}
+            <li class="mb-4 p-4 bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div class="text-lg font-semibold">{{ 'Dépense' if transaction.Type == "debit" else 'Crédit' }}
+                    </div>
+                    <div class="text-lg font-semibold"> {{ transaction.Amount }} €</div>
+                    <div class="text-sm">{{ transaction.Date | dateformat }}</div>
+                    {% if transaction.Type == "debit" %}
+                    <details class="col-span-1 md:col-span-3 mt-4 p-3 bg-gray-700 rounded-lg">
+                        <summary class="cursor-pointer text-white font-semibold">Détails de la dépense</summary>
+                        <div class="mt-2">
+                            {% for article in transaction.Cart %}
+                            {% set product = gh.get_product_from_code(transaction.EventId,article.ProductCode) %}
+                            <span>{{ product.Label }} x {{ article.Amount }} </span>
+                            {% endfor %}
+                        </div>
+                    </details>
+                    {% endif %}
+                </div>
             </li>
             {% endfor %}
+
         </ul>
     </div>
 </div>
