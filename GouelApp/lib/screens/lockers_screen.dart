@@ -69,9 +69,21 @@ class LockersScreenState extends State<LockersScreen> {
         appBar: AppBar(
           title: const Text("Vestiaires"),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showMenu(context),
-          child: const Icon(Icons.menu),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: null,
+              onPressed: () => _loadLockers(),
+              child: const Icon(Icons.refresh),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              heroTag: null,
+              onPressed: () => _showMenu(context),
+              child: const Icon(Icons.menu),
+            ),
+          ],
         ),
         body: Column(
           children: [

@@ -83,10 +83,19 @@ class CashierScreenState extends State<CashierScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double trueAmount = double.tryParse(_amount) ?? 0;
-
     return GouelScaffold(
       appBar: AppBar(title: const Text('Caisse')),
+      persistentFooterButtons: [
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: GouelButton(
+            text: "Payer",
+            icon: Icons.euro,
+            onTap: _onPayPressed,
+            color: Colors.green,
+          ),
+        )
+      ],
       body: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -98,16 +107,6 @@ class CashierScreenState extends State<CashierScreen> {
             input: _amount,
           ),
           _buildPaymentMethodSelector(),
-          Paragraph.space(),
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: GouelButton(
-              text: "Payer",
-              icon: Icons.euro,
-              onTap: trueAmount != 0 ? _onPayPressed : () {},
-              color: trueAmount != 0 ? Colors.green : Colors.grey,
-            ),
-          )
           // Autres éléments de l'interface utilisateur
         ],
       ),
@@ -538,6 +537,7 @@ class CashierScreenState extends State<CashierScreen> {
   }
 
   void _onPayPressed() {
+    double? trueAmount = double.tryParse(_amount) ?? 0;
     GouelBottomSheet.launch(
       context: context,
       bottomSheet: GouelBottomSheet(
@@ -547,14 +547,15 @@ class CashierScreenState extends State<CashierScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              GouelButton(
-                text: 'Recharger Compte',
-                onTap: () {
-                  Navigator.pop(context);
-                  _handleQrCodePayment();
-                },
-              ),
-              Paragraph.space(),
+              if (trueAmount > 0)
+                GouelButton(
+                  text: 'Recharger Compte',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _handleQrCodePayment();
+                  },
+                ),
+              if (trueAmount > 0) Paragraph.space(),
               GouelButton(
                 text: 'Nouveau Ticket',
                 onTap: () {
