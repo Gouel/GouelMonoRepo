@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gouel/models/event_model.dart';
+import 'package:gouel/models/gouel_cart.dart';
+import 'package:gouel/models/product_model.dart';
 import 'package:gouel/models/ticket_model.dart';
 import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_session_service.dart';
@@ -166,6 +168,23 @@ class GouelApiService with ChangeNotifier {
     }
   }
 
+  Future<List<Product>> getEventProducts(context) async {
+    try {
+      Event event = GouelSession().retrieve('event');
+
+      var response =
+          await GouelRequest.get("/events/${event.id}/products").send(context);
+
+      List<Product> products = (response as List)
+          .map((eventJson) => Product.fromJson(eventJson))
+          .toList();
+      return products;
+    } catch (e) {
+      print('Erreur lors de la récupération des produits: $e');
+      return [];
+    }
+  }
+
   // Tickets
 
   Future<String?> createTicket(context, Map<String, dynamic> ticket) async {
@@ -239,7 +258,7 @@ class GouelApiService with ChangeNotifier {
 
   Future<bool> addTransaction(String userId, Transaction transaction) async {
     try {
-      await GouelRequest.post("/users/$userId/transaction")
+      await GouelRequest.post("/users/transaction/$userId")
           .send(context, data: transaction.toJson());
       return true;
     } catch (e) {
@@ -256,6 +275,21 @@ class GouelApiService with ChangeNotifier {
       return response["UserId"];
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> userPay(String ticketId, GouelCart cart) async {
+    Event event = GouelSession().retrieve("event") as Event;
+    try {
+      Map<String, dynamic> response =
+          await GouelRequest.post("/users/pay/${event.id}/$ticketId")
+              .send(context, data: cart.toJson());
+      return {"statusCode": 200, "body": response};
+    } catch (e) {
+      if (e is GouelException) {
+        return e.data ?? {};
+      }
+      return {};
     }
   }
 }

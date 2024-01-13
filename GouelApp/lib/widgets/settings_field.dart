@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gouel/widgets/gouel_switch.dart';
 
 enum SettingsFieldType {
   inputText,
@@ -53,10 +54,10 @@ class SettingsField extends StatelessWidget {
           onChanged: (val) => onChanged!(num.tryParse(val)),
         );
       case SettingsFieldType.switchField:
-        return SwitchListTile(
-          title: Text(label),
-          value: value,
-          onChanged: (val) => onChanged!(val),
+        return GouelSwitch(
+          initialValue: value,
+          onChange: (val) => onChanged!(val),
+          label: label,
         );
       case SettingsFieldType.select:
         return DropdownButtonFormField<String>(

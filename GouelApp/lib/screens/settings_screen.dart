@@ -31,7 +31,6 @@ class SettingsScreen extends StatelessWidget {
   Future<Map<String, dynamic>> getSettings(List<String> keys) async {
     final storage = GouelStorage();
     Map<String, dynamic> settings = {};
-
     for (String key in keys) {
       dynamic value = await storage.retrieve(key);
       settings[key] = value;
@@ -67,6 +66,15 @@ class SettingsScreen extends StatelessWidget {
             "* Le taux de rafraîchissement correspond au temps que prend la page Vestiaire / Entrée pour s'actualiser",
       ),
       Paragraph.space(),
+
+      SettingsField(
+        type: SettingsFieldType.switchField,
+        label: "Afficher le titre des produits",
+        value: _settingsData['product_show_title'] ?? false,
+        onChanged: (value) => _handleSettingChange("product_show_title", value),
+      ),
+
+      Paragraph.space(),
       // Ajoutez d'autres champs de paramètres ici en utilisant _settingsData
       GouelButton(
         text: "Sauvegarder",
@@ -83,7 +91,8 @@ class SettingsScreen extends StatelessWidget {
     return GouelScaffold(
         appBar: AppBar(title: const Text("Paramètres")),
         body: FutureBuilder(
-          future: getSettings(["server_addr", "data_refresh"]),
+          future: getSettings(
+              ["server_addr", "data_refresh", "product_show_title"]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

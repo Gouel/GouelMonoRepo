@@ -22,6 +22,7 @@ enum GouelExceptionState {
 
 class GouelException implements Exception {
   final String message;
+  final Map<String, dynamic>? data;
 
   final GouelExceptionState state;
 
@@ -33,7 +34,8 @@ class GouelException implements Exception {
 
   GouelException(
       {this.message = "Une erreur est survenue.",
-      this.state = GouelExceptionState.info});
+      this.state = GouelExceptionState.info,
+      this.data});
 
   @override
   String toString() => message;

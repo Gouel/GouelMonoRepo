@@ -76,7 +76,12 @@ class GouelRequest {
     } else {
       var m = body as Map<String, dynamic>;
       throw GouelException(
-          message: "${m["error"]}", state: GouelExceptionState.critical);
+          message: "${m["error"]}",
+          state: GouelExceptionState.critical,
+          data: {
+            "statusCode": response.statusCode,
+            "body": m,
+          });
     }
   }
 }

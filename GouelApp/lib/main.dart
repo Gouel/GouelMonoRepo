@@ -7,6 +7,7 @@ import 'package:gouel/screens/lockers_screen.dart';
 import 'package:gouel/screens/login_screen.dart';
 import 'package:gouel/screens/manage_event_screen.dart';
 import 'package:gouel/screens/settings_screen.dart';
+import 'package:gouel/screens/store_screen.dart';
 import 'package:gouel/services/gouel_api_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,7 @@ class Gouel extends StatelessWidget {
       "/event/vestiaire": (builder) => const LockersScreen(),
       "/event/entree": (builder) => const EntryScreen(),
       "/event/caisse": (builder) => const CashierScreen(),
+      "/event/buvette": (builder) => const StoreScreen(),
 
       "/events": (builder) => const EventsScreen(),
       "/credits": (builder) => const CreditsScreen(),
