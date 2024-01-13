@@ -117,7 +117,7 @@ func UserPayHandler(c *gin.Context) {
 	}
 
 	// Générer une transaction de débit
-	err = addDebitTransaction(ticket.UserId, totalCost, purchaseItems)
+	err = addDebitTransaction(eventId, ticket.UserId, totalCost, purchaseItems)
 	if err != nil {
 		if err.Error() == "solde insuffisant" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": 0x04})
@@ -200,13 +200,14 @@ func hasEnded(endOfSale string) bool {
 	return time.Now().After(endOfSaleTime)
 }
 
-func addDebitTransaction(userId string, amount float32, cart []models.PurchaseProduct) error {
+func addDebitTransaction(eventId, userId string, amount float32, cart []models.PurchaseProduct) error {
 	// Créer une transaction de débit
 	debitTransaction := models.Transaction{
-		Type:   "debit",
-		Amount: amount,
-		Cart:   cart,
-		Date:   time.Now().Format("2006-01-02T15:04:05"),
+		Type:    "debit",
+		Amount:  amount,
+		Cart:    cart,
+		EventId: eventId,
+		Date:    time.Now().Format("2006-01-02T15:04:05"),
 	}
 
 	// Utiliser AddUserTransaction pour mettre à jour le solde de l'utilisateur et enregistrer la transaction
