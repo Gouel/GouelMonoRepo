@@ -9,12 +9,14 @@ import 'package:gouel/services/mail_service.dart';
 import 'package:gouel/utils/gouel_request.dart';
 import 'package:gouel/utils/gouel_exception.dart';
 import 'package:http/http.dart';
+import 'package:logging/logging.dart';
 
 class GouelApiService with ChangeNotifier {
   final GouelSession _sessionService = GouelSession();
   final BuildContext context;
   String? _token;
   bool isLogged = false;
+  Logger logger = Logger("GouelApiService");
 
   GouelApiService(this.context) {
     _init();
@@ -65,7 +67,7 @@ class GouelApiService with ChangeNotifier {
     try {
       return await GouelRequest.get("/token/view").send(context);
     } catch (e) {
-      print('Error getting token info: $e');
+      logger.severe('Error getting token info: $e');
       return null;
     }
   }
@@ -75,7 +77,7 @@ class GouelApiService with ChangeNotifier {
       var result = await GouelRequest.post("/token/refresh").send(context);
       await _saveToken(result);
     } catch (e) {
-      print('Error refreshing token: $e');
+      logger.severe('Error refreshing token: $e');
       logout(); // Déconnecter l'utilisateur si le rafraîchissement échoue
     }
   }
@@ -133,7 +135,7 @@ class GouelApiService with ChangeNotifier {
           .toList();
       return events;
     } catch (e) {
-      print('Erreur lors de la récupération des événements: $e');
+      logger.severe('Erreur lors de la récupération des événements: $e');
       return [];
     }
   }
@@ -148,7 +150,7 @@ class GouelApiService with ChangeNotifier {
           .toList();
       return lockers;
     } catch (e) {
-      print('Erreur lors de la récupération des vestiaires: $e');
+      logger.severe('Erreur lors de la récupération des vestiaires: $e');
       return [];
     }
   }
@@ -180,7 +182,7 @@ class GouelApiService with ChangeNotifier {
           .toList();
       return products;
     } catch (e) {
-      print('Erreur lors de la récupération des produits: $e');
+      logger.severe('Erreur lors de la récupération des produits: $e');
       return [];
     }
   }

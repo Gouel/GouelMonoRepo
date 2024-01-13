@@ -11,6 +11,7 @@ import 'package:gouel/widgets/gouel_button.dart';
 import 'package:gouel/widgets/gouel_modal.dart';
 import 'package:gouel/widgets/gouel_product_widget.dart';
 import 'package:gouel/widgets/gouel_scaffold.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 class StoreScreen extends StatefulWidget {
@@ -26,6 +27,8 @@ class StoreScreenState extends State<StoreScreen> {
   late GouelCart cart;
 
   bool isCartOpen = false;
+
+  Logger logger = Logger("StoreScreen");
 
   @override
   void dispose() {
@@ -224,10 +227,9 @@ class StoreScreenState extends State<StoreScreen> {
   }
 
   void processPayementReturn(Map<String, dynamic> payementReturn) {
-    //TODO: process payement return
     int statusCode = payementReturn["body"]["code"];
     Widget statusWidget;
-    print(payementReturn);
+    logger.severe(payementReturn);
     switch (statusCode) {
       case 0x0:
         // payement Success
