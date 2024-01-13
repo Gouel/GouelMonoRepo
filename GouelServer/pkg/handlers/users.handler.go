@@ -99,20 +99,20 @@ func UserPayHandler(c *gin.Context) {
 
 	var purchaseItems []models.PurchaseProduct
 	if err := c.ShouldBindJSON(&purchaseItems); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides", "code": 0x01})
 		return
 	}
 
 	ticket, err := database.GetTicketInfo(ticketId, &eventId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Ticket invalide"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ticket invalide", "code": 0x02})
 		return
 	}
 
 	// Logique pour traiter l'achat
-	totalCost, err := processPurchase(eventId, ticket, purchaseItems)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	totalCost, err2 := processPurchase(eventId, ticket, purchaseItems)
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err2, "code": 0x03})
 		return
 	}
 
@@ -120,32 +120,44 @@ func UserPayHandler(c *gin.Context) {
 	err = addDebitTransaction(ticket.UserId, totalCost, purchaseItems)
 	if err != nil {
 		if err.Error() == "solde insuffisant" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": 0x04})
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": 0xFF})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Achat effectué avec succès", "total_cost": totalCost})
+	c.JSON(http.StatusOK, gin.H{"message": "Achat effectué avec succès", "total_cost": totalCost, "code": 0x00})
 }
 
-func processPurchase(eventId string, ticket *models.Ticket, items []models.PurchaseProduct) (float32, error) {
+func processPurchase(eventId string, ticket *models.Ticket, items []models.PurchaseProduct) (float32, *models.GouelError) {
 	var totalCost float32
 
 	for _, item := range items {
 		product, err := database.GetEventProductsByCode(eventId, item.ProductCode)
 		if err != nil {
-			return 0, err
+			return 0, &models.GouelError{
+				Message: "Produit invalide",
+				Code:    0x00,
+				Data:    item.ProductCode,
+			}
 		}
 
 		if hasEnded(product.EndOfSale) {
-			return 0, fmt.Errorf("le produit %s n'est plus en vente", item.ProductCode)
+			return 0, &models.GouelError{
+				Message: "La vente de ce produit est terminée",
+				Code:    0x01,
+				Data:    product,
+			}
 		}
 
 		if product.HasAlcohol && !isUserAdult(*ticket) {
-			return 0, fmt.Errorf("l'utilisateur n'a pas le droit d'acheter le produit %s", item.ProductCode)
+			return 0, &models.GouelError{
+				Message: "L'utilisateur n'a pas le droit d'acheter ce produit",
+				Code:    0x02,
+				Data:    product,
+			}
 		}
 
 		totalCost += product.Price * float32(item.Amount)
