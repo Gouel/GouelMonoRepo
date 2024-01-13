@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -81,7 +83,9 @@ class EmailService {
 
 class MemoryAttachment extends StreamAttachment {
   final Uint8List data;
+  @override
   final String fileName;
+  @override
   final String contentType;
 
   MemoryAttachment(this.data,
