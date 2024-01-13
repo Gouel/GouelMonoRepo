@@ -1,5 +1,4 @@
 import 'package:gouel/models/product_model.dart';
-import 'package:gouel/models/transcations_model.dart';
 import 'package:gouel/services/gouel_session_service.dart';
 
 class CartItem {
