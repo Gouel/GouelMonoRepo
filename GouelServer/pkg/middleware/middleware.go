@@ -119,16 +119,15 @@ func EventAuthorizationMiddleware(requiredRights ...string) gin.HandlerFunc {
 		if eventsExists && eventsValue != nil {
 			events = eventsValue.([]interface{})
 		}
-
 		for _, e := range events {
 			event := e.(map[string]interface{})
-			if event["event_id"] == eventId {
-				if event["role"] == "ADMIN" {
+			if event["EventId"] == eventId {
+				if event["Role"] == "Admin" {
 					hasAccess = true
 					break
 				}
 
-				permissions := event["rights"].([]interface{})
+				permissions := event["Permissions"].([]interface{})
 				for _, p := range permissions {
 					for _, requiredRight := range requiredRights {
 						if p == requiredRight {
@@ -185,8 +184,8 @@ func EventAccessMiddleware() gin.HandlerFunc {
 		// Vérifier si l'utilisateur est Administrateur ou Volunteer de l'event
 		for _, e := range events {
 			event := e.(map[string]interface{})
-			if event["event_id"] == eventId {
-				if event["role"] == "ADMIN" || event["role"] == "Volunteer" {
+			if event["EventId"] == eventId {
+				if event["Role"] == "Admin" || event["Role"] == "Volunteer" {
 					hasAccess = true
 					break
 				}
