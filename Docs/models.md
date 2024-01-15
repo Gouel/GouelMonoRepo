@@ -69,7 +69,7 @@ La collection Events gère l'ensemble des données liés aux événements. Elle 
 |-------------|---------------------------------|------------------------------------------------------------------|
 | contact     | Texte                           | Une façon de contacter les organisateurs (ex : email, telephone) |
 | description | Texte                           | Description de l'événement                                       |
-| eventTicket | Liste des[ticket d'événement](#eventticket) | La liste des tickets à vendre pour l'événement                   |
+| eventTicket | Liste des [ticket d'événement](#eventticket) | La liste des tickets à vendre pour l'événement                   |
 | location    | Texte                           | L'endroit où se passe l'événement                                |
 | lockers     | Liste de [vestiaires](#lockers)         | La liste des vestiaires disponibles lors de l'événement          |
 | products    | Liste de [produits](#products)           | La liste des produits à vendre dans la buvette                   |
