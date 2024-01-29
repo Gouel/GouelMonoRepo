@@ -1,5 +1,13 @@
 # Liste des choses à faire/en cours
 
+## Pour la version 1
+
+- Produire une release de l'application sur Android et possiblement IOS
+- Produire les documents légaux pour GouelFront (CGU / CGV / Mentions légales)
+- Vérifier la sécurité de GouelFront / GouelServeur
+
+## Général
+
 - Utiliser des fonctions de logging plutôt que des prints
 - Limitation d'une Identité par email
 - Ajout champs "wherePurchased" dans les tickets avec une valeur ("onSite" / "online") + Ajouter prix différent OnSite / Online
