@@ -8,20 +8,27 @@
 
 ## Général
 
-- Utiliser des fonctions de logging plutôt que des prints
-- Limitation d'une Identité par email
-- Ajout champs "wherePurchased" dans les tickets avec une valeur ("onSite" / "online") + Ajouter prix différent OnSite / Online
-- Ajouter champ "SamBonus" dans event pour ajouter un certain montant aux utilisateurs SAM
-- Ajouter fonctionnalité BlueTooth + imprimante thermique (Impression ticket physique)
-- Ajouter panneaux statistiques dans GouelFront/admin
 - Ajouter gestion écocup
+- Entrée :
+  - Afficher tickets seulement en recherche (bottomsheet)
+  - Récupérer par packet (pagination coté serveur)
+  - Effectuer recherche ticket (coté serveur)
+  - Implémenter scroll infini
+- Ajouter champ "SamBonus" dans event pour ajouter un certain montant aux utilisateurs SAM
+- Limitation d'une Identité par email (demande confirmation email + avertissement)
+- Ajout champs "wherePurchased" dans les tickets avec une valeur ("onSite" / "online") + Ajouter prix différent OnSite / Online
+
 - Ajouter génération badges bénévoles (publipostage)
-- Optimisations :
-  - GouelApp : Utiliser RiverPod au lieu de Provider
-  - GouelApp / GouelServer : Utiliser des websockets pour les rechargements (rechargement "instantanés")
-- Généraliser GouelFront pour ajouter d'autres PayementProviders (autre que HelloAsso)
 - Faire documentation
   - Tutoriels Vidéos / écrits
   - GouelServer : Documentation routes API
   - Vidéo de présentation de Gouel
   - Remplir le README.md
+
+- Ajouter fonctionnalité BlueTooth + imprimante thermique (Impression ticket physique)
+- Ajouter panneaux statistiques dans GouelFront/admin
+- Optimisations :
+  - GouelApp : Utiliser RiverPod au lieu de Provider
+  - GouelApp / GouelServer : Utiliser des websockets pour les rechargements (rechargement "instantanés")
+- Généraliser GouelFront pour ajouter d'autres PayementProviders (autre que HelloAsso)
+- Utiliser des fonctions de logging plutôt que des prints
