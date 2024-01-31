@@ -87,7 +87,7 @@ class CreditsScreen extends StatelessWidget {
               Paragraph.space(),
               const Paragraph(
                 type: ParagraphType.link,
-                content: 'https://gouel.fr',
+                content: 'http://gouel.fr',
               ),
               Paragraph.space(),
               const Paragraph(

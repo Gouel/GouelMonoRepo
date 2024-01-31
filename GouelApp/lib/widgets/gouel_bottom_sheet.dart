@@ -7,10 +7,13 @@ class GouelBottomSheet extends StatelessWidget {
   const GouelBottomSheet({super.key, required this.title, required this.child});
 
   static void launch(
-      {required BuildContext context, required GouelBottomSheet bottomSheet}) {
+      {required BuildContext context,
+      required GouelBottomSheet bottomSheet,
+      bool isDismissible = true}) {
     showModalBottomSheet(
         context: context,
         builder: (_) => bottomSheet,
+        isDismissible: isDismissible,
         isScrollControlled: true);
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class GouelButton extends StatelessWidget {
   final String? text;
   final VoidCallback onTap;
+  final VoidCallback? onLongTap;
   final MaterialColor color;
   final IconData? icon;
 
@@ -10,6 +11,7 @@ class GouelButton extends StatelessWidget {
     Key? key,
     required this.text,
     required this.onTap,
+    this.onLongTap,
     this.color = Colors.deepPurple,
     this.icon,
   }) : super(key: key);
@@ -20,6 +22,9 @@ class GouelButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(5),
       child: ElevatedButton(
         onPressed: onTap,
+        onLongPress: () => {
+          if (onLongTap != null) {onLongTap!()}
+        },
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
           backgroundColor: color.shade600, // Text color
