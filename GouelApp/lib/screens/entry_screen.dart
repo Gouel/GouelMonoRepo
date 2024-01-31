@@ -51,7 +51,14 @@ class EntryScreenState extends State<EntryScreen> {
   Widget build(BuildContext context) {
     List<TicketInfos> filteredTickets = tickets.where((ticket) {
       var email = ticket.user["Email"] as String;
-      return email.startsWith(filterTickets);
+      var nom = ticket.user["LastName"] as String;
+      var prenom = ticket.user["FirstName"] as String;
+      List<bool> allows = [
+        email.toLowerCase().contains(filterTickets.toLowerCase()),
+        nom.toLowerCase().contains(filterTickets.toLowerCase()),
+        prenom.toLowerCase().contains(filterTickets.toLowerCase()),
+      ];
+      return allows.contains(true);
     }).toList();
 
     filteredTickets.sort(
@@ -81,7 +88,7 @@ class EntryScreenState extends State<EntryScreen> {
         children: [
           SettingsField(
               type: SettingsFieldType.inputText,
-              label: "Rechercher un email",
+              label: "Rechercher un ticket",
               value: GouelSession().retrieve("entry_filter_email") ?? "",
               onFinish: (value) {
                 GouelSession().store("entry_filter_email", value);
@@ -260,7 +267,13 @@ class EntryScreenState extends State<EntryScreen> {
               },
               icon: Icons.no_drinks,
               color: Colors.blue,
-            )
+            ),
+            Paragraph.space(),
+            GouelButton(
+                text: "OK",
+                onTap: () {
+                  Navigator.of(context, rootNavigator: true).pop('dialog');
+                }),
           ]);
         }
       }
