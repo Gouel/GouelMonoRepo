@@ -30,5 +30,5 @@
 - Optimisations :
   - GouelApp : Utiliser RiverPod au lieu de Provider
   - GouelApp / GouelServer : Utiliser des websockets pour les rechargements (rechargement "instantanés")
-- Généraliser GouelFront pour ajouter d'autres PayementProviders (autre que HelloAsso)
+- Généraliser GouelFront pour ajouter d'autres PaymentProviders (autre que HelloAsso)
 - Utiliser des fonctions de logging plutôt que des prints

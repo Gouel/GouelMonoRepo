@@ -51,7 +51,7 @@ Une transaction représente une action sur le solde de l'utilisateur. Que ce soi
 | cart         | Liste des [achats](#purchasedproduct) | La liste des achats (produits + nombre)                              |
 | date         | Texte                 | La date de transaction au format iso (yyyy-mm-ddThh:mm:ss)           |
 | eventId      | Texte                 | L'identifiant de l'événement concerné par la transaction             |
-| payementType | Texte                 | Le type de paiement utilisé (espece, carte, helloasso, cashless,...) |
+| paymentType | Texte                 | Le type de paiement utilisé (espece, carte, helloasso, cashless,...) |
 | type         | Texte                 | Le type d'action effectué (credit / debit)                           |
 
 ### PurchasedProduct

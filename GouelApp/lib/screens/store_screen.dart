@@ -176,9 +176,9 @@ class StoreScreenState extends State<StoreScreen> {
                           color: cart.total > 0 ? Colors.blue : Colors.grey,
                           onTap: () {
                             if (cart.total > 0) {
-                              //payementProcess
+                              //paymentProcess
                               Navigator.of(context).pop();
-                              payementProcess();
+                              paymentProcess();
                             }
                           },
                           text: "Payer ${cart.total.toStringAsFixed(2)}€",
@@ -206,8 +206,8 @@ class StoreScreenState extends State<StoreScreen> {
     return total;
   }
 
-  //payementProcess
-  void payementProcess() {
+  //paymentProcess
+  void paymentProcess() {
     QRScannerService().scanQR(
       context,
       "Scanner ticket",
@@ -217,22 +217,22 @@ class StoreScreenState extends State<StoreScreen> {
         if (ticketInfos == null) return;
         if (!mounted) return;
 
-        Map<String, dynamic> payementReturn =
+        Map<String, dynamic> paymentReturn =
             await Provider.of<GouelApiService>(context, listen: false)
                 .userPay(ticketInfos.id, cart);
-        processPayementReturn(payementReturn);
+        processPaymentReturn(paymentReturn);
       },
       (close) => null,
     );
   }
 
-  void processPayementReturn(Map<String, dynamic> payementReturn) {
-    int statusCode = payementReturn["body"]["code"];
+  void processPaymentReturn(Map<String, dynamic> paymentReturn) {
+    int statusCode = paymentReturn["body"]["code"];
     Widget statusWidget;
-    logger.severe(payementReturn);
+    logger.severe(paymentReturn);
     switch (statusCode) {
       case 0x0:
-        // payement Success
+        // payment Success
         statusWidget = statusWidget = buildStatusWidget(
           Icons.check_circle,
           Colors.green,
@@ -257,23 +257,23 @@ class StoreScreenState extends State<StoreScreen> {
         break;
       case 0x3:
         // erreur produits (endOfSale ou Alcohol ou produit invalide)
-        if (payementReturn['body']['error']['code'] == 0x0) {
+        if (paymentReturn['body']['error']['code'] == 0x0) {
           statusWidget = statusWidget = buildStatusWidget(
             Icons.error,
             Colors.red,
             "Produit invalide",
           );
-        } else if (payementReturn['body']['error']['code'] == 0x1) {
+        } else if (paymentReturn['body']['error']['code'] == 0x1) {
           statusWidget = statusWidget = buildStatusWidget(
             Icons.event_busy,
             Colors.red,
-            "${payementReturn['body']['error']['data']['Label']} n'est plus en vente",
+            "${paymentReturn['body']['error']['data']['Label']} n'est plus en vente",
           );
-        } else if (payementReturn['body']['error']['code'] == 0x2) {
+        } else if (paymentReturn['body']['error']['code'] == 0x2) {
           statusWidget = statusWidget = buildStatusWidget(
             Icons.error,
             Colors.red,
-            "${payementReturn['body']['error']['data']['Label']} contient de l'alcool",
+            "${paymentReturn['body']['error']['data']['Label']} contient de l'alcool",
           );
         } else {
           statusWidget = statusWidget = buildStatusWidget(
