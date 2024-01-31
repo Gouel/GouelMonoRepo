@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gouel/providers/payment/blank_payment_provider.dart';
+import 'package:gouel/providers/payment/payment_provider.dart';
+import 'package:gouel/providers/payment/sumup_payment_provider.dart';
 
 class Transaction {
   final TransactionType transactionType;
@@ -24,8 +27,8 @@ class Transaction {
     double amount = data["Amount"] as double;
     PaymentMethod? paymentMethod;
 
-    if (data.containsKey("PayementType")) {
-      paymentMethod = PaymentMethod.fromString(data["PayementType"] as String);
+    if (data.containsKey("PaymentType")) {
+      paymentMethod = PaymentMethod.fromString(data["PaymentType"] as String);
     }
 
     List<dynamic> preprocessedCart = data["Cart"] as List;
@@ -61,7 +64,7 @@ class Transaction {
     };
 
     if (paymentMethod != null) {
-      data["PayementType"] = paymentMethod!.name;
+      data["PaymentType"] = paymentMethod!.name;
     }
 
     return data;
@@ -95,29 +98,37 @@ class PurchasedItem {
 enum TransactionType { debit, credit }
 
 enum PaymentMethod {
-  // Maximum 6 available
-  espece(desc: "Espèces", available: true, icon: Icons.euro),
-  carte(desc: "Carte bleue", available: true, icon: Icons.credit_card),
-  helloasso(desc: "HelloAsso", available: false),
+  // Maximum 6 affichable.
+  //TODO utiliser options event
+  especes(desc: "Espèces", icon: Icons.euro),
+  carte(desc: "Carte bleue", icon: Icons.credit_card),
+  sumup(
+    desc: "SumUp",
+    icon: Icons.add_card,
+    paymentProvider: SumUpPaymentProvider(),
+  ),
+  helloasso(desc: "HelloAsso"),
   ;
 
   const PaymentMethod(
       {required this.desc,
-      this.available = false,
-      this.icon = Icons.radio_button_off});
+      this.icon = Icons.radio_button_off,
+      this.paymentProvider = const BlankPaymentProvider()});
 
   final String desc;
-  final bool available;
   final IconData icon;
+  final PaymentProvider paymentProvider;
 
   static PaymentMethod? fromString(String method) {
     switch (method) {
       case "carte":
         return PaymentMethod.carte;
-      case "espece":
-        return PaymentMethod.espece;
+      case "especes":
+        return PaymentMethod.especes;
       case "helloasso":
         return PaymentMethod.helloasso;
+      case "sumup":
+        return PaymentMethod.sumup;
       default:
         return null;
     }

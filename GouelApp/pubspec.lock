@@ -461,6 +461,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  sumup:
+    dependency: "direct main"
+    description:
+      name: sumup
+      sha256: "9c5989e609695262fa4acddb2f28787e668babb50a1981fc66a2ccfcb3f91296"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.1"
   term_glyph:
     dependency: transitive
     description:

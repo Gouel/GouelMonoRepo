@@ -43,7 +43,8 @@ class CashierScreen extends StatefulWidget {
 
 class CashierScreenState extends State<CashierScreen> {
   String _amount = '';
-  PaymentMethod? _selectedPaymentMethod = PaymentMethod.carte;
+  PaymentMethod? _selectedPaymentMethod;
+  final List<PaymentMethod> _availablePaymentMethods = [];
 
   void _handleKeypadInput(String value) {
     setState(() {
@@ -57,21 +58,48 @@ class CashierScreenState extends State<CashierScreen> {
     });
   }
 
-  Widget _buildPaymentMethodSelector() {
-    List<PaymentMethod> availableMethods =
-        PaymentMethod.values.where((element) => element.available).toList();
+  Future<void> initPaymentProviders() async {
+    // récupère dans les options de l'event
+    Event event = GouelSession().retrieve("event");
 
+    List<dynamic> methods = event.options?["PaymentProviders"] ?? [];
+
+    methods.forEach((element) async {
+      PaymentMethod? method = PaymentMethod.fromString(element);
+      if (method != null) {
+        _availablePaymentMethods.add(method);
+        await method.paymentProvider.init();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    initPaymentProviders();
+    super.initState();
+  }
+
+  Widget _buildPaymentMethodSelector() {
     return GridView.count(
       shrinkWrap: true,
       crossAxisCount: 2,
       childAspectRatio: 3,
-      children: availableMethods
+      children: _availablePaymentMethods
           .map((method) => Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: GouelButton(
                   text: method.desc,
                   icon: method.icon,
                   onTap: () => _selectPaymentMethod(method),
+                  onLongTap: () async {
+                    GouelBottomSheet.launch(
+                      context: context,
+                      bottomSheet: GouelBottomSheet(
+                        title: "Options",
+                        child: await method.paymentProvider.getOptions(),
+                      ),
+                    );
+                  },
                   color: _selectedPaymentMethod == method
                       ? Colors.blue
                       : Colors.grey,
@@ -91,8 +119,8 @@ class CashierScreenState extends State<CashierScreen> {
           child: GouelButton(
             text: "Payer",
             icon: Icons.euro,
-            onTap: _onPayPressed,
-            color: Colors.green,
+            onTap: _selectedPaymentMethod == null ? () {} : _onPayPressed,
+            color: _selectedPaymentMethod == null ? Colors.grey : Colors.green,
           ),
         )
       ],
@@ -137,6 +165,7 @@ class CashierScreenState extends State<CashierScreen> {
     double? trueAmount = currentAmount ?? double.tryParse(_amount);
     if (trueAmount == null || trueAmount <= 0) {
       // XXX Afficher problème
+      onCompletion(true);
       return;
     }
 
@@ -158,9 +187,26 @@ class CashierScreenState extends State<CashierScreen> {
     onCompletion(result);
   }
 
-  void _handleNewTicket() {
+  void _handleNewTicket() async {
+    bool? confirmed =
+        await _selectedPaymentMethod?.paymentProvider.confirmPayment(
+      {
+        "amount": double.tryParse(_amount) ?? 0,
+      },
+    );
+
+    if (confirmed == null || !confirmed) {
+      if (!mounted) return;
+      //TODO change to Dialog
+      showGouelSnackbar(
+          context, "Le paiement n'a pas été confirmé", Colors.red);
+      return;
+    }
+    if (!mounted) return;
+
     GouelBottomSheet.launch(
       context: context,
+      isDismissible: false,
       bottomSheet: GouelBottomSheet(
           title: 'Nouveau Ticket',
           child: GouelStepBuilder(
@@ -230,6 +276,14 @@ class CashierScreenState extends State<CashierScreen> {
   }
 
   Widget _buildStepOne(Map<String, dynamic> formData) {
+    formData["nom"] = "Onymous";
+    formData["prenom"] = "Anonymous";
+    formData["email"] = "test@iziram.fr";
+    formData["dateDeNaissance"] = "01/01/2000";
+    formData["EventTicketCode"] = GouelSelectItem(
+        value: "0864d578-2b8f-494b-86d9-b0a9946f3ee2", label: "ticket");
+    formData["IsSam"] = false;
+
     return Column(
       children: [
         TextFormField(
@@ -472,7 +526,27 @@ class CashierScreenState extends State<CashierScreen> {
         : (false, "Aucun ticket sélectionné");
   }
 
-  void _handleQrCodePayment() {
+  void _handleQrCodePayment() async {
+    //confirmer le paiement auprès du PaymentProvider
+
+    bool? confirmed =
+        await _selectedPaymentMethod?.paymentProvider.confirmPayment(
+      {
+        "amount": double.tryParse(_amount) ?? 0,
+      },
+    );
+
+    if (confirmed == null || !confirmed) {
+      if (!mounted) return;
+      showGouelSnackbar(
+          context, "Le paiement n'a pas été confirmé", Colors.red);
+      return;
+    }
+
+    //une latence pour être sur que le paiement est bien confirmé
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
     // Utiliser le service QRScanner pour scanner un QR Code
     QRScannerService().scanQR(
       context,
@@ -581,7 +655,6 @@ class CashierScreenState extends State<CashierScreen> {
               key: repaintBoundaryKey,
               child: QrImageView(
                 backgroundColor: Colors.white,
-                embeddedImage: const AssetImage("public/assets/icon.png"),
                 data: ticketId,
                 version: QrVersions.auto,
                 size: 200.0,
@@ -643,6 +716,7 @@ class CashierScreenState extends State<CashierScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
+
       showGouelSnackbar(context, "L'email n'a pas pu être envoyé", Colors.red);
     }
   }
