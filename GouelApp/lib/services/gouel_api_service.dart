@@ -260,7 +260,8 @@ class GouelApiService with ChangeNotifier {
 
   Future<bool> addTransaction(String userId, Transaction transaction) async {
     try {
-      await GouelRequest.post("/users/transaction/$userId")
+      Event event = GouelSession().retrieve("event") as Event;
+      await GouelRequest.post("/users/transaction/${event.id}/$userId")
           .send(context, data: transaction.toJson());
       return true;
     } catch (e) {
