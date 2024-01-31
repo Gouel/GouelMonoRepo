@@ -2,19 +2,24 @@ class Event {
   final String id;
   final String title;
   final List<EventTicket> eventTickets;
+  final Map<String, dynamic>? options;
 
-  Event({required this.id, required this.title, required this.eventTickets});
+  Event(
+      {required this.id,
+      required this.title,
+      required this.eventTickets,
+      this.options});
 
   factory Event.fromJson(Map<String, dynamic> json) {
     List<EventTicket> tickets = [];
 
     List<dynamic> listJson = json["EventTickets"];
     tickets.addAll(listJson.map((e) => EventTicket.fromJson(e)).toList());
-
     return Event(
         id: json['ID'] as String,
         title: json['Title'] as String,
-        eventTickets: tickets);
+        eventTickets: tickets,
+        options: json["Options"] as Map<String, dynamic>?);
   }
 }
 

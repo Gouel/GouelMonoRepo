@@ -1,6 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Event struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty"`
@@ -13,6 +16,7 @@ type Event struct {
 	Volunteers   []Volunteer        `bson:"Volunteers,omitempty"`
 	Products     []Product          `bson:"Products,omitempty"`
 	Lockers      []Locker           `bson:"Lockers,omitempty"`
+	Options      bson.M             `bson:"Options,omitempty"`
 }
 
 type EventTicket struct {
