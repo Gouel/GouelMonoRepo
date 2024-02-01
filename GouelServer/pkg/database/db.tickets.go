@@ -26,8 +26,6 @@ func CreateTicket(userId, eventId, eventTicketCode string, ticketRequestData mod
 		UserId:          userId,
 	}
 
-	fmt.Println(newTicket)
-
 	result, err := collection.InsertOne(ctx, newTicket)
 	if err != nil {
 		return "", err
