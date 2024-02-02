@@ -452,6 +452,23 @@ func UpdateEventTicket(eventId, eventTicketCode string, updateData bson.M) error
 	return err
 }
 
+// Update Event Options
+// TODO : Ne modifier que les options de l'événement
+func UpdateEventOptions(eventId string, updateData bson.M) error {
+	collection := Database.Collection("events")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objId, err := primitive.ObjectIDFromHex(eventId)
+	if err != nil {
+		return err
+	}
+
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": updateData})
+	return err
+}
+
 // <=== Suppression dans la BDD ===>
 
 func DeleteEvent(eventId string) error {

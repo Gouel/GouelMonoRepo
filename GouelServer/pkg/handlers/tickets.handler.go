@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
@@ -105,6 +106,25 @@ func GetAllTicketsFromEventHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 
 	tickets, err := database.GetAllTicketsFromEvent(eventId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, tickets)
+}
+
+func GetPaginatedTicketsFromEventHandler(c *gin.Context) {
+	eventId := c.Param("event_id")
+	page := c.Param("page")
+
+	// Vérifier si la page est un nombre
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "page is not a number"})
+		return
+	}
+
+	tickets, err := database.GetPaginatedTicketsFromEvent(eventId, int64(pageInt))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

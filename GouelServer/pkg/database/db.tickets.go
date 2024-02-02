@@ -146,7 +146,8 @@ func GetAllTicketsFromEvent(eventId string) (bson.A, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cursor, err := collection.Find(ctx, bson.M{})
+	filter := bson.M{"EventId": eventId}
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -167,4 +168,49 @@ func GetAllTicketsFromEvent(eventId string) (bson.A, error) {
 		tickets = append(tickets, ticket)
 	}
 	return tickets, nil
+}
+
+func GetPaginatedTicketsFromEvent(eventId string, page int64) (bson.M, error) {
+	collection := Database.Collection("tickets")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	//On skip les tickets des pages précédentes
+	opts := options.Find().SetSkip(25 * (page - 1)).SetLimit(25) // 25 tickets par page
+
+	filter := bson.M{"EventId": eventId}
+
+	cursor, err := collection.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	tickets := make(bson.A, 0)
+
+	for cursor.Next(ctx) {
+		var ticket models.Ticket
+		if err := cursor.Decode(&ticket); err != nil {
+			continue
+		}
+		user, err := userFromTicket(ctx, ticket)
+		if err != nil {
+			continue
+		}
+		ticket.User = user
+		tickets = append(tickets, ticket)
+	}
+
+	opts2 := options.Count()
+	count, err := collection.CountDocuments(ctx, filter, opts2)
+	if err != nil {
+		return nil, err
+	}
+
+	return bson.M{
+		"Tickets": tickets,
+		"Total":   count,
+		"PerPage": 25,
+	}, nil
 }
