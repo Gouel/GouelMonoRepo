@@ -39,6 +39,22 @@ func CreateTicket(userId, eventId, eventTicketCode string, ticketRequestData mod
 		return "", err
 	}
 
+	//Ajout du SamBonus si le ticket est un Sam
+	if ticketRequestData.IsSam {
+		user, err := GetUserById(userIdOID)
+		if err != nil {
+			return "", err
+		}
+		event, err := GetEventById(eventIdOID.Hex())
+		if err != nil {
+			return "", err
+		}
+		solde := user.Solde + event.SamBonus
+		err = UpdateUser(userId, bson.M{"Solde": solde})
+		if err != nil {
+			return "", err
+		}
+	}
 	// Obtenez l'ID du nouveau ticket
 	newTicketId := result.InsertedID.(primitive.ObjectID)
 	return newTicketId.Hex(), nil
@@ -77,12 +93,47 @@ func SetSAM(ticketId, eventId string, isSam bool) error {
 	collection := Database.Collection("tickets")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	objId, _ := primitive.ObjectIDFromHex(ticketId)
+	fmt.Println(ticketId, eventId)
+	ticket, err := GetTicketInfo(ticketId, &eventId)
+	if err != nil {
+		fmt.Println("A")
+		return err
+	}
 	// Mettre à jour le ticket pour le valider
-	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId, "EventId": eventId}, bson.M{"$set": bson.M{"IsSam": isSam}})
+	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": ticket.ID, "EventId": ticket.EventId}, bson.M{"$set": bson.M{"IsSam": isSam}})
 	if result.Err() != nil {
+		fmt.Println("Z")
 		return result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
 	}
+
+	user, err := GetUserById(ticket.UserId)
+	if err != nil {
+		fmt.Println("B")
+		return err
+	}
+	event, err := GetEventById(ticket.EventId.Hex())
+	if err != nil {
+		fmt.Println("C")
+		return err
+	}
+
+	var solde float32
+
+	if isSam {
+		//On ajoute le SamBonus à l'utilisateur
+		solde = user.Solde + event.SamBonus
+	} else {
+		if user.Solde > event.SamBonus {
+			solde = user.Solde - event.SamBonus
+		}
+	}
+
+	err = UpdateUser(ticket.UserId.Hex(), bson.M{"Solde": solde})
+	if err != nil {
+		fmt.Println("D")
+		return err
+	}
+
 	return nil
 }
 
@@ -111,18 +162,24 @@ func GetTicketInfo(ticketId string, eventId *string) (*models.Ticket, error) {
 	var filter bson.M
 
 	if eventId != nil {
-		filter = bson.M{"_id": objId, "EventId": eventId}
+		eventIdOID, err := primitive.ObjectIDFromHex(*eventId)
+		if err != nil {
+			return nil, err
+		}
+		filter = bson.M{"_id": objId, "EventId": eventIdOID}
 	} else {
 		filter = bson.M{"_id": objId}
 	}
 
 	err := collection.FindOne(ctx, filter).Decode(&ticket)
 	if err != nil {
+		fmt.Printf("1 debug : %s", err)
 		return nil, err
 	}
 
 	user, err := userFromTicket(ctx, ticket)
 	if err != nil {
+		fmt.Printf("2 debug : %s", err)
 		return nil, err
 	}
 	ticket.User = user
@@ -152,7 +209,12 @@ func GetAllTicketsFromEvent(eventId string) (bson.A, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	filter := bson.M{"EventId": eventId}
+	eventIdOID, err := primitive.ObjectIDFromHex(eventId)
+	if err != nil {
+		return make(primitive.A, 0), err
+	}
+
+	filter := bson.M{"EventId": eventIdOID}
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err

@@ -17,12 +17,13 @@ type Event struct {
 	Products     []Product          `bson:"Products,omitempty"`
 	Lockers      []Locker           `bson:"Lockers,omitempty"`
 	Options      bson.M             `bson:"Options,omitempty"`
+	SamBonus     float32            `bson:"SamBonus, omitempty"`
 }
 
 type EventTicket struct {
 	EventTicketCode string  `bson:"EventTicketCode,omitempty"`
 	Title           string  `bson:"Title,omitempty"`
-	Price           float64 `bson:"Price,omitempty"`
+	Price           float32 `bson:"Price,omitempty"`
 	Amount          *int32  `bson:"Amount, omitempty"`
 	Purchased       int32   `bson:"Purchased, omitempty"`
 }
