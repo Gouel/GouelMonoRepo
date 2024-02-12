@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"os/exec"
 	"time"
 
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
@@ -31,4 +32,25 @@ func ConnectDB(cfg config.Config) {
 	log.Println("Connexion à MongoDB réussie.")
 	Client = client
 	Database = client.Database(cfg.MongoDBName)
+}
+
+func ImportDB(filePath string, cfg config.Config) error {
+
+	cmd := exec.Command("mongorestore", "--uri="+cfg.MongoDBURI, "--gzip", "--archive="+filePath)
+	if err := cmd.Run(); err != nil {
+		log.Printf("Erreur lors de l'importation de la base de données: %v", err)
+		return err
+	}
+	log.Println("Importation réussie")
+	return nil
+}
+func ExportDB(filePath string, cfg config.Config) error {
+
+	cmd := exec.Command("mongodump", "--uri="+cfg.MongoDBURI, "--db", cfg.MongoDBName, "--gzip", "--archive="+filePath)
+	if err := cmd.Run(); err != nil {
+		log.Printf("Erreur lors de l'exportation de la base de données: %v", err)
+		return err
+	}
+	log.Printf("Exportation réussie vers %s", filePath)
+	return nil
 }

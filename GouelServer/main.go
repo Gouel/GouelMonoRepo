@@ -28,7 +28,49 @@ func main() {
 			setupSuperAdmin(cfg)
 			setupAPI(cfg)
 		case "--secret":
-			generateSecretKey(64)
+			// 64 bits peu sécurisé => 256bits OK
+			generateSecretKey(256)
+		case "--import":
+			if len(os.Args) != 3 {
+				log.Fatalf("Usage: gouel --import /path/to/the/in.dump")
+			}
+			importPath := os.Args[2]
+			err := database.ImportDB(importPath, cfg)
+			if err != nil {
+				log.Fatalf("Erreur lors de l'importation de la base de données: %v", err)
+			}
+		case "--export":
+			if len(os.Args) != 3 {
+				log.Fatalf("Usage: gouel --export /path/to/the/out.dump")
+			}
+			exportPath := os.Args[2]
+			err := database.ExportDB(exportPath, cfg)
+			if err != nil {
+				log.Fatalf("Erreur lors de l'exportation de la base de données: %v", err)
+			}
+
+		case "--help":
+			//Affichage aide / usage
+			fmt.Println("<=== Gouel ===>")
+			aide := []string{
+				"--export <file out>",
+				"--import <file in>",
+				"--help",
+				"--secret",
+				"--setup",
+			}
+
+			for _, v := range aide {
+				fmt.Println("gouel " + v)
+			}
+
+			return
+
+		default:
+			//Affichage erreur usage
+			log.Println("Argument non reconnu !")
+			log.Println("Usage: gouel --help")
+			return
 		}
 		return
 	}
