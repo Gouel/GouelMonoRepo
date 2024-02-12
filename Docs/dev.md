@@ -60,7 +60,7 @@ Et voilà, votre serveur Gouel est prêt.
 Une fois lancé, GouelServeur produit une API Rest sur le socket configuré (`.env`).
 Il n'y a pas encore de mapping des routes de l'API. Cependant plusieurs ressources existent:
 
-- PostMan : [`Docs/gouel.postman.json`](https://github.com/Gouel/GouelMonoRepo/blob/main/Docs/gouel.postman.md)
+- PostMan : [`Docs/gouel.postman.json`](https://github.com/Gouel/GouelMonoRepo/blob/main/Docs/gouel.postman.json)
 - Code source : [`GouelServer/pkg/router/routes.go`](https://github.com/Gouel/GouelMonoRepo/blob/main/GouelServer/pkg/router/routes.go)
 
 > [!TIP]
