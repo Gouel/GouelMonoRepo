@@ -1,0 +1,1205 @@
+{
+	"info": {
+		"_postman_id": "c1608f15-c160-4f61-9b71-18b770a265e6",
+		"name": "Gouel V2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27659222"
+	},
+	"item": [
+		{
+			"name": "token",
+			"item": [
+				{
+					"name": "token/auth",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"superadmin@example.com\",\n    \"password\" : \"VotreMotDePasseSuperAdmin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/token/auth",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"token",
+								"auth"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "superadmin",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Email\" : \"superadmin@example.com\",\n    \"Password\" : \"VotreMotDePasseSuperAdmin\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8080/token/auth",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8080",
+									"path": [
+										"token",
+										"auth"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "api",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Email\" : \"api@example.com\",\n    \"Password\" : \"VotreMotDePasseAPI\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/token/auth",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"token",
+										"auth"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "token/refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/token/refresh",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"token",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "token/view",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/token/view",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"token",
+								"view"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "token/auth/ticket",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticketId\" : \"659eeee2e343b8adacf75075\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/token/auth/ticket",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"token",
+								"auth",
+								"ticket"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tickets",
+			"item": [
+				{
+					"name": "createTicket",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"UserId\" : \"{{user_id}}\",\n    \"IsSam\" : true,\n    \"IsUsed\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}/{{ticket_code}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}",
+								"{{ticket_code}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteTicket",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tickets/659eecfd121fb6f92b402e25",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"659eecfd121fb6f92b402e25"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "validateTicket",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"TicketId\": \"659eecfd121fb6f92b402e25\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}/validate",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTicketInfo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}/ticket/65ca1c2abe6e70a50dad7d2b",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}",
+								"ticket",
+								"65ca1c2abe6e70a50dad7d2b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}/page/1",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}",
+								"page",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SetSam",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"TicketId\": \"65ca1c2abe6e70a50dad7d2b\",\n    \"IsSam\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}/sam",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}",
+								"sam"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ReturnEcoCup",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"TicketId\": \"65ca34df509bbbe92fca8643\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tickets/{{event_id}}/ecocup",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tickets",
+								"{{event_id}}",
+								"ecocup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "events",
+			"item": [
+				{
+					"name": "GET",
+					"item": [
+						{
+							"name": "getAll",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getId",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getIdSimple",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/simple",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"simple"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/products",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "productsCode",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/products/df572077-7d83-4e09-92ca-e480abbf4941",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"products",
+										"df572077-7d83-4e09-92ca-e480abbf4941"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "volunteers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/volunteers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"volunteers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "admins",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/admins",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"admins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "tickets",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/tickets",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"tickets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "lockers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/lockers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"lockers"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "POST",
+					"item": [
+						{
+							"name": "createEvent",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Title\": \"Up ton Lannion\",\n    \"IsPublic\": true,\n    \"Description\": \"Un super événement pour les JEUNES\",\n    \"Location\": \"Salle des URSULINES — LANNION\",\n    \"Contact\": \"contact.up@example.com\",\n    \"SamBonus\" : 2.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "addVolunteer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"UserId\" : \"65ca709e2dda8304d4978b30\",\n    \"permissions\" : [\n        \"entree\",\n        \"caisse\"\n    ],\n    \"IsAdmin\" : true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/volunteers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"volunteers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "addTicket",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\" : \"entree simple\",\n    \"price\" : 2.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/tickets",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"tickets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "addLocker",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"LockerCode\" : \"A1\",\n    \"UserId\" : null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/lockers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"lockers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "addLockerRange",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"start\" : 1,\n    \"end\" : 15,\n    \"prefix\" : \"A\",\n    \"suffix\" : \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/lockers/range",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"lockers",
+										"range"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "addProduct",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Label\": \"Bière\",\n    \"Price\": 4.5,\n    \"HasAlcohol\": true,\n    \"Icon\": \"inventory_2\",\n    \"EndOfSale\": \"2024-02-16T00:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/products",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"products"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PUT",
+					"item": [
+						{
+							"name": "updateEvent",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"IsPublic\" : true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateLocker",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"LockerCode\" : \"A1\",\n    \"UserId\" : \"65c9f4d14f8498f41ad4a813\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/lockers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"lockers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateProduct",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Icon\" : \"pizza\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/products/f3dde017-1229-4be5-8974-ad1eb9a717ba",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"products",
+										"f3dde017-1229-4be5-8974-ad1eb9a717ba"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateVolunteer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"UserId\": \"{{user_id}}\",\n    \"Permissions\" : [\n        \"nouvelle\",\n        \"permissions\",\n        \"Hello\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/volunteers",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"volunteers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateTicket",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Title\" : \"Entree Premium\",\n    \"Price\" : 10.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/tickets/2b7a55ef-a266-48ad-b3aa-b00a42e13a9f",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"tickets",
+										"2b7a55ef-a266-48ad-b3aa-b00a42e13a9f"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "DELETE",
+					"item": [
+						{
+							"name": "deleteTicket",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/tickets/2b7a55ef-a266-48ad-b3aa-b00a42e13a9f",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"tickets",
+										"2b7a55ef-a266-48ad-b3aa-b00a42e13a9f"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteLocker",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/lockers/B1",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"lockers",
+										"B1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteLockerAll",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/lockers/",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"lockers",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteVolunteer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/volunteers/{{user_id}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"volunteers",
+										"{{user_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteProduct",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/{{event_id}}/products/ac2a3541-bd2b-42c0-8096-782193cedb17",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"{{event_id}}",
+										"products",
+										"ac2a3541-bd2b-42c0-8096-782193cedb17"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteEvent",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/659ee9a1e95f8bc80fc4081d",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"659ee9a1e95f8bc80fc4081d"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "GetId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/{{user_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SearchEmail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/users/search/email/superadmin",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"search",
+								"email",
+								"superadmin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"FirstName\": \"Nicole\",\n    \"LastName\": \"Sèche\",\n    \"Email\": \"nicole.seche@example.com\",\n    \"Dob\": \"1996-01-04\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/users",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateUser",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"LastName\": \"BOB\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/users/{{user_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateTransaction",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Type\" : \"credit\",\n    \"Date\" : \"2024-01-06T16:50\",\n    \"EventId\": \"{{event_id}}\",\n    \"Cart\" : [\n    ],\n    \"Amount\" : 2.0,\n    \"PayementType\" : \"especes\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/users/transaction/{{event_id}}/{{user_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"transaction",
+								"{{event_id}}",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pay",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"ProductCode\" : \"f3dde017-1229-4be5-8974-ad1eb9a717ba\",\n        \"Amount\" : 2\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/users/pay/{{event_id}}/{{user_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"users",
+								"pay",
+								"{{event_id}}",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "test",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/test",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"test"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJldmVudHMiOm51bGwsImV4cCI6MTcwNzc2OTI3OSwicm9sZSI6IkFQSSIsInVzZXJJZCI6IjY1Y2E2ZjYxZmE3Mzg5NzVkM2RjOWQ0ZSJ9.9svfcYo6Oeiqs32TqhLiS6WtcrmjsneLl0qGpFTzVBo",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://127.0.0.1:8080"
+		},
+		{
+			"key": "ticket_code",
+			"value": ""
+		},
+		{
+			"key": "event_id",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
