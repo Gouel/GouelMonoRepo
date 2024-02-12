@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -281,4 +282,33 @@ func GetPaginatedTicketsFromEvent(eventId string, page int64) (bson.M, error) {
 		"Total":   count,
 		"PerPage": 25,
 	}, nil
+}
+
+func ReturnEcoCup(ticketId string) error {
+	collection := Database.Collection("tickets")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(ticketId)
+
+	// Trouver le ticket et vérifier s'il est déjà validé
+	var ticket models.Ticket
+	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&ticket)
+	if err != nil {
+		return err // Retourne l'erreur si le ticket n'est pas trouvé
+	}
+
+	// Vérifier une écocup a déjà été rendue
+	if ticket.ReturnedEcoCup {
+		return errors.New("an eco-cup has already been returned for this ticket")
+	}
+
+	// Mettre à jour le ticket pour le valider
+	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"ReturnedEcoCup": true}})
+	if result.Err() != nil {
+		return result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
+	}
+
+	return nil
 }

@@ -12,6 +12,7 @@ type Ticket struct {
 	IsSam           bool               `bson:"IsSam,omitempty"`
 	IsUsed          bool               `bson:"IsUsed,omitempty"`
 	WasPurchased    bool               `bson:"WasPurchased"`
+	ReturnedEcoCup  bool               `bson:"ReturnedEcoCup,omitempty"`
 
 	//Pour les informations simple sur un utilisateur
 	User *User `bson:"User,omitempty"`

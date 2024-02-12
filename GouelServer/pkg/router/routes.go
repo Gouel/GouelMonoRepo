@@ -38,7 +38,8 @@ func Routes(router *gin.Engine, cfg config.Config) {
 	router.GET("/tickets/:event_id/page/:page", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("entree"), handlers.GetPaginatedTicketsFromEventHandler)
 	router.GET("/tickets/:event_id/ticket/:ticket_id", middlewares.EventAccessMiddleware(), handlers.GetTicketInfoHandler)
 	router.POST("/tickets/:event_id/:ticket_code", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("caisse"), handlers.CreateTicketHandler)
-	router.PUT("/tickets/:event_id/sam", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("entree", ""), handlers.SetSamHandler)
+	router.PUT("/tickets/:event_id/sam", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("entree"), handlers.SetSamHandler)
+	router.PUT("/tickets/:event_id/ecocup", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("entree"), handlers.ReturnEcoCupHandler)
 	router.POST("/tickets/:event_id/validate", middlewares.EventAuthorizationMiddleware("entree"), handlers.ValidateTicketHandler)
 	router.DELETE("/tickets/:ticket_id", middlewares.RoleAuthorizationMiddleware("API"), handlers.DeleteTicketHandler)
 

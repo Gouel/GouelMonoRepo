@@ -131,3 +131,20 @@ func GetPaginatedTicketsFromEventHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, tickets)
 }
+
+func ReturnEcoCupHandler(c *gin.Context) {
+	var requestData struct {
+		TicketId string `json:"TicketId"`
+	}
+	if err := c.ShouldBindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
+		return
+	}
+
+	err := database.ReturnEcoCup(requestData.TicketId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "EcoCup retournée avec succès"})
+}
