@@ -9,14 +9,11 @@
 ## Général
 
 - Ajouter gestion écocup
-- Entrée :
-  - Afficher tickets seulement en recherche (bottomsheet)
-  - Récupérer par packet (pagination coté serveur)
-  - Effectuer recherche ticket (coté serveur)
-  - Implémenter scroll infini
+
 - Ajouter champ "SamBonus" dans event pour ajouter un certain montant aux utilisateurs SAM
-- Limitation d'une Identité par email (demande confirmation email + avertissement)
+- Limitation d'une Identité par email (demande confirmation email + avertissement) (gouelFront)
 - Ajout champs "wherePurchased" dans les tickets avec une valeur ("onSite" / "online") + Ajouter prix différent OnSite / Online
+- Documentation : fonction import et export avec `MongoDB Database Tools`
 
 - Ajouter génération badges bénévoles (publipostage)
 - Faire documentation
@@ -24,6 +21,11 @@
   - GouelServer : Documentation routes API
   - Vidéo de présentation de Gouel
   - Remplir le README.md
+- Entrée :
+  - Afficher tickets seulement en recherche (bottomsheet)
+  - Récupérer par packet (pagination coté serveur)
+  - Effectuer recherche ticket (coté serveur)
+  - Implémenter scroll infini
 
 - Ajouter fonctionnalité BlueTooth + imprimante thermique (Impression ticket physique)
 - Ajouter panneaux statistiques dans GouelFront/admin
