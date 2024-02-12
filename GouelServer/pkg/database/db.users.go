@@ -119,16 +119,14 @@ func AddUserTransaction(userId string, transaction models.Transaction) error {
 	return err
 }
 
-func GetUserById(userId string) (*models.User, error) {
+func GetUserById(userId primitive.ObjectID) (*models.User, error) {
 	collection := Database.Collection("users")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objId, _ := primitive.ObjectIDFromHex(userId)
-
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"_id": userId}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}

@@ -28,9 +28,9 @@ type EventTicket struct {
 }
 
 type Volunteer struct {
-	UserId      string   `bson:"UserId,omitempty"`      // ID de l'utilisateur
-	Permissions []string `bson:"Permissions,omitempty"` // Liste des permissions
-	IsAdmin     bool     `bson:"IsAdmin, omitempty"`
+	UserId      primitive.ObjectID `bson:"UserId,omitempty"`      // ID de l'utilisateur
+	Permissions []string           `bson:"Permissions,omitempty"` // Liste des permissions
+	IsAdmin     bool               `bson:"IsAdmin, omitempty"`
 }
 type Product struct {
 	ProductCode string  `bson:"ProductCode,omitempty"`
@@ -44,12 +44,12 @@ type Product struct {
 }
 
 type Locker struct {
-	LockerCode string `bson:"LockerCode,omitempty"`
-	UserId     string `bson:"UserId"`
+	LockerCode string              `bson:"LockerCode,omitempty"`
+	UserId     *primitive.ObjectID `bson:"UserId,omitempty"`
 }
 
 type EventRole struct {
-	EventId     string   `bson:"EventId"`
-	Role        string   `bson:"Role"`
-	Permissions []string `bson:"Permissions,omitempty"`
+	EventId     primitive.ObjectID `bson:"EventId"`
+	Role        string             `bson:"Role"`
+	Permissions []string           `bson:"Permissions,omitempty"`
 }

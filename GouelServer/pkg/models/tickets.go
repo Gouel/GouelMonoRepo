@@ -6,8 +6,8 @@ import (
 
 type Ticket struct {
 	ID              primitive.ObjectID `bson:"_id,omitempty"`
-	EventId         string             `bson:"EventId"`
-	UserId          string             `bson:"UserId"`
+	EventId         primitive.ObjectID `bson:"EventId"`
+	UserId          primitive.ObjectID `bson:"UserId"`
 	EventTicketCode string             `bson:"EventTicketCode"`
 	IsSam           bool               `bson:"IsSam,omitempty"`
 	IsUsed          bool               `bson:"IsUsed,omitempty"`

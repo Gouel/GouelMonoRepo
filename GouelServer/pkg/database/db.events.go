@@ -230,7 +230,7 @@ func GetUserEventsRoles(userId string) ([]models.EventRole, error) {
 		}
 
 		eventsRoles = append(eventsRoles, models.EventRole{
-			EventId:     event.ID.Hex(),
+			EventId:     event.ID,
 			Role:        role,
 			Permissions: permissions,
 		})
@@ -241,7 +241,7 @@ func GetUserEventsRoles(userId string) ([]models.EventRole, error) {
 
 func getVolunteerFromEvent(volunteers []models.Volunteer, userId string) (models.Volunteer, bool) {
 	for _, volunteer := range volunteers {
-		if volunteer.UserId == userId {
+		if volunteer.UserId.Hex() == userId {
 			return volunteer, true
 		}
 	}
@@ -329,7 +329,7 @@ func AddRangeOfLockersToEvent(eventId string, start, end int, prefix, suffix str
 	for i := start; i <= end; i++ {
 		// Générer le code avec le nombre de chiffres constants
 		lockerCode := fmt.Sprintf("%s%0*d%s", prefix, digitCount, i, suffix)
-		lockers = append(lockers, models.Locker{LockerCode: lockerCode, UserId: ""})
+		lockers = append(lockers, models.Locker{LockerCode: lockerCode, UserId: nil})
 	}
 
 	// Préparer la mise à jour pour ajouter les casiers
@@ -550,7 +550,7 @@ func DeleteVolunteer(eventId, userId string) error {
 	}
 
 	for _, volunteer := range event.Volunteers {
-		if volunteer.UserId == userId && volunteer.IsAdmin {
+		if volunteer.UserId.Hex() == userId && volunteer.IsAdmin {
 			return fmt.Errorf("impossible de supprimer un bénévole qui est également administrateur")
 		}
 	}

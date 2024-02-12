@@ -9,6 +9,7 @@ import (
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // FindUsersByEmailStartsWithHandler gère la recherche d'utilisateurs par email
@@ -26,7 +27,14 @@ func FindUsersByEmailStartsWithHandler(c *gin.Context) {
 func GetUserByIdHandler(c *gin.Context) {
 	userId := c.Param("user_id")
 	fmt.Println(userId)
-	user, err := database.GetUserById(userId)
+
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID d'utilisateur invalide"})
+		return
+	}
+
+	user, err := database.GetUserById(objId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -117,7 +125,7 @@ func UserPayHandler(c *gin.Context) {
 	}
 
 	// Générer une transaction de débit
-	err = addDebitTransaction(eventId, ticket.UserId, totalCost, purchaseItems)
+	err = addDebitTransaction(eventId, ticket.UserId.Hex(), totalCost, purchaseItems)
 	if err != nil {
 		if err.Error() == "solde insuffisant" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": 0x04})
@@ -201,17 +209,21 @@ func hasEnded(endOfSale string) bool {
 }
 
 func addDebitTransaction(eventId, userId string, amount float32, cart []models.PurchaseProduct) error {
+	objId, err := primitive.ObjectIDFromHex(eventId)
+	if err != nil {
+		return err
+	}
 	// Créer une transaction de débit
 	debitTransaction := models.Transaction{
 		Type:    "debit",
 		Amount:  amount,
 		Cart:    cart,
-		EventId: eventId,
+		EventId: objId,
 		Date:    time.Now().Format("2006-01-02T15:04:05"),
 	}
 
 	// Utiliser AddUserTransaction pour mettre à jour le solde de l'utilisateur et enregistrer la transaction
-	err := database.AddUserTransaction(userId, debitTransaction)
+	err = database.AddUserTransaction(userId, debitTransaction)
 	if err != nil {
 		return err // Gérer les erreurs, par exemple, solde insuffisant
 	}

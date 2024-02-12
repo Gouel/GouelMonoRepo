@@ -17,13 +17,21 @@ func CreateTicket(userId, eventId, eventTicketCode string, ticketRequestData mod
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	userIdOID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return "", err
+	}
+	eventIdOID, err := primitive.ObjectIDFromHex(eventId)
+	if err != nil {
+		return "", err
+	}
 	newTicket := models.Ticket{
-		EventId:         eventId,
+		EventId:         eventIdOID,
 		EventTicketCode: eventTicketCode,
 		IsSam:           ticketRequestData.IsSam,
 		IsUsed:          ticketRequestData.IsUsed,
 		WasPurchased:    *ticketRequestData.WasPurchased,
-		UserId:          userId,
+		UserId:          userIdOID,
 	}
 
 	result, err := collection.InsertOne(ctx, newTicket)
@@ -123,10 +131,8 @@ func GetTicketInfo(ticketId string, eventId *string) (*models.Ticket, error) {
 
 func userFromTicket(ctx context.Context, ticket models.Ticket) (*models.User, error) {
 	var user models.User
-	userId, _ := primitive.ObjectIDFromHex(ticket.UserId)
-
 	err := Database.Collection("users").FindOne(
-		ctx, bson.M{"_id": userId},
+		ctx, bson.M{"_id": ticket.UserId},
 		options.FindOne().SetProjection(bson.M{
 			"FirstName": 1,
 			"LastName":  1,

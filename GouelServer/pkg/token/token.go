@@ -83,7 +83,7 @@ func AuthRouteTicket(c *gin.Context) {
 	}
 
 	// Générer le token JWT
-	token, err := createToken(userId, user.Role, cfg.JWTSecretKey, int64(cfg.JWTExpiration))
+	token, err := createToken(userId.Hex(), user.Role, cfg.JWTSecretKey, int64(cfg.JWTExpiration))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création du token"})
 		return

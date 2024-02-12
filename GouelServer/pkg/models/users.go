@@ -22,10 +22,10 @@ type PurchaseProduct struct {
 }
 
 type Transaction struct {
-	Type        string            `bson:"Type,omitempty"` // ex: "credit", "debit"
-	Date        string            `bson:"Date,omitempty"` // Format: "YYYY-MM-DDTHH:MM"
-	EventId     string            `bson:"EventId,omitempty"`
-	Cart        []PurchaseProduct `bson:"Cart,omitempty"`
-	Amount      float32           `bson:"Amount,omitempty"`
-	PaymentType string            `bson:"PaymentType,omitempty"` // "espece", "carte", "helloasso" ...
+	Type        string             `bson:"Type,omitempty"` // ex: "credit", "debit"
+	Date        string             `bson:"Date,omitempty"` // Format: "YYYY-MM-DDTHH:MM"
+	EventId     primitive.ObjectID `bson:"EventId,omitempty"`
+	Cart        []PurchaseProduct  `bson:"Cart,omitempty"`
+	Amount      float32            `bson:"Amount,omitempty"`
+	PaymentType string             `bson:"PaymentType,omitempty"` // "espece", "carte", "helloasso" ...
 }
