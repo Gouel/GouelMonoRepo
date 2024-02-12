@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
@@ -23,6 +24,15 @@ func CreateUser(user models.User) (string, error) {
 
 	if user.Password != "" {
 		user.Password = HashPassword(user.Password)
+	}
+
+	// Vérification de l'email. Si déjà présent lever Erreur.
+
+	var alreadyUser models.User
+	err := collection.FindOne(ctx, bson.M{"Email": user.Email}).Decode(&alreadyUser)
+
+	if err == nil {
+		return "", errors.New("email already registered")
 	}
 
 	result, err := collection.InsertOne(ctx, user)

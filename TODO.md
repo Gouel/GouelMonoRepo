@@ -9,9 +9,10 @@
 ## Général
 
 - Ajouter gestion écocup
+- Limitation d'une Identité par email
+  - *blocage coté serveur*
+  - demande confirmation email + avertissement (gouelFront)
 
-- Ajouter champ "SamBonus" dans event pour ajouter un certain montant aux utilisateurs SAM
-- Limitation d'une Identité par email (demande confirmation email + avertissement) (gouelFront)
 - Ajout champs "wherePurchased" dans les tickets avec une valeur ("onSite" / "online") + Ajouter prix différent OnSite / Online
 - Documentation : fonction import et export avec `MongoDB Database Tools`
 
