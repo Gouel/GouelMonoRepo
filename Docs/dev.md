@@ -47,6 +47,7 @@ Une fois le fichier `.env` complété. Il vous sera possible de instancier le se
 > [!NOTE]
 > Il est possible d'importer et d'exporter la base de données.
 > Dans le cas de l'importation, `--setup` n'est pas obligatoire
+> **Attention** : Ces arguments nécessite l'installation d'un packet externe [mongodb tools](https://www.mongodb.com/docs/database-tools/)
 
 ```bash
     ./GouelServer --export ./out.gz

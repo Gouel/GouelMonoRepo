@@ -8,13 +8,12 @@
 
 ## Général
 
-- Ajouter gestion écocup
+- Ajouter gestion écocup (*server* / App / FrontEnd)
 - Limitation d'une Identité par email
   - *blocage coté serveur*
   - demande confirmation email + avertissement (gouelFront)
 
 - Ajout champs "wherePurchased" dans les tickets avec une valeur ("onSite" / "online") + Ajouter prix différent OnSite / Online
-- Documentation : fonction import et export avec `MongoDB Database Tools`
 
 - Ajouter génération badges bénévoles (publipostage)
 - Faire documentation
