@@ -35,6 +35,10 @@ class Locker {
       userId: json['UserId'] as String? ?? "",
     );
   }
+
+  bool isTaken() {
+    return userId.isNotEmpty && userId != "000000000000000000000000";
+  }
 }
 
 class EventTicket {

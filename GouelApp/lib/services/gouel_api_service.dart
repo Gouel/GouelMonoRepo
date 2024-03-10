@@ -207,8 +207,9 @@ class GouelApiService with ChangeNotifier {
     try {
       final Event event = GouelSession().retrieve("event") as Event;
 
-      var response = await GouelRequest.get("/tickets/${event.id}/$ticketId")
-          .send(context);
+      var response =
+          await GouelRequest.get("/tickets/${event.id}/ticket/$ticketId")
+              .send(context);
       return TicketInfos.fromJson(response);
     } catch (e) {
       return null;

@@ -46,7 +46,7 @@ class LockersScreenState extends State<LockersScreen> {
   Widget build(BuildContext context) {
     List<Locker> filteredLockers = showTakenLockers
         ? lockers
-        : lockers.where((locker) => locker.userId == '').toList();
+        : lockers.where((locker) => !locker.isTaken()).toList();
 
     if (filterLockers != null) {
       filteredLockers = filteredLockers
@@ -95,9 +95,8 @@ class LockersScreenState extends State<LockersScreen> {
                 ),
                 itemCount: filteredLockers.length,
                 itemBuilder: (context, index) {
-                  var locker = filteredLockers[index];
-                  bool isTaken = locker.userId != '';
-                  if (!showTakenLockers && isTaken) {
+                  Locker locker = filteredLockers[index];
+                  if (!showTakenLockers && locker.isTaken()) {
                     return const SizedBox.shrink();
                   }
                   return Container(
@@ -209,16 +208,16 @@ class LockersScreenState extends State<LockersScreen> {
   }
 
   Widget _buildLockerItem(Locker locker) {
-    bool isTaken = locker.userId != '';
     return ClipRRect(
       borderRadius: BorderRadius.circular(16), // Rayon de bordure arrondie
       child: Container(
-        color: isTaken ? Colors.red.shade500 : Colors.green.shade500,
+        color: locker.isTaken() ? Colors.red.shade500 : Colors.green.shade500,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () =>
-                isTaken ? _showLockerInfo(locker) : _assignLocker(locker),
+            onTap: () => locker.isTaken()
+                ? _showLockerInfo(locker)
+                : _assignLocker(locker),
             child: Center(
               child: Text(locker.lockerCode,
                   style: Theme.of(context).textTheme.titleLarge),

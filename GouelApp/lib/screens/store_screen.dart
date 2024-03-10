@@ -309,6 +309,7 @@ class StoreScreenState extends State<StoreScreen> {
           "Paiement effectué",
         );
         cart.clear();
+        setState(() {});
         break;
       case 0x1:
         // donnéees invalides

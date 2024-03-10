@@ -68,10 +68,11 @@ func ValidateTicket(ticketId, eventId string) (int, error) {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(ticketId)
+	eventOID, _ := primitive.ObjectIDFromHex(eventId)
 
 	// Trouver le ticket et vérifier s'il est déjà validé
 	var ticket models.Ticket
-	err := collection.FindOne(ctx, bson.M{"_id": objId, "EventId": eventId}).Decode(&ticket)
+	err := collection.FindOne(ctx, bson.M{"_id": objId, "EventId": eventOID}).Decode(&ticket)
 	if err != nil {
 		return 1, err // Retourne l'erreur si le ticket n'est pas trouvé
 	}
