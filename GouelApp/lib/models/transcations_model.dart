@@ -99,7 +99,6 @@ enum TransactionType { debit, credit }
 
 enum PaymentMethod {
   // Maximum 6 affichable.
-  //TODO utiliser options event
   especes(desc: "Espèces", icon: Icons.euro),
   carte(desc: "Carte bleue", icon: Icons.credit_card),
   sumup(

@@ -43,7 +43,7 @@ class CreditsScreen extends StatelessWidget {
               Paragraph.space(),
               const Paragraph(
                 type: ParagraphType.heading,
-                content: 'Partenariat',
+                content: 'Partenaires',
               ),
               Paragraph.space(),
               const Paragraph(
@@ -60,13 +60,42 @@ class CreditsScreen extends StatelessWidget {
               ),
               Paragraph.space(),
               const Paragraph(
-                type: ParagraphType.heading,
-                content: 'Remerciements',
+                type: ParagraphType.text,
+                content: "Association des Élèves de l'ENSSAT:",
+              ),
+              Paragraph.space(),
+              const Paragraph(
+                type: ParagraphType.bulletList,
+                items: [
+                  'Audit de sécurité du logiciel',
+                  'Aide au développement',
+                ],
               ),
               Paragraph.space(),
               const Paragraph(
                 type: ParagraphType.text,
-                content: 'Merci à tous ceux qui ont contribué au projet.',
+                content: "Rythmes and blouse (IFSI Lannion)",
+              ),
+              Paragraph.space(),
+              const Paragraph(
+                type: ParagraphType.bulletList,
+                items: [
+                  'Testes utilisateurs',
+                  'Aide au développement',
+                ],
+              ),
+              Paragraph.space(),
+              const Paragraph(
+                type: ParagraphType.text,
+                content: "Service Jeunesse de la ville de Lannion",
+              ),
+              Paragraph.space(),
+              const Paragraph(
+                type: ParagraphType.bulletList,
+                items: [
+                  'Mise en relation avec les associations de la ville',
+                  'Aide au développement',
+                ],
               ),
               Paragraph.space(),
               const Paragraph(
@@ -76,8 +105,7 @@ class CreditsScreen extends StatelessWidget {
               Paragraph.space(),
               const Paragraph(
                 type: ParagraphType.text,
-                content:
-                    'Distribué sous la Licence Mozilla Public License version 2.0.',
+                content: 'Distribué sous la Licence MIT',
               ),
               Paragraph.space(),
               const Paragraph(
@@ -100,6 +128,11 @@ class CreditsScreen extends StatelessWidget {
                 content:
                     'La fonctionnalité NFC/RFID n\'est plus utilisée dans l\'application Gouel.',
               ),
+              Paragraph.space(),
+              const Paragraph(
+                  type: ParagraphType.text,
+                  content:
+                      'Attention l\'abus d\'alcool est dangereux pour la santé, à consommer avec modération.'),
             ],
           ),
         ),

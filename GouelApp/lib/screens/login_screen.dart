@@ -15,7 +15,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final apiService = Provider.of<GouelApiService>(context, listen: false);
     final TextEditingController userIdController =
-        TextEditingController(text: "659f0f93e2c36f9fc413eb67");
+        TextEditingController(text: "65ec90c0c1067e98382a770a");
 
     Future<void> authenticateUser(String userId) async {
       await apiService.authenticateWithTicket(userId);

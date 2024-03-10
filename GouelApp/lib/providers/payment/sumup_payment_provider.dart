@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gouel/models/event_model.dart';
 import 'package:gouel/providers/payment/payment_provider.dart';
@@ -37,7 +38,9 @@ class SumUpPaymentProvider extends PaymentProvider {
           await Sumup.checkout(request);
       return checkout.success ?? false;
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       return false;
     }
   }
