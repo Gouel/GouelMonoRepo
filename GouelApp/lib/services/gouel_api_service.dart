@@ -293,7 +293,13 @@ class GouelApiService with ChangeNotifier {
           await GouelRequest.post("/users/event/${event.id}")
               .send(context, data: user);
       return response["UserId"];
-    } catch (e) {
+    } on GouelException catch (e) {
+      if (e.data?["statusCode"] == 409) {
+        throw GouelException(
+            message: "erreur user",
+            state: GouelExceptionState.critical,
+            data: e.data?["body"]);
+      }
       return null;
     }
   }
