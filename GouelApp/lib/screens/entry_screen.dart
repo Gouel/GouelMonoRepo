@@ -73,29 +73,33 @@ class EntryScreenState extends State<EntryScreen> {
       appBar: AppBar(
         title: const Text("Entrée"),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _loadTickets,
-        child: const Icon(Icons.refresh),
-      ),
-      persistentFooterButtons: [
-        GouelButton(
-          text: "Valider un ticket",
-          onTap: _qrValidateTicket,
-          icon: Icons.qr_code,
-        ),
-      ],
       body: Column(
         children: [
-          SettingsField(
-              type: SettingsFieldType.inputText,
-              label: "Rechercher un ticket",
-              value: GouelSession().retrieve("entry_filter_email") ?? "",
-              onFinish: (value) {
-                GouelSession().store("entry_filter_email", value);
-                setState(() {
-                  filterTickets = value;
-                });
-              }),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Flexible(
+                child: SettingsField(
+                    type: SettingsFieldType.inputText,
+                    label: "Rechercher un ticket",
+                    value: GouelSession().retrieve("entry_filter_email") ?? "",
+                    onFinish: (value) {
+                      GouelSession().store("entry_filter_email", value);
+                      setState(() {
+                        filterTickets = value;
+                      });
+                    }),
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              GouelButton(
+                text: null,
+                onTap: _loadTickets,
+                icon: Icons.refresh,
+              ),
+            ],
+          ),
           Paragraph.space(),
           Expanded(
             child: ListView.builder(
@@ -107,6 +111,17 @@ class EntryScreenState extends State<EntryScreen> {
                     child: _buildTicket(ticket, index + 1, context));
               },
             ),
+          ),
+          Paragraph.space(),
+          GouelButton(
+            text: "Valider un ticket",
+            onTap: _qrValidateTicket,
+            icon: Icons.qr_code,
+          ),
+          GouelButton(
+            text: "Rendu EcoCup",
+            onTap: _qrValidateEcoCup,
+            icon: Icons.local_drink,
           ),
         ],
       ),
@@ -323,6 +338,13 @@ class EntryScreenState extends State<EntryScreen> {
     );
   }
 
+  void _validateEcoCup(String ticketID) {
+    GouelModal.showFuture(
+      context,
+      futureChild: getEcoCupValidation(ticketID),
+    );
+  }
+
   void _qrValidateTicket() {
     QRScannerService().scanQR(
       context,
@@ -332,6 +354,66 @@ class EntryScreenState extends State<EntryScreen> {
       },
       (close) => null,
     );
+  }
+
+  void _qrValidateEcoCup() {
+    QRScannerService().scanQR(
+      context,
+      "Scanner ticket",
+      (result) async {
+        if (context.mounted) _validateEcoCup(result);
+      },
+      (close) => null,
+    );
+  }
+
+  Future<Widget> getEcoCupValidation(String ticketID) async {
+    ValidateState state =
+        await Provider.of<GouelApiService>(context, listen: false)
+            .getEcoCup(ticketID);
+
+    if (context.mounted) {
+      String message = "";
+      IconData icon;
+      Color iconColor;
+
+      switch (state) {
+        case ValidateState.ok:
+          icon = Icons.check;
+          message = "L'EcoCup a bien été rendu";
+          iconColor = Colors.green;
+          break;
+        case ValidateState.alreadyValidated:
+          icon = Icons.warning;
+          message = "L'EcoCup a déjà été rendu";
+          iconColor = Colors.orange;
+          break;
+        default:
+          icon = Icons.error;
+          message = "Ce ticket n'existe pas / n'est pas bon";
+          iconColor = Colors.red;
+          break;
+      }
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: iconColor, size: 60),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          Paragraph.space(),
+          GouelButton(
+              text: "OK",
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).pop('dialog');
+              }),
+        ],
+      );
+    } else {
+      return const Text("ERREUR");
+    }
   }
 
   void _showTicketInfo(TicketInfos ticketInfos, BuildContext context) async {

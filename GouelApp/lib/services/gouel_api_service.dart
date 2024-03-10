@@ -245,6 +245,23 @@ class GouelApiService with ChangeNotifier {
     }
   }
 
+  Future<ValidateState> getEcoCup(String ticketID) async {
+    try {
+      final Event event = GouelSession().retrieve("event") as Event;
+      await GouelRequest.put("/tickets/${event.id}/ecocup")
+          .send(context, data: {"TicketId": ticketID}) as Map<String, dynamic>;
+
+      return ValidateState.ok;
+    } catch (e) {
+      if (e is GouelException &&
+          e.message == "an eco-cup has already been returned for this ticket") {
+        return ValidateState.alreadyValidated;
+      }
+
+      return ValidateState.invalid;
+    }
+  }
+
   Future<bool> setTicketSAM(String ticketID, {bool isSAM = true}) async {
     try {
       final Event event = GouelSession().retrieve("event") as Event;
