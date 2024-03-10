@@ -27,7 +27,7 @@ class ProductWidgetState extends State<ProductWidget> {
       _isTapped = true;
     });
 
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 250), () {
       widget.onTap();
       setState(() {
         _isTapped = false;
@@ -59,9 +59,27 @@ class ProductWidgetState extends State<ProductWidget> {
                         fontSize: 18,
                       ),
                     )),
-                  Icon(
-                    widget.product.icon,
-                    size: 50,
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Icon(
+                        widget.product.icon,
+                        size: 50,
+                      ),
+                      if (widget.product.hasAlcohol)
+                        Container(
+                          padding: const EdgeInsets.all(1),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.new_releases_outlined,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                    ],
                   ),
                   Text("${widget.product.price.toStringAsFixed(2)}€")
                 ],
@@ -74,7 +92,7 @@ class ProductWidgetState extends State<ProductWidget> {
   }
 
   void _getShowTitle() async {
-    _showTitle = await GouelStorage().retrieve("product_show_title") ?? false;
+    _showTitle = await GouelStorage().retrieve("product_show_title") ?? true;
     setState(() {});
   }
 }

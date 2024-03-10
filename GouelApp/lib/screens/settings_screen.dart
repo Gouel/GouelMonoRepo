@@ -70,7 +70,7 @@ class SettingsScreen extends StatelessWidget {
       SettingsField(
         type: SettingsFieldType.switchField,
         label: "Afficher le titre des produits",
-        value: _settingsData['product_show_title'] ?? false,
+        value: _settingsData['product_show_title'] ?? true,
         onChanged: (value) => _handleSettingChange("product_show_title", value),
       ),
 
