@@ -21,11 +21,16 @@ type Event struct {
 }
 
 type EventTicket struct {
-	EventTicketCode string  `bson:"EventTicketCode,omitempty"`
-	Title           string  `bson:"Title,omitempty"`
-	Price           float32 `bson:"Price,omitempty"`
-	Amount          *int32  `bson:"Amount, omitempty"`
-	Purchased       int32   `bson:"Purchased, omitempty"`
+	EventTicketCode string           `bson:"EventTicketCode,omitempty"`
+	Title           string           `bson:"Title,omitempty"`
+	Price           EventTicketPrice `bson:"Price,omitempty"`
+	Amount          *int32           `bson:"Amount, omitempty"`
+	Purchased       int32            `bson:"Purchased, omitempty"`
+}
+
+type EventTicketPrice struct {
+	OnSite float32 `bson:"OnSite,omitempty"`
+	Online float32 `bson:"Online,omitempty"`
 }
 
 type Volunteer struct {
