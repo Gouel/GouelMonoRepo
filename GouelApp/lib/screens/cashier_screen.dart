@@ -62,7 +62,8 @@ class CashierScreenState extends State<CashierScreen> {
     // récupère dans les options de l'event
     Event event = GouelSession().retrieve("event");
 
-    List<dynamic> methods = event.options?["PaymentProviders"] ?? [];
+    List<dynamic> methods =
+        event.options?["PaymentProviders"] ?? ["especes", "carte"];
 
     methods.forEach((element) async {
       PaymentMethod? method = PaymentMethod.fromString(element);
@@ -187,11 +188,41 @@ class CashierScreenState extends State<CashierScreen> {
     onCompletion(result);
   }
 
+  void _chooseEventTicket() {
+    List<GouelSelectItem> items = [];
+    Event event = GouelSession().retrieve("event");
+    event.eventTickets.forEach((ticket) {
+      items.add(GouelSelectItem(
+          value: ticket.eventTicketCode, label: ticket.title, data: ticket));
+    });
+
+    GouelBottomSheet.launch(
+      context: context,
+      bottomSheet: GouelBottomSheet(
+        title: "Choisir un ticket",
+        child: GouelSelect(
+          initialValue: "",
+          title: "Sélectionner le Ticket",
+          items: items,
+          onChange: (v) {
+            GouelSession().store("EventTicket", v);
+            Navigator.pop(context);
+            _handleNewTicket();
+          },
+        ),
+      ),
+    );
+  }
+
   void _handleNewTicket() async {
+    GouelSelectItem ticket = GouelSession().retrieve("EventTicket");
+    EventTicket eventTicket = ticket.data as EventTicket;
+
     bool? confirmed =
         await _selectedPaymentMethod?.paymentProvider.confirmPayment(
       {
-        "amount": double.tryParse(_amount) ?? 0,
+        "amount": (double.tryParse(_amount) ?? 0) +
+            (eventTicket.price["OnSite"] ?? 0),
       },
     );
 
@@ -280,8 +311,6 @@ class CashierScreenState extends State<CashierScreen> {
     formData["prenom"] = "Anonymous";
     formData["email"] = "test@iziram.fr";
     formData["dateDeNaissance"] = "01/01/2000";
-    formData["EventTicketCode"] = GouelSelectItem(
-        value: "0864d578-2b8f-494b-86d9-b0a9946f3ee2", label: "ticket");
     formData["IsSam"] = false;
 
     return Column(
@@ -631,10 +660,10 @@ class CashierScreenState extends State<CashierScreen> {
                 ),
               if (trueAmount > 0) Paragraph.space(),
               GouelButton(
-                text: 'Nouveau Ticket',
+                text: 'Créer une nouvelle entrée',
                 onTap: () {
                   Navigator.pop(context);
-                  _handleNewTicket();
+                  _chooseEventTicket();
                 },
               ),
             ],

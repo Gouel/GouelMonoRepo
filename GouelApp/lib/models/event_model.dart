@@ -40,13 +40,22 @@ class Locker {
 class EventTicket {
   final String title;
   final String eventTicketCode;
+  final Map<String, double> price;
 
-  EventTicket({required this.title, required this.eventTicketCode});
+  EventTicket(
+      {required this.title,
+      required this.eventTicketCode,
+      required this.price});
 
   factory EventTicket.fromJson(Map<String, dynamic> json) {
+    Map<String, double> price = {};
+    json["Price"].forEach((key, value) {
+      price[key] = value.toDouble();
+    });
     return EventTicket(
       title: json["Title"] as String,
       eventTicketCode: json["EventTicketCode"] as String,
+      price: price,
     );
   }
 }

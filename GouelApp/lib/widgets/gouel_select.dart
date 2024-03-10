@@ -71,6 +71,7 @@ class GouelSelectState extends State<GouelSelect> {
 class GouelSelectItem {
   final String value;
   final String label;
+  final Object? data;
 
-  GouelSelectItem({required this.value, required this.label});
+  GouelSelectItem({required this.value, required this.label, this.data});
 }
