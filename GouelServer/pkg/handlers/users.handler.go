@@ -51,9 +51,14 @@ func CreateUserHandler(c *gin.Context) {
 	}
 	userId, err := database.CreateUser(newUser)
 	if err != nil {
+		if err.Error() == "email already registered" {
+			c.JSON(http.StatusConflict, gin.H{"error": "Email déjà enregistré", "UserId": userId})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"UserId": userId})
 }
 

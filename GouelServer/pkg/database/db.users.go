@@ -32,7 +32,7 @@ func CreateUser(user models.User) (string, error) {
 	err := collection.FindOne(ctx, bson.M{"Email": user.Email}).Decode(&alreadyUser)
 
 	if err == nil {
-		return "", errors.New("email already registered")
+		return alreadyUser.ID.Hex(), errors.New("email already registered")
 	}
 
 	result, err := collection.InsertOne(ctx, user)
