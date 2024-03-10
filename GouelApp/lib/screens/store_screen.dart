@@ -11,6 +11,7 @@ import 'package:gouel/widgets/gouel_dialog.dart';
 import 'package:gouel/widgets/gouel_modal.dart';
 import 'package:gouel/widgets/gouel_product_widget.dart';
 import 'package:gouel/widgets/gouel_scaffold.dart';
+import 'package:gouel/widgets/icon_badge.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
@@ -63,21 +64,50 @@ class StoreScreenState extends State<StoreScreen> {
               Icons.local_mall,
               size: 60,
             ))
-          : GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-              ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return ProductWidget(
-                  product: products[index],
-                  onTap: () {
-                    cart.addProduct(products[index]);
-                    cart.saveCart();
-                    setState(() {});
-                  },
-                );
-              },
+          : Column(
+              children: [
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      return ProductWidget(
+                        product: products[index],
+                        onTap: () {
+                          cart.addProduct(products[index]);
+                          cart.saveCart();
+                          setState(() {});
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                const Divider(
+                  height: 1,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                SizedBox(
+                    height: 50,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: cart.items.length,
+                      itemBuilder: (context, index) {
+                        final CartItem item = cart.items[index];
+                        return IconBadge(
+                            icon: item.product.icon,
+                            badgeCount: item.quantity,
+                            size: 50);
+                      },
+                    ))
+              ],
             ),
       persistentFooterButtons: [
         GouelButton(
