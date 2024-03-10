@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gouel/models/gouel_cart.dart';
 import 'package:gouel/models/product_model.dart';
 import 'package:gouel/models/ticket_model.dart';
@@ -8,6 +7,7 @@ import 'package:gouel/services/qr_scanner_service.dart';
 import 'package:gouel/utils/gouel_getter.dart';
 import 'package:gouel/widgets/gouel_bottom_sheet.dart';
 import 'package:gouel/widgets/gouel_button.dart';
+import 'package:gouel/widgets/gouel_dialog.dart';
 import 'package:gouel/widgets/gouel_modal.dart';
 import 'package:gouel/widgets/gouel_product_widget.dart';
 import 'package:gouel/widgets/gouel_scaffold.dart';
@@ -24,7 +24,7 @@ class StoreScreen extends StatefulWidget {
 class StoreScreenState extends State<StoreScreen> {
   List<Product> products = [];
 
-  late GouelCart cart;
+  GouelCart cart = GouelCart();
 
   bool isCartOpen = false;
 
@@ -39,7 +39,7 @@ class StoreScreenState extends State<StoreScreen> {
     products = await Provider.of<GouelApiService>(context, listen: false)
         .getEventProducts(context);
 
-    cart = GouelCart().loadCart();
+    cart.loadCart();
     setState(() {});
   }
 
@@ -74,13 +74,14 @@ class StoreScreenState extends State<StoreScreen> {
                   onTap: () {
                     cart.addProduct(products[index]);
                     cart.saveCart();
+                    setState(() {});
                   },
                 );
               },
             ),
       persistentFooterButtons: [
         GouelButton(
-          text: "Panier",
+          text: "Panier ${cart.total.toStringAsFixed(2)}€",
           onTap: _showCart,
           icon: Icons.shopping_bag,
         )
@@ -116,39 +117,49 @@ class StoreScreenState extends State<StoreScreen> {
                     final quantity = cartItem.quantity;
                     final Product product = cartItem.product;
 
-                    return Slidable(
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
+                    return ListTile(
+                      title: Text(product.label),
+                      leading: Icon(
+                        product.icon,
+                        color: product.hasAlcohol ? Colors.red[500] : null,
+                        size: 40,
+                      ),
+                      subtitle: Text('${product.price.toStringAsFixed(2)}€'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SlidableAction(
-                            backgroundColor: Colors.blue,
-                            icon: Icons.remove_circle,
-                            onPressed: (context) {
-                              cart.removeProduct(product);
-                              setModalState(() {});
-                            },
+                          Text(
+                            'x$quantity',
+                            style: const TextStyle(fontSize: 18),
                           ),
-                          SlidableAction(
-                            backgroundColor: Colors.red,
-                            icon: Icons.delete,
-                            onPressed: (context) {
+                          const SizedBox(
+                            width: 4,
+                          ),
+                          IconButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                cart.removeProduct(product);
+                                setModalState(() {});
+                                setState(() {});
+                              },
+                              icon: Icon(
+                                Icons.remove_circle,
+                                color: Colors.blue[300],
+                              )),
+                          const SizedBox(
+                            width: 4,
+                          ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () {
                               cart.removeProduct(product, all: true);
                               setModalState(() {});
+                              setState(() {});
                             },
+                            icon: const Icon(Icons.delete),
+                            color: Colors.red[500],
                           ),
                         ],
-                      ),
-                      child: ListTile(
-                        title: Text(product.label),
-                        leading: Icon(
-                          product.icon,
-                          color: product.hasAlcohol ? Colors.amber[600] : null,
-                        ),
-                        subtitle: Text('${product.price.toStringAsFixed(2)}€'),
-                        trailing: Text(
-                          'x$quantity',
-                          style: const TextStyle(fontSize: 18),
-                        ),
                       ),
                     );
                   },
@@ -163,13 +174,42 @@ class StoreScreenState extends State<StoreScreen> {
                       Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: GouelButton(
-                            text: null,
-                            color: Colors.red,
-                            onTap: () {
-                              cart.clear();
-                              setModalState(() {});
-                            },
-                            icon: Icons.delete),
+                          text: null,
+                          color: Colors.red,
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                builder: (builder) {
+                                  return GouelDialog(
+                                    title: "Vider le panier",
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text(
+                                          "Non",
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          cart.clear();
+                                          setModalState(() {});
+                                          setState(() {});
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text("Oui",
+                                            style:
+                                                TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                    child: const Text(
+                                        "Êtes-vous sûr de vouloir vider le panier ?"),
+                                  );
+                                });
+                          },
+                          icon: Icons.delete,
+                        ),
                       ),
                       Expanded(
                         child: GouelButton(
