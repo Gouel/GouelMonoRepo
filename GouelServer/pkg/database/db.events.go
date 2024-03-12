@@ -198,8 +198,10 @@ func GetUserEventsRoles(userId string) ([]models.EventRole, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	oid, _ := primitive.ObjectIDFromHex(userId)
+
 	filter := bson.M{
-		"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": userId}},
+		"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": oid}},
 	}
 
 	cursor, err := collection.Find(ctx, filter)
@@ -377,8 +379,7 @@ func UpdateEvent(eventId string, updateData bson.M) error {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
-	a, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": updateData})
-	fmt.Println(a)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": updateData})
 	return err
 }
 
@@ -421,7 +422,6 @@ func UpdateVolunteer(eventId string, volunteer models.Volunteer) error {
 	defer cancel()
 
 	objId, _ := primitive.ObjectIDFromHex(eventId)
-	fmt.Println(volunteer)
 	_, err := collection.UpdateOne(ctx, bson.M{
 		"_id":               objId,
 		"Volunteers.UserId": volunteer.UserId},
