@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/config"
@@ -244,7 +243,6 @@ func UpdateEventHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
-	fmt.Println(eventData)
 
 	err := database.UpdateEvent(eventId, eventData)
 	if err != nil {

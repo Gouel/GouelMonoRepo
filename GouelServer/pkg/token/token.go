@@ -39,8 +39,6 @@ func AuthRoute(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(user)
-
 	// Générer le token JWT
 	token, err := createToken(user.ID.Hex(), user.Role, cfg.JWTSecretKey, int64(cfg.JWTExpiration))
 	if err != nil {
@@ -102,8 +100,6 @@ func RefreshRoute(c *gin.Context) {
 	userId, _ := c.Get("userId")
 	role, _ := c.Get("role")
 
-	fmt.Println(userId, role)
-
 	token, err := createToken(userId.(string), role.(string), cfg.JWTSecretKey, int64(cfg.JWTExpiration))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création du token"})
@@ -127,8 +123,6 @@ func createToken(userId, role, secretKey string, expirationMinutes int64) (strin
 		"exp":    expirationTime.Unix(),
 		"events": eventsRoles,
 	}
-
-	fmt.Println(claims)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secretKey))

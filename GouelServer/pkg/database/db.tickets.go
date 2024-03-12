@@ -95,27 +95,22 @@ func SetSAM(ticketId, eventId string, isSam bool) error {
 	collection := Database.Collection("tickets")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	fmt.Println(ticketId, eventId)
 	ticket, err := GetTicketInfo(ticketId, &eventId)
 	if err != nil {
-		fmt.Println("A")
 		return err
 	}
 	// Mettre à jour le ticket pour le valider
 	result := collection.FindOneAndUpdate(ctx, bson.M{"_id": ticket.ID, "EventId": ticket.EventId}, bson.M{"$set": bson.M{"IsSam": isSam}})
 	if result.Err() != nil {
-		fmt.Println("Z")
 		return result.Err() // Retourne une erreur en cas de problème lors de la mise à jour
 	}
 
 	user, err := GetUserById(ticket.UserId)
 	if err != nil {
-		fmt.Println("B")
 		return err
 	}
 	event, err := GetEventById(ticket.EventId.Hex())
 	if err != nil {
-		fmt.Println("C")
 		return err
 	}
 
@@ -132,7 +127,6 @@ func SetSAM(ticketId, eventId string, isSam bool) error {
 
 	err = UpdateUser(ticket.UserId.Hex(), bson.M{"Solde": solde})
 	if err != nil {
-		fmt.Println("D")
 		return err
 	}
 

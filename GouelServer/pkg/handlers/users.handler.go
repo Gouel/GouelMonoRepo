@@ -26,7 +26,6 @@ func FindUsersByEmailStartsWithHandler(c *gin.Context) {
 // GetUserByIDHandler gère la récupération d'un utilisateur par son ID
 func GetUserByIdHandler(c *gin.Context) {
 	userId := c.Param("user_id")
-	fmt.Println(userId)
 
 	objId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
