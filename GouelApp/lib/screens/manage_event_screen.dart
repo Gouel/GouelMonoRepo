@@ -47,8 +47,31 @@ class ManageEventScreen extends StatelessWidget {
   ManageEventScreen({super.key});
 
   List<String> getPermissions(String eventId) {
-    List<String> allPermission = ["buvette", "vestiaire", "caisse", "entree"];
-    return allPermission;
+    List<String> allPermission = [
+      "buvette",
+      "caisse",
+      "entree",
+      "vestiaire",
+    ];
+
+    // Récupérer les permissions de l'utilisateur pour l'événement
+    var events = GouelSession().retrieve("infos")["events"] as List<dynamic>?;
+    if (events == null) {
+      if (["SUPERADMIN", "API"]
+          .contains(GouelSession().retrieve("infos")["role"])) {
+        return allPermission;
+      }
+
+      return [];
+    }
+    var event = events.firstWhere((event) => event["EventId"] == eventId,
+        orElse: () => null);
+    if (event == null) return [];
+    if (event["Role"] == "Admin") return allPermission;
+    var permissions = event["Permissions"] as List<dynamic>;
+    return permissions
+        .map((permission) => (permission as String).toLowerCase())
+        .toList();
   }
 
   @override
