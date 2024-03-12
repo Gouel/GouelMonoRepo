@@ -20,6 +20,8 @@ dependencies:
   mailer: ^6.0.1
   logging: ^1.2.0
   sumup: ^0.8.1
+  mobile_scanner: ^4.0.1
+  permission_handler: ^8.0.0
 
 dev_dependencies:
   flutter_test:

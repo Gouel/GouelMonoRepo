@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../widgets/gouel_bottom_sheet.dart';
 
@@ -9,11 +9,17 @@ class QRScannerService {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      builder: (BuildContext context) {
-        var scanArea = (MediaQuery.of(context).size.width < 400 ||
-                MediaQuery.of(context).size.height < 400)
+      builder: (BuildContext context2) {
+        var scanArea = (MediaQuery.of(context2).size.width < 400 ||
+                MediaQuery.of(context2).size.height < 400)
             ? 200.0
             : 300.0;
+
+        MobileScannerController controller = MobileScannerController(
+            detectionSpeed: DetectionSpeed.normal,
+            facing: CameraFacing.back,
+            detectionTimeoutMs: 1000,
+            autoStart: true);
         return GouelBottomSheet(
           title: title,
           child: ClipRRect(
@@ -21,21 +27,15 @@ class QRScannerService {
             child: SizedBox(
               width: scanArea,
               height: scanArea,
-              child: QRView(
-                key: GlobalKey(debugLabel: 'QR'),
-                overlay: QrScannerOverlayShape(
-                    borderColor: Colors.red,
-                    borderRadius: 10,
-                    borderLength: 30,
-                    borderWidth: 10,
-                    cutOutSize: scanArea),
-                onQRViewCreated: (QRViewController controller) {
-                  controller.scannedDataStream.listen((scanData) {
-                    controller.pauseCamera();
-
-                    Navigator.of(context).pop();
-                    onResult(scanData.code ?? "");
-                  });
+              child: MobileScanner(
+                // fit: BoxFit.contain,
+                controller: controller,
+                onDetect: (capture) {
+                  final List<Barcode> barcodes = capture.barcodes;
+                  if (barcodes.isNotEmpty) {
+                    Navigator.of(context2).pop();
+                    onResult(barcodes.first.rawValue ?? "");
+                  }
                 },
               ),
             ),
