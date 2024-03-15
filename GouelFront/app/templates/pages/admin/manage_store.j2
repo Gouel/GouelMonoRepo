@@ -1,0 +1,267 @@
+{% extends 'base.j2' %}
+
+{% block title %}Gestion de la buvette{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    {% include "components/retour.j2" %}
+    <h2 class="text-3xl font-bold mb-4">Produits de la Buvette</h2>
+
+    <!-- Bouton Ajouter -->
+    <button onclick="openProductModal('add')"
+        class="border-b-4 bg-green-600 border-green-800 hover:bg-green-500 hover:border-green-700 text-white font-bold py-2 px-4 rounded mb-4 inline-flex items-center">
+        <span class="material-symbols-outlined mr-2">
+            add
+        </span>
+        Ajouter un Produit
+    </button>
+
+    <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
+        {% for produit in produits %}
+        <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col items-center justify-center relative">
+
+            <div class="hidden" key="values" product-code="{{produit.ProductCode}}">
+                <input type="hidden" name="Icon" value="{{produit.Icon}}">
+                <input type="hidden" name="Label" value="{{produit.Label}}">
+                <input type="hidden" name="Price" value="{{produit.Price}}">
+                <input type="hidden" name="HasAlcohol" value="{{produit.HasAlcohol}}">
+                <input type="hidden" name="EndOfSale" value="{{produit.EndOfSale}}">
+            </div>
+
+            <!-- Icône du produit -->
+            {{ get_icon(produit.Icon) | safe }}
+            <!-- Label du produit -->
+            <h3 class="text-xl font-bold mt-2">{{ produit.Label }}</h3>
+            <!-- Prix du produit -->
+            <p class="text-md mt-1">Prix: {{ produit.Price }}€</p>
+            <!-- Indication si le produit contient de l'alcool -->
+            {% if produit.HasAlcohol %}
+            <p class="text-sm mt-1 text-red-500">Non disponible pour les mineurs / SAM</p>
+            {% endif %}
+            <!-- Date de fin de vente -->
+            {% if produit.EndOfSale %}
+            <p class="text-sm mt-2">Fin de vente: {{ produit.EndOfSale | dateformat('%d/%m/%Y %H:%M') }}</p>
+            {% endif %}
+
+            <!-- Boutons Modifier et Supprimer -->
+            <div class="flex justify-center gap-4 my-2">
+                <button onclick="openProductModal('edit','{{ produit.ProductCode }}')"
+                    class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded mb-4 inline-flex items-center">
+                    <span class="material-symbols-outlined">
+                        edit
+                    </span>
+                </button>
+                <button onclick="openDeleteModal('{{ produit.ProductCode }}')"
+                    class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded mb-4 inline-flex items-center">
+                    <span class="material-symbols-outlined">
+                        delete
+                    </span>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modals pour Ajouter, Modifier, Supprimer ici -->
+
+<!-- Modal Ajouter un Produit -->
+<div id="addProductModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4" id="titreModal">Ajouter un Produit</h2>
+
+            <form id="ProductForm" method="post">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" id="ProductCode" name="ProductCode">
+                <!-- Champ Label -->
+                <div class="mb-4">
+                    <label for="Label" class="block text-black text-sm font-bold mb-2">Label:</label>
+                    <input required type="text" id="Label" name="Label"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black" required>
+                </div>
+
+                <!-- Champ Prix -->
+                <div class="mb-4">
+                    <label for="Price" class="block text-black text-sm font-bold mb-2">Prix:</label>
+                    <input required type="number" id="Price" name="Price" step="0.01"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black" required>
+                </div>
+
+                <!-- Checkbox HasAlcohol -->
+                <div class="mb-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="HasAlcohol" name="HasAlcohol" class="form-checkbox">
+                        <span class="ml-2">Produit interdit aux mineurs / SAM</span>
+                    </label>
+                </div>
+
+                <!-- Champ Icon -->
+                <div class="mb-4">
+                    <label for="Icon" class="block text-black text-sm font-bold mb-2">Icône:</label>
+                    <input type="text" id="Icon" name="Icon"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                    <ul class="text-gray-600 list-disc my-2">
+                        <li class="text-xs flex items-center">
+                            <span class="material-symbols-outlined text-4xl">
+                                local_pizza
+                            </span>
+                            pizza
+                        </li>
+                        <li class="text-xs flex items-center">
+                            <span class="material-symbols-outlined text-4xl">
+                                sports_bar
+                            </span>
+                            sportsDrink
+                        </li>
+                        <li class="text-xs flex items-center">
+                            <span class="material-symbols-outlined text-4xl">
+                                wine_bar
+                            </span>
+                            wineBar
+                        </li>
+                        <li class="text-xs flex items-center">
+                            <span class="material-symbols-outlined text-4xl">
+                                local_bar
+                            </span>
+                            glassCup
+                        </li>
+                        <li class="text-xs flex items-center">
+                            <span class="material-symbols-outlined text-4xl">
+                                inventory_2
+                            </span>
+                            inventory2 (par défaut)
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Champ EndOfSale -->
+                <div class="mb-4">
+                    <label for="EndOfSale" class="block text-black text-sm font-bold mb-2">Fin de vente:</label>
+                    <input type="datetime-local" id="EndOfSale" name="EndOfSale"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Boutons Annuler et Ajouter -->
+                <div class="flex justify-end space-x-4">
+                    <button type="submit"
+                        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">Valider</button>
+                    <button type="button" onclick="closeModal(this)"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Supprimer un Produit -->
+<div id="deleteProductModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Supprimer ce Produit</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.</p>
+
+            <form id="deleteProductForm" method="post">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" id="ProductCode" name="ProductCode">
+
+                <!-- Boutons Annuler et Supprimer -->
+                <div class="flex justify-end space-x-4">
+                    <button type="submit"
+                        class="button border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded">Supprimer</button>
+                    <button type="button" onclick="closeModal(this)"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function openProductModal(type, productCode = null) {
+        let modal = document.getElementById("addProductModal");
+        modal.classList.remove('hidden');
+        if (type === 'edit') {
+
+            const product = document.querySelector(`[product-code="${productCode}"]`);
+            const produit = {
+                ProductCode: product.getAttribute('product-code'),
+                Label: product.querySelector('input[name="Label"]').value,
+                Price: product.querySelector('input[name="Price"]').value,
+                HasAlcohol: product.querySelector('input[name="HasAlcohol"]').value == "True",
+                Icon: product.querySelector('input[name="Icon"]').value,
+                EndOfSale: product.querySelector('input[name="EndOfSale"]').value,
+            }
+            console.log(produit);
+            const form = modal.querySelector('form');
+
+            form.querySelector('#Label').value = produit.Label;
+            form.querySelector('#Price').value = produit.Price;
+            form.querySelector('#HasAlcohol').checked = produit.HasAlcohol;
+            form.querySelector('#Icon').value = produit.Icon;
+            form.querySelector('#EndOfSale').value = produit.EndOfSale;
+
+            form.querySelector('input[name="action"]').value = 'edit';
+            form.querySelector('input[name="ProductCode"]').value = productCode;
+            titreModal.textContent = "Modifier le Produit";
+
+        } else {
+            const form = modal.querySelector('form');
+            form.reset();
+            form.querySelector('input[name="action"]').value = 'add';
+            form.querySelector('input[name="ProductCode"]').value = '';
+            titreModal.textContent = "Ajouter un Produit";
+        }
+    }
+
+    function openDeleteModal(productCode) {
+        deleteProductModal.querySelector('#ProductCode').value = productCode;
+        deleteProductModal.classList.remove('hidden');
+    }
+
+    function closeModal(e) {
+        e.closest('.fixed').classList.add('hidden');
+    }
+
+</script>
+{% endblock %}
+
+{%macro get_icon(icon_name)%}
+
+{% if icon_name == 'pizza' %}
+<span class="material-symbols-outlined text-4xl">
+    local_pizza
+</span>
+{% elif icon_name == 'sportsDrink' %}
+<span class="material-symbols-outlined text-4xl">
+    sports_bar
+</span>
+{% elif icon_name == 'wineBar' %}
+<span class="material-symbols-outlined text-4xl">
+    wine_bar
+</span>
+{% elif icon_name == 'glassCup' %}
+<span class="material-symbols-outlined text-4xl">
+    local_bar
+</span>
+{% else %}
+<span class="material-symbols-outlined text-4xl">
+    inventory_2
+</span>
+{% endif %}
+
+{%endmacro%}

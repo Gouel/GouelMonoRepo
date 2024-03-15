@@ -9,6 +9,8 @@
 
 :root {
     --color-violet: #7c3aed;
+    --color-error: #f56565;
+    --color-success: #48bb78;
 }
 
 .accent {

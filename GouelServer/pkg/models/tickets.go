@@ -13,14 +13,15 @@ type Ticket struct {
 	IsUsed          bool               `bson:"IsUsed,omitempty"`
 	WasPurchased    bool               `bson:"WasPurchased"`
 	ReturnedEcoCup  bool               `bson:"ReturnedEcoCup,omitempty"`
-
+	PurchasedOnline bool               `bson:"PurchasedOnline,omitempty"`
 	//Pour les informations simple sur un utilisateur
 	User *User `bson:"User,omitempty"`
 }
 
 type TicketRequestData struct {
-	UserId       string `json:"UserId"`
-	WasPurchased *bool  `json:"WasPurchased,omitempty"`
-	IsSam        bool   `json:"IsSam,omitempty"`
-	IsUsed       bool   `json:"IsUsed,omitempty"`
+	UserId          string `json:"UserId"`
+	WasPurchased    *bool  `json:"WasPurchased,omitempty"`
+	IsSam           bool   `json:"IsSam,omitempty"`
+	IsUsed          bool   `json:"IsUsed,omitempty"`
+	PurchasedOnline bool   `json:"PurchasedOnline,omitempty"`
 }

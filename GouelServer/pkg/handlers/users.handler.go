@@ -41,6 +41,17 @@ func GetUserByIdHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func GetUserByEmailHandler(c *gin.Context) {
+	email := c.Param("email")
+
+	user, err := database.GetUserByEmail(email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur non trouvé"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
 // CreateUserHandler gère la création d'un nouvel utilisateur
 func CreateUserHandler(c *gin.Context) {
 	var newUser models.User

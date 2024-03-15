@@ -7,6 +7,15 @@
     {% include "components/retour.j2" %}
     <h2 class="text-3xl font-bold mb-4">Gestion des Tickets</h2>
 
+    <div class="my-6 flex justify-start space-x-4">
+        <a href="{{ url_for('admin.manage_event_tickets', event_id=event_id) }}"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                confirmation_number
+            </span> Gérer les billets à vendre
+        </a>
+    </div>
+
     <!-- Statistiques des Tickets -->
     <div class="mb-6 rounded bg-gray-900 p-4">
         <div class="grid md:grid-cols-4 grid-cols-2 gap-4">
@@ -71,31 +80,50 @@
             <span class="text-white text-center">Ticket validé</span>
         </div>
         {% for ticket in tickets %}
-        <div class="bg-gray-700 rounded-md p-4 mb-4">
+        <div class="bg-gray-700 rounded-md p-4 mb-4" ticket-id="{{ticket.ID}}">
             <div class="md:grid grid-cols-4 gap-4">
-                <div class="md:hidden text-white mb-2"><strong>Nom:</strong> {{ ticket.nom }}</div>
-                <div class="md:hidden text-white mb-2"><strong>Prénom:</strong> {{ ticket.prenom }}</div>
-                <div class="md:hidden text-white mb-2"><strong>Email:</strong> {{ ticket.email }}</div>
-                <div class="md:hidden text-white mb-2"><strong>Ticket Validé:</strong> {{ 'Oui' if ticket.valide else
+                <div class="md:hidden text-white mb-2"><strong search-key>Nom:</strong> {{ ticket.User.LastName }}</div>
+                <div class="md:hidden text-white mb-2"><strong search-key>Prénom:</strong> {{ ticket.User.FirstName }}
+                </div>
+                <div class="md:hidden text-white mb-2"><strong search-key>Email:</strong> {{ ticket.User.Email }}</div>
+                <div class="md:hidden text-white mb-2"><strong>Ticket Validé:</strong> {{ 'Oui' if ticket.IsUsed else
                     'Non' }}</div>
 
-                <span class="text-white text-center hidden md:block">{{ ticket.nom }}</span>
-                <span class="text-white text-center hidden md:block">{{ ticket.prenom }}</span>
-                <span class="text-white text-center hidden md:block">{{ ticket.email }}</span>
-                <span class="text-white text-center hidden md:block">{{ 'Oui' if ticket.valide else 'Non' }}</span>
+                <span class="text-white text-center hidden md:block" search-key>{{ ticket.User.LastName }}</span>
+                <span class="text-white text-center hidden md:block" search-key>{{ ticket.User.FirstName }}</span>
+                <span class="text-white text-center hidden md:block" search-key>{{ ticket.User.Email }}</span>
+                <span class="text-white text-center hidden md:block">{{ 'Oui' if ticket.IsUsed else 'Non' }}</span>
             </div>
         </div>
         {% endfor %}
     </div>
 
-
 </div>
 
 
 
-</div>
+
 
 <script>
-    // Script pour la recherche et la filtration des tickets
+    searchTicket.addEventListener('keyup', () => {
+        const search = searchTicket.value.toLowerCase();
+        const tickets = document.querySelectorAll('[ticket-id]');
+        tickets.forEach(ticket => {
+            const searchKeys = ticket.querySelectorAll('[search-key]');
+
+            let found = false;
+            searchKeys.forEach(key => {
+                if (key.textContent.toLowerCase().includes(search)) {
+                    found = true;
+                }
+            });
+
+            if (found) {
+                ticket.style.display = 'block';
+            } else {
+                ticket.style.display = 'none';
+            }
+        })
+    })
 </script>
 {% endblock %}

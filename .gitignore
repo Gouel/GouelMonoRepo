@@ -75,3 +75,5 @@ bin/
 tmp/
 build/
 .fvm/
+
+GouelFront/app/static/img/events/

@@ -45,6 +45,7 @@ func GetAccessibleEventsHandler(c *gin.Context) {
 	events, err := database.GetAccessibleEvents(userId.(string), userRole.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		println("DEBUG", err.Error())
 		return
 	}
 

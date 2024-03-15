@@ -25,10 +25,11 @@ func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 
 	if userRole != "SUPERADMIN" && userRole != "API" {
 		// Filtre pour les utilisateurs qui ne sont ni SUPERADMIN ni API
+		oid, _ := primitive.ObjectIDFromHex(userId)
 		filter = bson.M{
 			"$or": []bson.M{
 				{"IsPublic": true},
-				{"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": userId, "IsAdmin": true}}},
+				{"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": oid, "IsAdmin": true}}},
 			},
 		}
 	}
@@ -38,7 +39,10 @@ func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 		return nil, err
 	}
 
-	cursor.All(ctx, &events)
+	err = cursor.All(ctx, &events)
+	if err != nil {
+		return nil, err
+	}
 
 	return events, nil
 }
@@ -549,14 +553,16 @@ func DeleteVolunteer(eventId, userId string) error {
 		return err
 	}
 
+	userOid, err := primitive.ObjectIDFromHex(userId)
+
 	for _, volunteer := range event.Volunteers {
-		if volunteer.UserId.Hex() == userId && volunteer.IsAdmin {
+		if volunteer.UserId == userOid && volunteer.IsAdmin {
 			return fmt.Errorf("impossible de supprimer un bénévole qui est également administrateur")
 		}
 	}
 
 	// Supprimer le bénévole si ce n'est pas un administrateur
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"Volunteers": bson.M{"UserId": userId}}})
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$pull": bson.M{"Volunteers": bson.M{"UserId": userOid}}})
 	return err
 }
 

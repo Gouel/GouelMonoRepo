@@ -6,7 +6,12 @@
 <div class="container mx-auto p-4 text-white">
 
     {% include "components/retour.j2" %}
-    <h2 class="text-3xl font-bold mb-4">Gérer Événement: {{ event.title }}</h2>
+    <h2 class="text-3xl font-bold mb-4">Gérer Événement: {{ event.Title }}</h2>
+
+    <!-- Image de l'événement -->
+
+    <img src="{{ url_for('static', filename='img/events/' + event_id) }}" alt="Pas d'image"
+        class="max-w-32 max-h-32 object-cover">
 
     <!-- Liens de Gestion transformés en boutons avec icônes -->
     <div class="my-6 flex justify-start space-x-4">
@@ -22,6 +27,18 @@
                 confirmation_number
             </span> Gestion des tickets
         </a>
+        <a href="{{ url_for('admin.manage_store', event_id=event_id) }}"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                inventory_2
+            </span> Gestion de la buvette
+        </a>
+        <a href="{{ url_for('admin.manage_options', event_id=event_id) }}"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                settings
+            </span> Paramètres
+        </a>
     </div>
 
 
@@ -29,39 +46,46 @@
     <form action="{{ url_for('admin.manage_event', event_id=event_id) }}" method="post" enctype="multipart/form-data"
         class="rounded bg-gray-900 p-2">
         <div class="mb-4">
-            <label class="block text-gray-200 text-sm font-bold mb-2" for="title">Titre</label>
-            <input type="text" id="title" name="title" value="{{ event.title }}"
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="Title">Titre</label>
+            <input type="text" id="Title" name="Title" value="{{ event.Title }}"
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <!-- Champ Description -->
+        <div class="mb-4">
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="Description">Description</label>
+            <textarea id="Description" name="Description"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ event.Description }}</textarea>
         </div>
 
         <!-- Champ Contact -->
         <div class="mb-4">
-            <label class="block text-gray-200 text-sm font-bold mb-2" for="contact">Contact</label>
-            <input type="text" id="contact" name="contact" value="{{ event.contact }}"
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="Contact">Contact</label>
+            <input type="text" id="Contact" name="Contact" value="{{ event.Contact }}"
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         </div>
 
         <!-- Champ Image -->
         <div class="mb-4">
-            <label class="block text-gray-200 text-sm font-bold mb-2" for="image">Image</label>
-            <input type="file" id="image" name="image"
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="Image">Image</label>
+            <input type="file" id="Image" name="Image" accept="image/png, image/jpeg"
                 class="bg-gray-800 shadow appearance-none border rounded w-full py-2 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline">
         </div>
 
         <!-- Champ Localisation -->
         <div class="mb-4">
-            <label class="block text-gray-200 text-sm font-bold mb-2" for="location">Localisation</label>
-            <input type="text" id="location" name="location" value="{{ event.location }}"
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="Location">Localisation</label>
+            <input type="text" id="Location" name="Location" value="{{ event.Location }}"
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         </div>
 
         <!-- Champ Visibilité -->
         <div class="mb-4">
-            <label class="block text-gray-200 text-sm font-bold mb-2" for="visibility">Visibilité</label>
-            <select id="visibility" name="visibility"
+            <label class="block text-gray-200 text-sm font-bold mb-2" for="IsPublic">Visibilité</label>
+            <select id="IsPublic" name="IsPublic"
                 class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                <option value="public" {% if event.visibility=='public' %}selected{% endif %}>Public</option>
-                <option value="private" {% if event.visibility=='private' %}selected{% endif %}>Privé</option>
+                <option value="true" {% if event.IsPublic %}selected{% endif %}>Public</option>
+                <option value="false" {% if not event.IsPublic %}selected{% endif %}>Privé</option>
             </select>
         </div>
 

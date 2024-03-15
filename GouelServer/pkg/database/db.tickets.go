@@ -243,7 +243,9 @@ func GetPaginatedTicketsFromEvent(eventId string, page int64) (bson.M, error) {
 	//On skip les tickets des pages précédentes
 	opts := options.Find().SetSkip(25 * (page - 1)).SetLimit(25) // 25 tickets par page
 
-	filter := bson.M{"EventId": eventId}
+	eventIdOID, _ := primitive.ObjectIDFromHex(eventId)
+
+	filter := bson.M{"EventId": eventIdOID}
 
 	cursor, err := collection.Find(ctx, filter, opts)
 	if err != nil {

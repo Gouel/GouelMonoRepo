@@ -144,6 +144,21 @@ func GetUserById(userId primitive.ObjectID) (*models.User, error) {
 	return &user, nil
 }
 
+func GetUserByEmail(email string) (*models.User, error) {
+	collection := Database.Collection("users")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var user models.User
+	err := collection.FindOne(ctx, bson.M{"Email": email}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func FindUsersByEmailStartsWith(emailStart string) ([]models.User, error) {
 	collection := Database.Collection("users")
 

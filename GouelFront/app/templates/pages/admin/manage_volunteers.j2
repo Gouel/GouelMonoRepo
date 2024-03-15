@@ -8,47 +8,64 @@
     {% include "components/retour.j2" %}
     <h2 class="text-3xl font-bold mb-4">Gestion des Bénévoles</h2>
 
+    <div class="my-6 flex justify-start space-x-4">
+        <button onclick="openAddVolunteerModal()"
+            class="md:w-1/5 border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+            Ajouter un Bénévole
+        </button>
+    </div>
+
     <div class="flex flex-col justify-center">
         <!-- Barre de recherche -->
         <input type="text" id="searchVolunteer" placeholder="Rechercher un bénévole..."
+            onkeyup="searchVolunteer(this.value)"
             class="shadow appearance-none border rounded w-full py-2 px-3 mb-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
 
         <!-- Liste des bénévoles -->
         <div class="grid md:grid-cols-4 gap-4 mb-4">
             {% for volunteer in volunteers %}
             <div class="bg-gray-900 p-4 rounded shadow flex justify-between items-center">
-                <div>
-                    <p>{{ volunteer.nom }} {{ volunteer.prenom }}</p>
+                <div user-id="{{volunteer.ID}}">
+                    <p class="flex">{{ volunteer.LastName.upper() }} {{ volunteer.FirstName }}
+                        {% if volunteer.IsAdmin %}
+                        <span class="material-symbols-outlined" title="Administrateur">
+                            shield_person
+                        </span>
+                        {% endif %}
+                    </p>
+
+                    <p class="text-sm italic text-gray-500">{{ volunteer.Email }}</p>
+                    <span style="display: none;" admin="{{volunteer.IsAdmin or False}}"></span>
                     <!-- Icônes des droits -->
-                    <div class="flex space-x-2 mt-2">
+                    <div class="flex space-x-2 mt-2 droits">
                         <!-- Exemple d'icône de droit -->
                         {% if 'buvette' in volunteer.droits %}
-                        <span class="material-symbols-outlined">
+                        <span class="material-symbols-outlined" droit="buvette">
                             sports_bar
                         </span>
                         {% endif %}
                         {% if 'restauration' in volunteer.droits %}
-                        <span class="material-symbols-outlined">
+                        <span class="material-symbols-outlined" droit="restauration">
                             restaurant
                         </span>
                         {% endif %}
-                        {% if 'entrée' in volunteer.droits %}
-                        <span class="material-symbols-outlined">
+                        {% if 'entree' in volunteer.droits %}
+                        <span class="material-symbols-outlined" droit="entree">
                             door_front
                         </span>
                         {% endif %}
                         {% if 'vestiaire' in volunteer.droits %}
-                        <span class="material-symbols-outlined">
+                        <span class="material-symbols-outlined" droit="vestiaire">
                             inventory_2
                         </span>
                         {% endif %}
                         {% if 'caisse' in volunteer.droits %}
-                        <span class="material-symbols-outlined">
+                        <span class="material-symbols-outlined" droit="caisse">
                             payments
                         </span>
                         {% endif %}
                         {% if 'prevention' in volunteer.droits %}
-                        <span class="material-symbols-outlined">
+                        <span class="material-symbols-outlined" droit="prevention">
                             health_and_safety
                         </span>
                         {% endif %}
@@ -57,13 +74,13 @@
                 <!-- Boutons d'action -->
                 <div class="flex space-x-2">
                     <!-- Bouton Éditer -->
-                    <button onclick="openEditVolunteerModal({{ volunteer.id }})"
+                    <button onclick="openEditVolunteerModal('{{ volunteer.ID }}')"
                         class="focus:outline-none text-blue-500 hover:text-blue-700">
                         <span class="material-symbols-outlined">edit</span>
                     </button>
 
                     <!-- Bouton Supprimer -->
-                    <button onclick="openDeleteVolunteerModal({{ volunteer.id }})"
+                    <button onclick="openDeleteVolunteerModal('{{ volunteer.ID }}')"
                         class="focus:outline-none text-red-500 hover:text-red-700">
                         <span class="material-symbols-outlined">delete</span>
                     </button>
@@ -72,11 +89,7 @@
             {% endfor %}
         </div>
 
-        <!-- Bouton pour ajouter un bénévole -->
-        <button onclick="openAddVolunteerModal()"
-            class="md:w-1/5 border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
-            Ajouter un Bénévole
-        </button>
+
     </div>
 </div>
 
@@ -90,36 +103,27 @@
                 </button>
             </div>
 
-            <h2 class="text-2xl font-bold mb-4">Ajouter un Bénévole</h2>
+            <h2 class="text-2xl font-bold">Ajouter un Bénévole</h2>
+            <p class="text-sm italic text-gray-500">
+                Le compte utilisé sera celui lié à l'adresse mail.
+            </p>
 
-            <form id="addVolunteerForm">
-                <!-- Nom -->
-                <div class="mb-4">
-                    <label for="nom" class="block text-black text-sm font-bold mb-2">Nom:</label>
-                    <input type="text" id="nom" name="nom"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
-                </div>
-
-                <!-- Prénom -->
-                <div class="mb-4">
-                    <label for="prenom" class="block text-black text-sm font-bold mb-2">Prénom:</label>
-                    <input type="text" id="prenom" name="prenom"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
-                </div>
-
+            <form id="addVolunteerForm" method="post">
+                <input type="hidden" name="action" value="add">
                 <!-- Email -->
                 <div class="mb-4">
-                    <label for="email" class="block text-black text-sm font-bold mb-2">Email:</label>
-                    <input type="email" id="email" name="email"
+                    <label for="Email" class="block text-black text-sm font-bold mb-2">Email:</label>
+                    <input type="Email" id="Email" name="Email"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
                 </div>
 
-                <!-- Date de Naissance -->
-                <div class="mb-4">
-                    <label for="dob" class="block text-black text-sm font-bold mb-2">Date de Naissance:</label>
-                    <input type="date" id="dob" name="dob"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
-                </div>
+                <label class="flex items-center space-x-2" id="creerCompte">
+                    <input id="creerCompteCbox" type="checkbox" class="accent" name="newUser"
+                        onclick="createNewUser(this.checked)">
+                    <span class="material-symbols-outlined">person</span> Créer un compte
+                </label>
+
+                <br>
 
                 <!-- Droits -->
                 <div class="mb-6">
@@ -181,13 +185,58 @@
 <script>
     function openAddVolunteerModal() {
         document.getElementById('addVolunteerModal').classList.remove('hidden');
+        creerCompteCbox.checked = false;
+        createNewUser(false);
     }
 
     function closeAddVolunteerModal() {
         document.getElementById('addVolunteerModal').classList.add('hidden');
     }
 
-    // Ajoutez ici le script pour gérer la soumission du formulaire
+    function createNewUser(create) {
+        const html = `
+                <div id="createNewUserHTML">
+                <!-- Nom -->
+                <div class="mb-4">
+                    <label for="LastName" class="block text-black text-sm font-bold mb-2">Nom:</label>
+                    <input type="text" id="LastName" name="LastName"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Prénom -->
+                <div class="mb-4">
+                    <label for="FirstName" class="block text-black text-sm font-bold mb-2">Prénom:</label>
+                    <input type="text" id="FirstName" name="FirstName"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Date de Naissance -->
+                <div class="mb-4">
+                    <label for="Dob" class="block text-black text-sm font-bold mb-2">Date de Naissance:</label>
+                    <input type="date" id="Dob" name="Dob"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+                </div>
+        `
+
+        if (create) {
+            document.getElementById('creerCompte').insertAdjacentHTML('afterend', html)
+        } else {
+            document.getElementById('createNewUserHTML')?.remove();
+        }
+
+
+    }
+
+    function searchVolunteer(value) {
+        const volunteers = document.querySelectorAll('.bg-gray-900');
+        volunteers.forEach((volunteer) => {
+            [...volunteer.querySelectorAll('p')].filter((item) => {
+                return item.textContent.toLowerCase().includes(value.toLowerCase());
+            }).length > 0 ? volunteer.style.display = 'flex' : volunteer.style.display = 'none';
+        });
+    }
+
 </script>
 
 <!-- Modal de modification des droits d'un bénévole -->
@@ -202,7 +251,9 @@
 
             <h2 class="text-2xl font-bold mb-4">Modifier les Droits du Bénévole</h2>
 
-            <form id="editVolunteerForm">
+            <form id="editVolunteerForm" method="post">
+                <input type="hidden" name="UserId" value="">
+                <input type="hidden" name="action" value="edit">
                 <!-- Droits -->
                 <div class="mb-6">
                     <label class="block text-black text-sm font-bold mb-2">Droits:</label>
@@ -244,8 +295,15 @@
                                 <span class="material-symbols-outlined">health_and_safety</span> Prévention
                             </label>
                         </div>
-                        <!-- Répétez pour chaque droit avec son icône -->
                     </div>
+
+
+
+                </div>
+
+                <div class="mb-6">
+                    <label class="text-black text-sm font-bold mb-2" for="IsAdmin">Administrateur:</label>
+                    <input type="checkbox" class="accent" name="IsAdmin" id="IsAdmin">
                 </div>
 
                 <!-- Boutons Annuler et Valider -->
@@ -266,11 +324,28 @@
 
 <script>
     function openEditVolunteerModal(volunteerId) {
-        // Logique pour charger les données du bénévole et afficher le modal
+
+        // Logique pour identifier le bénévole à modifier et afficher le modal
+
+        const form = document.getElementById('editVolunteerForm');
+        const user = document.querySelector(`[user-id="${volunteerId}"]`);
+        const data = user.querySelectorAll(`.droits span`);
+        data.forEach((item) => {
+            const value = item.getAttribute('droit');
+            form.querySelector(`input[name="droits"][value="${value}"]`).checked = true;
+        });
+
+        form.querySelector('input[name="UserId"]').value = volunteerId;
+
+        const isAdmin = user.querySelector('[admin]').getAttribute('admin');
+        form.querySelector('input[name="IsAdmin"]').checked = isAdmin === 'True';
+
         document.getElementById('editVolunteerModal').classList.remove('hidden');
     }
 
     function closeEditVolunteerModal() {
+        const form = document.getElementById('editVolunteerForm');
+        form.reset();
         document.getElementById('editVolunteerModal').classList.add('hidden');
     }
 </script>
@@ -285,16 +360,22 @@
                     <i class="material-symbols-outlined">close</i>
                 </button>
             </div>
+            <form id="deleteVolunteerForm" action="" method="post">
+                <input type="hidden" name="UserId" value="">
+                <input type="hidden" name="action" value="delete">
+                <h2 class="text-2xl font-bold mb-4">Confirmer la Suppression</h2>
+                <p>Êtes-vous sûr de vouloir supprimer ce bénévole ? <br>Cette action est irréversible.</p>
+                <p class="text-sm italic text-gray-500">La suppression ne peut se faire que si le bénévole n'est pas
+                    Administrateur.</p>
 
-            <h2 class="text-2xl font-bold mb-4">Confirmer la Suppression</h2>
-            <p>Êtes-vous sûr de vouloir supprimer ce bénévole ? Cette action est irréversible.</p>
+                <div class="flex justify-center mt-4">
+                    <button type="submit"
+                        class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded mr-2">Supprimer</button>
+                    <button type="button" onclick="closeDeleteVolunteerModal()"
+                        class="border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">Annuler</button>
+                </div>
+            </form>
 
-            <div class="flex justify-center mt-4">
-                <button onclick="confirmDeleteVolunteer()"
-                    class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded mr-2">Supprimer</button>
-                <button onclick="closeDeleteVolunteerModal()"
-                    class="border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">Annuler</button>
-            </div>
         </div>
     </div>
 </div>
@@ -302,16 +383,17 @@
 <script>
     function openDeleteVolunteerModal(volunteerId) {
         // Logique pour identifier le bénévole à supprimer et afficher le modal
+        const form = document.getElementById('deleteVolunteerForm');
+        form.querySelector('input[name="UserId"]').value = volunteerId;
         document.getElementById('deleteVolunteerModal').classList.remove('hidden');
     }
 
     function closeDeleteVolunteerModal() {
+        const form = document.getElementById('deleteVolunteerForm');
         document.getElementById('deleteVolunteerModal').classList.add('hidden');
+        form.reset();
     }
 
-    function confirmDeleteVolunteer() {
-        // Logique pour supprimer le bénévole
-    }
 </script>
 
 

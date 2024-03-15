@@ -1,0 +1,358 @@
+{% extends 'base.j2' %}
+
+{% block title %}Gestion des Options{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white" spellcheck="false">
+    {% include "components/retour.j2" %}
+    <h2 class="text-3xl font-bold mb-4">Gestion des Options</h2>
+    <!-- Liens de Gestion transformés en boutons avec icônes -->
+    <div class="my-6 flex justify-start space-x-4">
+        <button onclick="sauvegarder()"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                save
+            </span> Sauvegarder
+        </button>
+        <button onclick="ajouterOption('option', optionsContainer)"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                add
+            </span> Ajouter une Option
+        </button>
+        <button onclick="importOptions()"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                download
+            </span> Importer les Options
+        </button>
+        <button onclick="exportOptions()"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                upload
+            </span> Exporter les Options
+        </button>
+    </div>
+    <div id="optionsContainer" class="space-y-4">
+        {{ gen_option(Options) }}
+    </div>
+</div>
+
+
+<style>
+    .option {
+        padding: 2em;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: start;
+        width: fit-content;
+        border-radius: 8px;
+        border: 2px solid #000;
+        gap: 4px;
+
+        background-color: rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 4px 0px 0px #000;
+    }
+
+    .option>.option-value,
+    .option>.option-content {
+        margin-left: 5em;
+    }
+
+    .option-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: start;
+        gap: 8px;
+
+    }
+
+    .option-title {
+        font-weight: bold;
+    }
+
+    .option-add {
+        color: #6b6d71;
+        font-style: italic;
+        cursor: pointer;
+    }
+
+    .option-value {
+        padding: 3px;
+        border-radius: 8px;
+        background-color: #444;
+        margin: 2px 0;
+        text-decoration: none;
+        min-width: 2em;
+    }
+</style>
+
+<!-- Modal ajout Option --->
+<div id="addOption" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Ajouter</h2>
+
+            <label for="titre">
+                <input
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    type="text" name="titre" id="titre" placeholder="Titre de l'option">
+            </label>
+
+            <div class="my-4">
+                <button id="valeur"
+                    class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                    Valeur
+                </button>
+                <button id="liste"
+                    class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                    Liste
+                </button>
+                <button id="sousOptions"
+                    class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                    Sous Options
+                </button>
+            </div>
+
+            <div>
+                <button onclick="closeModal(this)" type="button"
+                    class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function closeModal(button) {
+        button.closest(".fixed").classList.add("hidden");
+    }
+
+
+    function ajouterOption(type, el) {
+        if (type === "string") {
+            el.insertAdjacentHTML(
+                "beforebegin",
+                '<span class="option-value" contenteditable="" onblur="autoremove(this)" >Nouvelle Valeur</span>'
+            );
+        } else {
+            titre.value = "";
+            addOption.classList.remove("hidden");
+            valeur.onclick = () => {
+                nouvelleOption("valeur", el);
+                addOption.classList.add("hidden");
+            };
+            sousOptions.onclick = () => {
+                nouvelleOption("option", el);
+                addOption.classList.add("hidden");
+            };
+            liste.onclick = () => {
+                nouvelleOption("liste", el);
+                addOption.classList.add("hidden");
+            };
+        }
+    }
+
+    function nouvelleOption(type, el) {
+        let html = ``;
+        if (titre.value == "") titre.value = `[Nouvelle ${type}]`;
+        switch (type) {
+            case "valeur":
+                html = `
+                    <span class="option-title" contenteditable="" onblur="autoremove(this)">${titre.value}</span>
+                    <div class="option-content">
+                        <span class="option-value" contenteditable="">Nouvelle Valeur</span>
+                    </div>
+                `;
+                break;
+            case "liste":
+                html = `
+                    <span class="option-title" contenteditable="" onblur="autoremove(this)">${titre.value}</span>
+                    <div class="option-content">
+                        <span class="option-add" type="string" onclick="ajouterOption('string', this);">Ajouter une valeur</span>
+                    </div>
+                `;
+                break;
+            case "option":
+                html = `
+                    <span class="option-title" contenteditable="" onblur="autoremove(this)">${titre.value}</span>
+                    <div class="option-content">
+                        <span class="option-add" type="option" onclick="ajouterOption('option', this);">Ajouter une valeur</span>
+                    </div>
+                `;
+                break;
+        }
+
+        const div = document.createElement("div");
+        div.classList.add("option")
+        div.innerHTML = html;
+
+        if (el == optionsContainer) {
+            el.insertAdjacentElement("beforeend", div);
+        } else {
+            el.insertAdjacentElement("beforebegin", div);
+        }
+    }
+
+    function autoremove(ce) {
+        if (ce.textContent != "") return;
+        if (ce.className == "option-value") {
+            ce.remove();
+        } else {
+            ce.parentElement.remove();
+        }
+    }
+
+    function exportOptions(download = true) {
+        let options = document.querySelectorAll('#optionsContainer>.option');
+        let json = {};
+        options.forEach(option => {
+            json = { ...json, ...htmlToOption(option) };
+        });
+
+        if (download) {
+            //JSON To File
+            let blob = new Blob([JSON.stringify(json)], { type: "application/json" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "options.json";
+            a.click();
+        } else {
+            return json;
+        }
+
+    }
+
+    function htmlToOption(element) {
+        console.log(element);
+        let option = {};
+
+        let title = element.querySelector('.option-title').textContent;
+        const content = element.querySelector('.option-content');
+        const values = [...content.children].filter(child => child.classList.contains('option-value'));
+        const options = [...content.children].filter(child => child.classList.contains('option'));
+
+        if (values.length > 0) {
+            valeur = element.querySelector('.option-content>.option-add') == null;
+            if (valeur) {
+                option[title] = values[0].textContent;
+            } else {
+                option[title] = [];
+                values.forEach(value => {
+                    option[title].push(value.textContent);
+                });
+            }
+        } else if (options.length > 0) {
+            option[title] = {};
+            options.forEach(opt => {
+                option[title] = { ...option[title], ...htmlToOption(opt) };
+            });
+        }
+
+
+        return option;
+    }
+
+    function importOptions() {
+        let input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json";
+        input.onchange = (e) => {
+            let file = e.target.files[0];
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                let json = JSON.parse(e.target.result);
+                optionsContainer.innerHTML = optionToDOM(json);
+            }
+            reader.readAsText(file);
+        }
+        input.click();
+    }
+
+    function optionToDOM(obj) {
+        let html = ``;
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                const value = obj[key];
+                html += `<div class="option">`;
+                if (value instanceof Array) {
+                    let content = ``;
+                    value.forEach(val => {
+                        content += `<span class="option-value" contenteditable="">${val}</span>`;
+                    });
+                    html += `<span class="option-title" contenteditable="" onblur="autoremove(this)">${key}</span>
+                    <div class="option-content">
+                        ${content}
+                        <span class="option-add" type="string" onclick="ajouterOption('string', this);">Ajouter une valeur</span>`;
+                    html += `</div>`;
+                } else if (value instanceof Object) {
+                    let content = optionToDOM(value);
+                    html += `<span class="option-title" contenteditable="" onblur="autoremove(this)">${key}</span>
+                    <div class="option-content">
+                        ${content}
+                        <span class="option-add" type="option" onclick="ajouterOption('option', this);">Ajouter une valeur</span>`;
+                    html += `</div>`;
+                } else {
+                    html += `<span class="option-title" contenteditable="" onblur="autoremove(this)">${key}</span>
+                    <div class="option-content">
+                        <span class="option-value" contenteditable="">${value}</span>
+                    </div>`;
+                }
+                html += `</div>`;
+            }
+        }
+        return html;
+    }
+
+    function sauvegarder() {
+        let options = JSON.stringify(exportOptions(false));
+
+        const form = document.createElement("form");
+        form.style.display = "none";
+        form.method = "POST";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "options";
+        input.value = options;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+
+</script>
+
+{% endblock content %}
+
+{%macro gen_option(options)%}
+{% for key, value in options.items() %}
+<div class="option">
+    <span class="option-title" contenteditable="" onblur="autoremove(this)">{{key}}</span>
+    <div class="option-content">
+        {% if value is mapping %}
+        {{ gen_option(value) }}
+        <span class="option-add" type="option" onclick="ajouterOption('option', this);">Ajouter une valeur</span>
+        {% elif value is iterable and value is not string %}
+        {% for item in value %}
+        <span class="option-value" contenteditable="" onblur="autoremove(this)">{{item}}</span>
+        {% endfor %}
+        <span class="option-add" type="string" onclick="ajouterOption('string', this);">Ajouter une valeur</span>
+        {% else %}
+        <span class="option-value" contenteditable="">{{value}}</span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{%endmacro%}

@@ -6,21 +6,25 @@
 <div class="flex flex-col items-center">
     <!-- Sidebar Component -->
     <button onclick="logout()"
-        class="w-4/5 border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">Déconnecter</button>
+        class="w-4/5 border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">Se
+        déconnecter</button>
+    <button onclick="openModal('addEvent')"
+        class="w-4/5 border-b-4 bg-green-700 border-green-900 hover:bg-green-500 hover:border-green-700 text-white font-bold py-2 px-4 rounded block mt-4">Créer
+        un événement</button>
 
     <!-- Contenu principal -->
     <div class="w-3/4 p-4">
         <div class="grid md:grid-cols-3 gap-4">
-            {% if "superadmin" in user.sessions %}
-            {% for event in all_events %}
-            {% with event_id=loop.index - 1, role="Superadmin" %}
+            {% if "SUPERADMIN" in user.role %}
+            {% for event in all_events.values() %}
+            {% with role="Superadmin" %}
             {% include 'components/event_block.j2' %}
             {% endwith %}
             {% endfor %}
             {% else %}
-            {% for event_id, role in user.sessions.items() %}
-            {% if role == "admin" %}
-            {% with event=all_events[event_id | int] %}
+            {% for event in user.events %}
+            {% if event.Role == "Admin" %}
+            {% with event=all_events[event.EventId], role="Admin" %}
             {% include 'components/event_block.j2' %}
             {% endwith %}
             {% endif %}
@@ -30,10 +34,94 @@
     </div>
 </div>
 
+<!-- Modal création --->
+<div id="addEvent" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Nouvel événement</h2>
+
+            <form id="addEventForm" method="post">
+                <input type="hidden" name="action" value="add">
+
+                <div class="mb-4">
+                    <label for="Title" class="block text-black text-sm font-bold mb-2">Titre:</label>
+                    <input type="text" id="Title" name="Title"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                </div>
+
+                <!-- Boutons Annuler et Valider -->
+                <div class="flex justify-center mt-4 space-x-2">
+                    <button type="submit"
+                        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Valider
+                    </button>
+                    <button onclick="closeModal(this)" type="button"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal suppression --->
+<div id="deleteEvent" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Supprimer l'événement</h2>
+
+            <form id="deleteEventForm" method="post">
+                <input type="hidden" name="action" value="delete">
+                <!-- Boutons Annuler et Valider -->
+                <div class="flex justify-center mt-4 space-x-2">
+                    <button type="submit"
+                        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Valider
+                    </button>
+                    <button onclick="closeModal(this)" type="button"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function logout() {
-        // Logique de déconnexion
         window.location.href = "/admin/deconnexion"
+    }
+
+    function closeModal(button) {
+        // Fermeture de la modal
+        button.closest('.fixed').classList.add('hidden');
+    }
+
+    function openModal(modalId, eventId = null) {
+        // Ouverture de la modal
+        document.getElementById(modalId).classList.remove('hidden');
+
+        if (modalId === "deleteEvent") {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'EventId';
+            input.value = eventId;
+            document.getElementById('deleteEventForm').appendChild(input);
+        }
     }
 </script>
 {% endblock %}

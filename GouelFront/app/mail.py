@@ -1,40 +1,69 @@
-def send_email(
-    to,
-    sender="Gouel<noreply.gouel@iziram.com>",
-    cc=None,
-    bcc=None,
-    subject=None,
-    body=None,
-):
-    """sends email using a Jinja HTML template"""
-    import smtplib
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
-    # Import the email modules
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.header import Header
-    from email.utils import formataddr
 
-    # convert TO into list if string
-    if type(to) is not list:
-        to = to.split()
+class EmailSender:
+    def __init__(self, smtp_server, smtp_port, smtp_user, smtp_password):
+        self.smtp_server = smtp_server
+        self.smtp_port = int(smtp_port)
+        self.smtp_user = smtp_user
+        self.smtp_password = smtp_password
 
-    to_list = to + [cc] + [bcc]
-    to_list = filter(None, to_list)  # remove null emails
+    def send_email(self, subject, to_addr, body_html, attachments=None):
+        # Création de l'objet message
+        msg = MIMEMultipart()
+        msg["From"] = self.smtp_user
+        msg["To"] = to_addr
+        msg["Subject"] = subject
 
-    msg = MIMEMultipart("alternative")
-    msg["From"] = sender
-    msg["Subject"] = subject
-    msg["To"] = ",".join(to)
-    msg["Cc"] = cc
-    msg["Bcc"] = bcc
-    msg.attach(MIMEText(body, "html"))
-    server = smtplib.SMTP("127.0.0.1")  # or your smtp server
-    try:
-        log.info("sending email xxx")
-        server.sendmail(sender, to_list, msg.as_string())
-    except Exception as e:
-        log.error("Error sending email")
-        log.exception(str(e))
-    finally:
-        server.quit()
+        # Ajout du corps HTML de l'email
+        msg.attach(MIMEText(body_html, "html"))
+
+        # Traitement des pièces jointes
+        if attachments:
+            for filepath in attachments:
+                part = MIMEBase("application", "octet-stream")
+                with open(filepath, "rb") as file:
+                    part.set_payload(file.read())
+                encoders.encode_base64(part)
+                part.add_header(
+                    "Content-Disposition",
+                    'attachment; filename="{}"'.format(filepath.split("/")[-1]),
+                )
+                msg.attach(part)
+
+        # Connexion au serveur SMTP et envoi de l'email
+        with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port) as server:
+            server.login(self.smtp_user, self.smtp_password)
+            server.send_message(msg)
+            server.quit()
+
+
+# Utilisation de la classe
+if __name__ == "__main__":
+    # Remplacez les valeurs suivantes par vos informations de connexion SMTP
+    smtp_server = "smtp.ionos.fr"
+    smtp_port = 465  # Port SMTP SSL généralement
+    smtp_user = "no-reply@gouel.fr"
+    smtp_password = "Pacifier2-Angles3-Quarters2-Marlin3"
+
+    # Création d'une instance de EmailSender
+    email_sender = EmailSender(smtp_server, smtp_port, smtp_user, smtp_password)
+
+    # Envoi d'un email
+    subject = "Sujet de l'email"
+    to_addr = "test@iziram.fr"
+    body_html = """\
+    <html>
+      <head></head>
+      <body>
+        <p>Bonjour !<br>
+           Voici un email envoyé avec <b>du contenu HTML</b> et des pièces jointes.
+        </p>
+      </body>
+    </html>
+    """
+    email_sender.send_email(subject, to_addr, body_html)

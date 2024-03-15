@@ -91,6 +91,7 @@ func main() {
 	routes.Routes(router, cfg)
 
 	// Lancement du serveur sur le port configuré
+	// err = router.RunTLS(cfg.ServerHost+":"+cfg.ServerPort, "server.pem", "key.pem")
 	err = router.Run(cfg.ServerHost + ":" + cfg.ServerPort)
 	if err != nil {
 		log.Fatalf("Erreur lors du lancement du serveur: %v", err)

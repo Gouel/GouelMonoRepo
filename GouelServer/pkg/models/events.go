@@ -29,8 +29,8 @@ type EventTicket struct {
 }
 
 type EventTicketPrice struct {
-	OnSite float32 `bson:"OnSite,omitempty"`
-	Online float32 `bson:"Online,omitempty"`
+	OnSite float32 `bson:"OnSite,omitempty,truncate"`
+	Online float32 `bson:"Online,omitempty,truncate"`
 }
 
 type Volunteer struct {

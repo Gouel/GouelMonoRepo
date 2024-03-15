@@ -1,0 +1,184 @@
+{% extends 'base.j2' %}
+
+{% block title %}Gestion des Tickets à vendre{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    {% include "components/retour.j2" %}
+    <h2 class="text-3xl font-bold mb-4">Gestion des Tickets à vendre</h2>
+
+    <div class="my-6 flex justify-start space-x-4">
+        <button onclick="openAddEditModal('add')"
+            class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <span class="material-symbols-outlined mr-2">
+                add
+            </span> Nouveau ticket
+        </button>
+    </div>
+
+    <div class="p-4 rounded-lg bg-gray-900 shadow-md">
+        <div class="bg-purple-600 rounded-md p-4 mb-4 grid grid-cols-4 gap-4">
+            <span class="text-white text-center">Nom</span>
+            <span class="text-white text-center">Prix en ligne</span>
+            <span class="text-white text-center">Prix sur place</span>
+            <span class="text-white text-center">Actions</span>
+        </div>
+        {% for et in event_tickets %}
+        <div class="bg-gray-700 rounded-md p-4 mb-4" code="{{et.EventTicketCode}}">
+            <div class="grid grid-cols-4 gap-4 text-center items-center">
+                <span class="text-white" key="Title">{{ et.Title}}</span>
+                <span class="text-white" key="Online">{{ et.Price.Online}}€</span>
+                <span class="text-white" key="OnSite">{{ et.Price.OnSite}}€</span>
+                <div>
+                    <button onclick="openAddEditModal('edit', '{{ et.EventTicketCode}}')"
+                        class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                        <span class="material-symbols-outlined">
+                            edit
+                        </span>
+                    </button>
+                    <button onclick="openDeleteModal('{{ et.EventTicketCode}}')"
+                        class="border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                        <span class="material-symbols-outlined">
+                            delete
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modals pour Ajouter, Modifier, Supprimer -->
+
+<!-- Modal Ajouter un Ticket -->
+<div id="addEditTicketModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4" id="titreModal">Ajouter un Ticket</h2>
+
+            <form id="addTicketForm" method="post">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="EventTicketCode" value="">
+
+                <!-- Champ Titre -->
+                <div class="mb-4">
+                    <label for="Title" class="block text-black text-sm font-bold mb-2">Titre:</label>
+                    <input type="text" id="Title" name="Title"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black" required>
+                </div>
+
+                <!-- Champ Prix Sur Place -->
+                <div class="mb-4">
+                    <label for="PriceOnSite" class="block text-black text-sm font-bold mb-2">Prix Sur Place:</label>
+                    <input type="number" id="PriceOnSite" name="PriceOnSite" step="0.01"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black" required>
+                </div>
+
+                <!-- Champ Prix En Ligne -->
+                <div class="mb-4">
+                    <label for="PriceOnline" class="block text-black text-sm font-bold mb-2">Prix En Ligne:</label>
+                    <input type="number" id="PriceOnline" name="PriceOnline" step="0.01"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black" required>
+                </div>
+
+                <!-- Boutons Annuler et Valider -->
+                <div class="flex justify-center mt-4 space-x-2">
+                    <button type="submit"
+                        class="button border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Ajouter
+                    </button>
+                    <button onclick="closeModal(this)" type="button"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Supprimer un Ticket -->
+<div id="deleteTicketModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Supprimer le Ticket</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce ticket ? Cette action est irréversible.</p>
+
+            <form id="deleteTicketForm" method="post">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="EventTicketCode" value="">
+
+                <!-- Boutons Annuler et Confirmer -->
+                <div class="flex justify-center mt-4 space-x-2">
+                    <button type="submit"
+                        class="button border-b-4 bg-red-600 border-red-800 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded">
+                        Supprimer
+                    </button>
+                    <button onclick="closeModal(this)" type="button"
+                        class="button border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function openAddEditModal(type, eventTicketCode = null) {
+        let modal = document.getElementById('addEditTicketModal');
+        modal.classList.remove('hidden');
+        let form = document.getElementById('addTicketForm');
+        let titreModal = document.getElementById('titreModal');
+        let title = document.getElementById('Title');
+        let priceOnSite = document.getElementById('PriceOnSite');
+        let priceOnline = document.getElementById('PriceOnline');
+        let action = document.querySelector('input[name="action"]');
+        if (type == 'add') {
+            titreModal.innerHTML = "Ajouter un Ticket";
+            action.value = 'add';
+            title.value = '';
+            priceOnSite.value = '';
+            priceOnline.value = '';
+            form.querySelector('input[name="EventTicketCode"]').value = "";
+        } else {
+            titreModal.innerHTML = "Modifier un Ticket";
+            action.value = 'edit';
+            title.value = document.querySelector(`div[code="${eventTicketCode}"] span[key="Title"]`).innerHTML;
+            priceOnSite.value = document.querySelector(`div[code="${eventTicketCode}"] span[key="OnSite"]`).innerHTML.replace('€', '');
+            priceOnline.value = document.querySelector(`div[code="${eventTicketCode}"] span[key="Online"]`).innerHTML.replace('€', '');
+
+            form.querySelector('input[name="EventTicketCode"]').value = eventTicketCode;
+        }
+    }
+
+    function openDeleteModal(eventTicketCode) {
+        let modal = document.getElementById('deleteTicketModal');
+        modal.classList.remove('hidden');
+        let form = document.getElementById('deleteTicketForm');
+        form.querySelector('input[name="EventTicketCode"]').value = eventTicketCode;
+    }
+
+    function closeModal(e) {
+        e.closest('.fixed').classList.add('hidden');
+    }
+
+</script>
+
+
+{% endblock %}

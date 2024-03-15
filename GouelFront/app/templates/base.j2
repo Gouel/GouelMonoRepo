@@ -27,6 +27,23 @@
 </head>
 
 <body class="bg-gray-800">
+    {% for cat, mesg in get_flashed_messages(with_categories=true) %}
+    <span style="display: none;">{{cat}} {{mesg}}</span>
+    <script>
+        Swal.fire({
+            icon: '{{ cat| lower}}',
+            toast: true,
+            position: "bottom-end",
+            iconColor: 'white',
+            background: 'var(--color-{{ cat| lower }})',
+            color: 'white',
+            title: "{{mesg}}",
+            timerProgressBar: true,
+            showConfirmButton: false,
+            timer: 3000
+        })
+    </script>
+    {% endfor %}
     <header>
         {% block header %}
         {% include 'components/header.j2' %}

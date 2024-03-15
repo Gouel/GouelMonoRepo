@@ -15,10 +15,14 @@ ha = HelloAssoAPI(
 )
 
 
-ga = GouelApi(
-    username=os.environ["GOUEL_API_USERNAME"],
-    password=os.environ["GOUEL_API_PASSWORD"],
-)
+def get_ga():
+    return GouelApi(
+        username=os.environ["GOUEL_API_USERNAME"],
+        password=os.environ["GOUEL_API_PASSWORD"],
+    )
+
+
+from .mail import EmailSender
 
 
 def create_app():
