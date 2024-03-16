@@ -16,6 +16,9 @@ class GouelHelper:
 
     # API
 
+    def get_conf_smtp(self):
+        return self.ga.get("/config/smtp").json()
+
     def get_events(self, to_dict: bool = False):
         events = self.ga.get("/events").json()
         if not to_dict:
@@ -80,11 +83,23 @@ class GouelHelper:
         return user
 
     def add_user(self, data):
-        r = self.ga.post("/users", data)
+        r = self.ga.post("/users/", data)
         return r.status_code == 200, r.json()
+
+    def update_user(self, user_id, data):
+        r = self.ga.put(f"/users/{user_id}", data)
+        return r.status_code == 200
+
+    def add_transaction(self, event_id, user_id, data):
+        r = self.ga.post(f"/users/transaction/{event_id}/{user_id}", data)
+        ok = r.status_code == 200
+        return ok, r.json() if ok else None
 
     def get_products(self, event_id):
         return self.ga.get(f"/events/{event_id}/products").json()
+
+    def get_product(self, event_id, product_id):
+        return self.ga.get(f"/events/{event_id}/products/{product_id}").json()
 
     def add_product(self, event_id, data):
         r = self.ga.post(f"/events/{event_id}/products", data)
@@ -102,3 +117,7 @@ class GouelHelper:
 
     def get_tickets(self, event_id):
         return self.ga.get(f"/tickets/{event_id}").json()
+
+    def add_ticket(self, event_id, event_ticket_code, data) -> str:
+        r = self.ga.post(f"/tickets/{event_id}/{event_ticket_code}", data)
+        return r.json()["TicketId"] if r.status_code == 200 else None

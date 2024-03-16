@@ -14,6 +14,8 @@ from .helper import GouelHelper
 import json
 import os
 
+from .cache import MagicLink
+
 admin = Blueprint("admin", __name__)
 
 
@@ -112,11 +114,12 @@ def manage_event(event_id: str, **kwargs):
         }
         GouelHelper(g.uga).update_event(event_id, update_event)
 
-        # les images sont stockés dans le dossier static/img/events/<event_id>.xxx
+        # les images sont stockés dans le dossier static/img/events/<event_id>
         if (
             request.files
             and "Image" in request.files
             and request.files["Image"] is not None
+            and request.files["Image"].filename != ""
         ):
             img = request.files["Image"]
             img.save(f"app/static/img/events/{event_id}")
@@ -144,23 +147,15 @@ def manage_volunteers(event_id: str):
         if action == "add":
             if request.form.get("newUser") == "on":
                 # Créer un nouvel utilisateur
-
-                password = GouelHelper.generate_password()
-
                 user = {
                     "FirstName": request.form["FirstName"],
                     "LastName": request.form["LastName"],
                     "Email": request.form["Email"],
                     "Dob": request.form["Dob"],
-                    "Password": password,
                 }
-                # TODO : remove debug
-                print(f"DEBUG {user=}")
 
                 if "mailConf" not in session:
-                    session["mailConf"] = GouelHelper(g.uga).get_event_smtp(
-                        g.event["ID"]
-                    )
+                    session["mailConf"] = GouelHelper(get_ga()).get_conf_smtp()
 
                 smtp = session["mailConf"]
                 email_sender = EmailSender(
@@ -170,18 +165,28 @@ def manage_volunteers(event_id: str):
                     smtp["EmailPassword"],
                 )
 
-                email_sender.send_email(
-                    subject="Création de votre compte Gouel",
-                    to_addr=user["Email"],
-                    body_html=render_template("mails/compte.j2", user=user),
-                )
-
                 r, e = GouelHelper(get_ga()).add_user(user)
                 if not r:
                     flash(f"{e['error']}", "error")
                     return redirect(
                         url_for("admin.manage_volunteers", event_id=event_id)
                     )
+
+                mdp_link = MagicLink(
+                    "reset_password", {"UserId": user["ID"]}, 24 * 60 * 60
+                )
+
+                email_sender.send_email(
+                    "Création de votre compte Gouel",
+                    user["Email"],
+                    render_template(
+                        "mails/compte.j2",
+                        user=user,
+                        mdp_url=url_for(
+                            "main.magic", magic_id=mdp_link.id, _external=True
+                        ),
+                    ),
+                )
 
             user = GouelHelper(get_ga()).get_user("", email=request.form["Email"])
             if user is None:
@@ -411,10 +416,3 @@ def manage_store(event_id):
         produits=GouelHelper(g.uga).get_products(event_id),
         retour=url_for("admin.manage_event", event_id=event_id),
     )
-
-
-@admin.route("/deconnexion")
-def admin_deconnxion():
-    if "compte" in session:
-        session.pop("compte")
-    return redirect(url_for("admin.login"))

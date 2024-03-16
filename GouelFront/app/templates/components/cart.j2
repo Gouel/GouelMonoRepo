@@ -72,21 +72,38 @@
 
             if (!response.ok) {
                 const res = await response.json();
-                Swal.fire({
-                    title: "Erreur",
-                    text: res.error,
-                    icon: "error"
-                });
-                throw new Error(`HTTP error! status: ${response.status} msg = ${res}`);
-
+                throw res;
             }
 
             const data = await response.json();
-            console.warn(data);
             paymentUrl = data.redirectUrl;
         } catch (error) {
             console.error("Error during checkout process:", error);
-            // Gérer l'erreur ici, par exemple en affichant un message à l'utilisateur
+            let message = ""
+            if (error instanceof Array) {
+
+                error.forEach((err) => {
+                    message += err.message + "\n";
+                });
+
+            } else {
+                message = error.error;
+            }
+
+            Swal.fire({
+                icon: "error",
+                toast: true,
+                position: "center",
+                iconColor: 'white',
+                background: 'var(--color-error)',
+                color: 'white',
+                title: message,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                timer: 3000
+            });
+            document.getElementById('checkout-button').innerHTML = "Payer";
+
         }
 
         return paymentUrl;
@@ -101,8 +118,8 @@
                 title: "Préparation du paiement",
                 text: "Vous allez être redirigé sur le site de paiement",
                 icon: "info",
-                button: "OK",
                 timer: 4000,
+                toast: true,
                 timerProgressBar: true,
                 showClass: {
                     popup: 'animate__animated animate__fadeInDown'

@@ -1,45 +1,63 @@
-<div id="ticket-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+<div id="ticket-modal" class="hidden z-30 fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
     <div class="container mx-auto h-full flex justify-center items-center">
         <div class="bg-white rounded-lg p-5 md:max-w-xl md:p-10">
             <div class="flex justify-end">
-                <button onclick="closeModal()" class="text-black">
-                    <i class="iconoir-xmark"></i>
+                <button onclick="closeModal(this)" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
                 </button>
             </div>
 
-            <h2 class="text-2xl font-bold mb-4">Informations sur le Billet</h2>
-
+            <h2 class="text-2xl font-bold mb-4">Création du ticket</h2>
             <form id="ticket-form">
+                {% if user %}
+                <div id="usedIdentity">
+                    <p class="mb-4">Le billet sera enregistré sous l'identité de votre compte:</p>
+                    <ul class="list-disc mb-6 ml-4">
+                        <li>Nom: {{ user.LastName }}</li>
+                        <li>Prénom: {{ user.FirstName }}</li>
+                        <li>Email: {{ user.Email }}</li>
+                    </ul>
+                </div>
+                <div class="mb-4">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="newIdentity" name="newIdentity"
+                            class="shadow accent border rounded text-black">
+                        <span>Créer une nouvelle identité pour ce billet</span>
+                    </label>
+                </div>
+                {% endif %}
+
                 <!-- Nom et Prénom -->
-                <div class="mb-4">
-                    <label for="firstName" class="block text-black text-sm font-bold mb-2">Prénom:</label>
-                    <input type="text" id="firstName" name="firstName"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
-                </div>
-                <div class="mb-4">
-                    <label for="lastName" class="block text-black text-sm font-bold mb-2">Nom:</label>
-                    <input type="text" id="lastName" name="lastName"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
-                </div>
+                <div id="newIdentityForm" {% if user %}class="hidden" {% endif %}>
+                    <div class="mb-4">
+                        <label for="firstName" class="block text-black text-sm font-bold mb-2">Prénom:</label>
+                        <input type="text" id="firstName" name="firstName"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                    </div>
+                    <div class="mb-4">
+                        <label for="lastName" class="block text-black text-sm font-bold mb-2">Nom:</label>
+                        <input type="text" id="lastName" name="lastName"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                    </div>
+                    <!-- Email -->
+                    <div class="mb-4 relative">
+                        <label for="email" class="block text-black text-sm font-bold mb-2">Email:</label>
+                        <input type="email" id="email" name="email"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                    </div>
+                    <!-- Age -->
+                    <div class="mb-4">
+                        <label for="age" class="block text-black text-sm font-bold mb-2">Âge:</label>
+                        <input type="date" id="age" name="age"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
+                    </div>
 
-                <!-- Email -->
-                <div class="mb-4">
-                    <label for="email" class="block text-black text-sm font-bold mb-2">Email:</label>
-                    <input type="email" id="email" name="email"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
                 </div>
-
-                <!-- Age -->
-                <div class="mb-4">
-                    <label for="age" class="block text-black text-sm font-bold mb-2">Âge:</label>
-                    <input type="date" id="age" name="age"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black">
-                </div>
-
                 <!-- Options de crédit -->
                 <div class="mb-6">
-                    <label for="credit-amount" class="block text-black text-sm font-bold mb-2">Montant à Créditer sur le
-                        Compte (en €) :</label>
+                    <label for="credit-amount" class="block text-black text-sm font-bold mb-2">Montant à Créditer
+                        sur le
+                        Compte (en €):</label>
                     <input type="number" id="credit-amount" name="credit" min="0" step="1"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-black" placeholder="0"
                         value="0">
@@ -58,3 +76,19 @@
         </div>
     </div>
 </div>
+
+<script>
+    function changeNewIdentity() {
+        const form = document.getElementById('newIdentityForm');
+        if (newIdentity.checked) {
+            form.classList.remove('hidden');
+            document.getElementById('usedIdentity').classList.add('hidden');
+        } else {
+            form.classList.add('hidden');
+            document.getElementById('usedIdentity').classList.remove('hidden');
+        }
+    }
+    document.getElementById('newIdentity')?.addEventListener('change', function () {
+        changeNewIdentity();
+    });
+</script>

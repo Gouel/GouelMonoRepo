@@ -23,7 +23,11 @@
 
     <!-- css basique -->
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
-
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-800">
@@ -44,19 +48,16 @@
         })
     </script>
     {% endfor %}
-    <header>
-        {% block header %}
-        {% include 'components/header.j2' %}
-        {% endblock %}
-    </header>
+
+    {% block header %}
+    {% include 'components/header.j2' %}
+    {% endblock %}
 
     <main>
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        {% block footer %}{% endblock %}
-    </footer>
+    {% block footer %}{% endblock %}
 </body>
 
 </html>

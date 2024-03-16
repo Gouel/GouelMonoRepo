@@ -24,6 +24,11 @@ func CreateTicketHandler(c *gin.Context) {
 		*TicketRequestData.WasPurchased = true
 	}
 
+	if TicketRequestData.PurchasedOnline == nil {
+		TicketRequestData.PurchasedOnline = new(bool)
+		*TicketRequestData.PurchasedOnline = false
+	}
+
 	ticketId, err := database.CreateTicket(TicketRequestData.UserId, eventId, ticketCode, TicketRequestData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

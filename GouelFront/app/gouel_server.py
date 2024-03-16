@@ -3,7 +3,6 @@
 import os
 from time import time
 import requests
-from flask import abort
 
 
 class GouelApi(object):

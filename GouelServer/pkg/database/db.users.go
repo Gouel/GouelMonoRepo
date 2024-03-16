@@ -70,8 +70,7 @@ func UpdateUser(userId string, updateData bson.M) error {
 
 	// Vérifier si le mot de passe est présent dans les données de mise à jour
 	if password, ok := updateData["Password"].(string); ok && password != "" {
-
-		updateData["password"] = HashPassword(password)
+		updateData["Password"] = HashPassword(password)
 	}
 
 	objId, _ := primitive.ObjectIDFromHex(userId)

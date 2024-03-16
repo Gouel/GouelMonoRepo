@@ -1,9 +1,9 @@
 <div class="ticket bg-gray-900 p-4 rounded-lg mb-2 flex justify-between items-center shadow-2xl">
     <div>
         <h3 class="text-xl font-bold">{{ ticket.Title }}</h3>
-        <p>Prix: {{ ticket.Price }}€</p>
+        <p>Prix: {{ ticket.Price.Online }}€</p>
     </div>
-    <button onclick="openModal('{{ id }}', {{ticket.Price}})"
+    <button onclick="openModal('{{ id }}', {{ticket.Price.Online}})"
         class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
         +
     </button>

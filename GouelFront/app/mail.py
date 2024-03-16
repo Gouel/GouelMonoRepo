@@ -4,6 +4,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
+from threading import Thread
+
 
 class EmailSender:
     def __init__(self, smtp_server, smtp_port, smtp_user, smtp_password):
@@ -36,6 +38,11 @@ class EmailSender:
                 msg.attach(part)
 
         # Connexion au serveur SMTP et envoi de l'email
+
+        # Envoi de l'email dans un thread pour ne pas bloquer l'application
+        Thread(target=self._connect_and_send, args=(msg,)).start()
+
+    def _connect_and_send(self, msg):
         with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port) as server:
             server.login(self.smtp_user, self.smtp_password)
             server.send_message(msg)

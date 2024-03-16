@@ -1,16 +1,72 @@
 {% extends 'base.j2' %}
 
-{% block title %}Accueil - Gouel Front{% endblock %}
+{% block title %}Accueil - Gouel{% endblock %}
 
 {% block content %}
-<div class="container mx-auto p-4 text-white">
-    <h2 class="text-2xl font-bold mb-4">Événements à Venir</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for event in events %}
-        {% with event_id = event.ID %}
-        {% include 'components/event_card.j2' %}
-        {% endwith %}
-        {% endfor %}
+<!-- Hero Section -->
+<section class="bg-gray-900 text-white">
+    <div class="mx-auto max-w-screen-xl px-4 py-32 lg:flex lg:h-screen lg:items-center">
+        <div class="mx-auto max-w-3xl text-center">
+
+            <img class="mx-auto h-24 w-auto" src="{{url_for('static', filename='img/icon.svg')}}" alt="Gouel">
+
+            <h1
+                class="bg-gradient-to-r from-purple-700 via-blue-400 to-purple-700 bg-clip-text text-3xl font-extrabold text-transparent sm:text-5xl">
+                Gouel
+                <span class="sm:block text-2xl"> La gestion d'événement simplifiée </span>
+            </h1>
+
+            <p class="mx-auto mt-4 max-w-xl sm:text-xl/relaxed">
+                Gouel est une solution tout en un pour la gestion de vos événements. De la vente de tickets à la gestion
+                cashless sur place, tout est conçu pour faciliter la vie des organisateurs et des participants.
+            </p>
+
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <a class="flex items-center block border-b-4 bg-blue-600 border-blue-800 hover:bg-blue-500 hover:border-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                    href="{{url_for('main.events')}}">
+                    <span class="material-symbols-outlined mr-2">
+                        event
+                    </span>
+                    Accéder aux événements
+                </a>
+
+                <a class="flex items-center block border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                    href="#en-savoir-plus">
+                    <span class="material-symbols-outlined mr-2">
+                        info
+                    </span>
+                    En savoir plus
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Concept et Fonctionnalités -->
+<div class="py-12 bg-gray-300" id="en-savoir-plus">
+    <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-8">Qu'est-ce que Gouel ?</h2>
+        <div class="flex flex-wrap">
+            <div class="w-full md:w-1/2 px-6">
+                <h3 class="text-3xl font-bold mb-3">Le Concept</h3>
+                <p class="text-lg mb-5">Gouel est une plateforme dédiée à la gestion complète de vos événements,
+                    permettant une organisation simplifiée et une expérience utilisateur améliorée. De la vente de
+                    tickets à la gestion cashless sur place, tout est conçu pour faciliter la vie des organisateurs et
+                    des participants.</p>
+            </div>
+            <div class="w-full md:w-1/2 px-6">
+                <h3 class="text-3xl font-bold mb-3">Fonctionnalités</h3>
+                <ul class="list-disc text-lg mb-5 ml-5">
+                    <li>Vente de tickets en ligne et sur place</li>
+                    <li>Système cashless pour des paiements rapides et sécurisés</li>
+                    <li>Gestion des bénévoles et attribution des tâches</li>
+                    <li>Statistiques en temps réel pour un suivi précis de l'événement</li>
+                    <li>Et bien plus encore...</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
+
 {% endblock %}

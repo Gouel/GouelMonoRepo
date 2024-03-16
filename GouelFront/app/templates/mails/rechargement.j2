@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de rechargement</title>
+</head>
+
+<body>
+    <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2 style="color: #0056b3;">Confirmation de rechargement de votre solde</h2>
+        <p>Bonjour {{ user.FirstName }} {{ user.LastName }},</p>
+        <p>Nous vous confirmons le rechargement de votre solde sur Gouel. Voici les détails de la transaction :</p>
+        <ul>
+            <li>Montant rechargé: {{ amount }}€</li>
+        </ul>
+        <p>Ce rechargement est désormais disponible sur votre compte Gouel. Vous pouvez l'utiliser pour payer vos achats
+            lors des différents événement</p>
+        <a href="{{url_for('main.solde', _external=True)}}" target="_blank" rel="noopener noreferrer">Voir mon
+            solde</a>
+        <br>
+        <p>Merci d'utiliser Gouel et à très bientôt</p>
+    </div>
+</body>
+
+</html>

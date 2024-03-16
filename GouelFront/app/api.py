@@ -1,66 +1,36 @@
 from flask import (
     Blueprint,
-    render_template,
     request,
     url_for,
-    g,
     session,
-    make_response,
     jsonify,
+    g,
 )
-import json
 from app import ha
-from flask_json import as_json
-from .generate_fake_data import db
-from .hello_asso import CheckoutOrder, Payer, HelloAssoAPI
+from .hello_asso import CheckoutOrder, Payer
+from . import get_ga
+from .gouel_server import GouelApi
+from .helper import GouelHelper
 import re
+from datetime import datetime
 
 api = Blueprint("api", __name__)
 
 
-@as_json
-@api.route("/")
-def api_index():
-    return "ok"
-
-
-@as_json
-@api.route("/event")
-def api_events():
-    return db["events"]
-
-
-@as_json
-@api.route("/event/<int:event_id>")
-def api_event(event_id: int):
-    return db["events"][event_id]
-
-
-@as_json
-@api.route("/event/<int:event_id>/ticket")
-def api_event_tickets(event_id: int):
-    return db["events"][event_id]["tickets"]
-
-
-@as_json
-@api.route("/event/<int:event_id>/ticket/<int:ticket_id>")
-def api_event_ticket(event_id: int, ticket_id):
-    return db["events"][event_id]["tickets"][ticket_id]
-
-
-@api.route("/checkout/<int:event_id>", methods=["POST"])
-def api_checkout(event_id: int):
+@api.route("/checkout/<event_id>", methods=["POST"])
+def api_checkout(event_id):
     panier = request.json
-    tickets = db["events"][event_id]["tickets"]
+    event = GouelHelper(get_ga()).get_event(event_id)
+    if event is None:
+        return jsonify({"error": "Événement introuvable"}), 404
+
+    tickets = {et["EventTicketCode"]: et for et in event["EventTickets"]}
+
     totalAmount = 0
     for ticket in panier:
         ticket_id = ticket.get("id", -1)
-        try:
-            ticket_id = int(ticket_id)
-        except:
-            ticket_id = None
-        if ticket_id is None or ticket_id >= len(tickets):
-            jsonify({"error": "Ticket invalide ou mal formé"}), 400
+        if ticket_id is None or ticket_id not in tickets:
+            return jsonify({"error": "Ticket invalide ou mal formé"}), 400
 
         # Validation des informations du ticket
         firstName = ticket.get("firstName", "")
@@ -78,11 +48,14 @@ def api_checkout(event_id: int):
         res, err = verify_name(lastName, "nom")
         if not res:
             return jsonify({{"error": err}}), 400
-
-        if ticket.get("credit", 0) < 0:
+        credit = ticket.get("credit", 0)
+        if credit < 0:
             return jsonify({"error": "Le crédit doit être supérieur ou égal à 0"}), 400
 
-        if not re.match(r"[^@]+@[^@]+\.[^@]+\b", ticket.get("email", "")):
+        if credit > 50:
+            return jsonify({"error": "Le crédit ne peut pas être supérieur à 50"}), 400
+        email = ticket.get("email", "")
+        if not re.match(r"[^@]+@[^@]+\.[^@]+\b", email):
             return jsonify({"error": "Email non conforme"}), 400
 
         if not re.match(
@@ -90,12 +63,20 @@ def api_checkout(event_id: int):
         ):
             return jsonify({"error": "Date de naissance non conforme"}), 400
 
-        totalAmount += tickets[ticket_id]["price"] + ticket.get("credit", 0)
+        user = GouelHelper(get_ga()).get_user("", email=email)
+        if user is not None:
+            return jsonify({"error": f"Email déjà utilisée ({email})"}), 400
+
+        totalAmount += tickets[ticket_id]["Price"]["Online"] + credit
+
     # Génération du checkout
+    dob: datetime = datetime.strptime(panier[0].get("age"), "%Y-%m-%d")
+
     payer: Payer = Payer(
         firstName=panier[0].get("firstName"),
         lastName=panier[0].get("lastName"),
         email=panier[0].get("email"),
+        dob=dob,
     )
     chk = CheckoutOrder(
         totalAmount=totalAmount * 100,
@@ -107,34 +88,45 @@ def api_checkout(event_id: int):
         meta={"panier": panier},
         payer=payer,
     )
-
     # Sauvegarde du checkout dans la session
     session["checkout"] = ha.addCheckOutOrder(chk)
+    session["checkout_event_id"] = event_id
+    session["checkout_type"] = "new_billets"
     session["backUrl"] = url_for("main.billets", event_id=event_id, _external=True)
 
     # Sauvegarde du panier dans la session
-    session[f"panier-{event_id}"] = panier
+    paniers = session.get("paniers", {})
+    paniers[event_id] = panier
+    session["paniers"] = paniers
+
+    if chk_error := session["checkout"].get("errors"):
+        return jsonify(chk_error), 400
 
     return jsonify(session["checkout"])
 
 
-@api.route("/recharge/<user_id>", methods=["POST"])
-def api_recharge(user_id: int):
-    u = db["users"][0]
+@api.route("/recharge", methods=["POST"])
+def api_recharge():
+    if session.get("compte") is None:
+        return jsonify({"error": "Utilisateur non connecté"}), 401
+    g.uga = GouelApi.from_json(session.get("compte"))
+    user_id = g.uga.token["infos"]["userId"]
+    g.user = GouelHelper(get_ga()).get_user(user_id)
 
     recharge = request.json
     if recharge.get("credit", 0) < 1:
         return jsonify({"error": "Le crédit doit être supérieur ou égal à 1"}), 400
     # Génération du checkout
     payer: Payer = Payer(
-        firstName=u.get("prenom"),
-        lastName=u.get("nom"),
-        email=u.get("email"),
+        firstName=g.user["FirstName"],
+        lastName=g.user["LastName"],
+        email=g.user["Email"],
+        dob=datetime.strptime(g.user["DOB"], "%Y-%m-%d"),
     )
     chk = CheckoutOrder(
         totalAmount=recharge.get("credit") * 100,
         initialAmount=recharge.get("credit") * 100,
-        backUrl=url_for("main.solde", user_id=user_id, _external=True),
+        backUrl=url_for("main.solde", _external=True),
         returnUrl=url_for("main.payment_response", action="payment", _external=True),
         errorUrl=url_for("main.payment_response", action="error", _external=True),
         itemName=f"payment-recharge_{user_id}",
@@ -144,6 +136,9 @@ def api_recharge(user_id: int):
 
     # Sauvegarde du checkout dans la session
     session["checkout"] = ha.addCheckOutOrder(chk)
+    session["checkout_user_id"] = user_id
+    session["checkout_amount"] = recharge.get("credit")
+    session["checkout_type"] = "recharge"
     session["backUrl"] = url_for("main.solde", user_id=user_id, _external=True)
 
     return jsonify(session["checkout"])

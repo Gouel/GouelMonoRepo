@@ -1,6 +1,7 @@
 import redis
 from uuid import uuid4
 import os
+import json
 
 
 class Cache:
@@ -24,17 +25,31 @@ class Cache:
 
 
 class MagicLink:
-    def __init__(self, type: str, obj: dict, ttl: int = 60):
+    def __init__(self, type: str, obj: dict, ttl: int = 60, **kwargs):
         self.type = type
         self.obj = obj
         self.ttl = ttl
         self.id = str(uuid4())
 
         c = Cache()
-        c.set(self.id, self, ttl)
+        c.set(self.id, str(self), ttl)
 
     def __str__(self):
-        return str({"type": self.type, "obj": self.obj, "ttl": self.ttl, "id": self.id})
+        return json.dumps(
+            {"type": self.type, "obj": self.obj, "ttl": self.ttl, "id": self.id}
+        )
 
     def __repr__(self):
         return f"MagicLink[{self.id}]({self.type}, {self.obj}, {self.ttl})"
+
+    @staticmethod
+    def from_id(id: str):
+        c = Cache()
+        link = c.get(id)
+        if link:
+            return MagicLink.from_json(link)
+        return None
+
+    @staticmethod
+    def from_json(link_str: str):
+        return MagicLink(**json.loads(link_str))

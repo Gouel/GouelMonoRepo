@@ -46,8 +46,4 @@ def create_app():
     def page_not_found(e):
         return render_template("404.j2"), 404
 
-    from .helper import GouelHelper
-
-    app.jinja_env.globals.update(gh=GouelHelper)
-
     return app

@@ -12,9 +12,6 @@
         <button onclick="openModal('addEvent')"
             class=" border-b-4 bg-green-700 border-green-900 hover:bg-green-500 hover:border-green-700 text-white font-bold py-2 px-4 rounded block mt-4">Créer
             un événement</button>
-        <button onclick="logout()"
-            class="border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">Se
-            déconnecter</button>
     </div>
     <!-- Contenu principal -->
     <div class="p-4">
@@ -106,10 +103,6 @@
 </div>
 
 <script>
-    function logout() {
-        window.location.href = "/admin/deconnexion"
-    }
-
     function closeModal(button) {
         // Fermeture de la modal
         button.closest('.fixed').classList.add('hidden');

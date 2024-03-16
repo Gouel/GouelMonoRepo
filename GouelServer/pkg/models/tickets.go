@@ -23,5 +23,5 @@ type TicketRequestData struct {
 	WasPurchased    *bool  `json:"WasPurchased,omitempty"`
 	IsSam           bool   `json:"IsSam,omitempty"`
 	IsUsed          bool   `json:"IsUsed,omitempty"`
-	PurchasedOnline bool   `json:"PurchasedOnline,omitempty"`
+	PurchasedOnline *bool  `json:"PurchasedOnline,omitempty"`
 }

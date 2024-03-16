@@ -38,7 +38,7 @@
                         <summary class="cursor-pointer text-white font-semibold">Détails de la dépense</summary>
                         <div class="mt-2">
                             {% for article in transaction.Cart %}
-                            {% set product = gh.get_product_from_code(transaction.EventId,article.ProductCode) %}
+                            {% set product = gh.get_product(transaction.EventId,article.ProductCode) %}
                             <span>{{ product.Label }} x {{ article.Amount }} </span>
                             {% endfor %}
                         </div>
@@ -51,6 +51,7 @@
         </ul>
     </div>
 </div>
+
 <script>
     function recharge() {
         Swal.fire({
@@ -63,7 +64,8 @@
             showCancelButton: true,
             confirmButtonText: 'Recharger',
             cancelButtonText: 'Annuler',
-
+            toast: true,
+            position: 'center',
             showClass: {
                 popup: 'animate__animated animate__fadeInDown'
             },
@@ -85,6 +87,8 @@
                     title: 'Traitement en cours...',
                     text: 'Veuillez patienter',
                     icon: 'info',
+                    toast: true,
+                    position: 'center',
                     allowOutsideClick: false,
                     showConfirmButton: false,
                     showClass: {
@@ -103,7 +107,7 @@
     }
 
     function rechargeAccount(amount) {
-        fetch(`/api/recharge/1`, {
+        fetch(`/api/recharge`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -123,6 +127,8 @@
                     text: "Vous allez être redirigé sur le site de paiement",
                     icon: "info",
                     button: "OK",
+                    toast: true,
+                    position: 'center',
                     timer: 4000,
                     timerProgressBar: true,
                     showClass: {
@@ -136,7 +142,19 @@
                 });
             })
             .catch(error => {
-                Swal.fire('Erreur', error.message, 'error');
+                Swal.fire({
+                    title: 'Erreur',
+                    text: error.message,
+                    icon: 'error',
+                    toast: true,
+                    position: 'center',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
             });
     }
 </script>

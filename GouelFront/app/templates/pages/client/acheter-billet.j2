@@ -51,7 +51,14 @@
 
 
     function openModal(ticketId, price) {
-        document.getElementById('ticket-modal').classList.remove('hidden');
+        const modal = document.getElementById('ticket-modal');
+        modal.classList.remove('hidden');
+        modal.querySelector("#ticket-form").reset();
+        try {
+            modal.querySelector("#newIdentity").checked = false;
+            changeNewIdentity();
+        } catch {
+        }
         document.getElementById('ticket-id').value = ticketId;
         document.getElementById('ticket-price').value = price;
     }
@@ -73,16 +80,29 @@
         const credit = document.getElementById('credit-amount').value;
         const price = document.getElementById('ticket-price').value;
 
+        const isNewIdentity = document.getElementById('newIdentity')?.checked ?? true;
+
         // Création de l'objet ticket
-        const ticket = {
+        let ticket = {
             id: ticketId,
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            age: age,
             credit: verifyPriceValid(credit),
             price: verifyPriceValid(price),
         };
+
+        if (isNewIdentity) {
+            ticket.lastName = lastName;
+            ticket.firstName = firstName;
+            ticket.email = email;
+            ticket.age = age;
+        } else {
+            ticket.userId = "{{ user.ID }}";
+            ticket.lastName = "{{ user.LastName }}";
+            ticket.firstName = "{{ user.FirstName }}";
+            ticket.email = "{{ user.Email }}";
+            ticket.age = "{{ user.DOB }}";
+        }
+
+        console.log(ticket);
 
         if (!verifyTicket(ticket)) {
             return
@@ -190,6 +210,10 @@
     }
 
     function verifyTicket(ticket) {
+        if (ticket.userId) {
+            return true;
+        }
+
 
         if (ticket.lastName == ticket.firstName) {
             errorSwal("Le nom et le prénom doivent être différent");
@@ -234,7 +258,8 @@
         Swal.fire({
             title: "Erreur",
             text: message,
-            icon: "error"
+            icon: "error",
+            toast: true
         });
     }
 

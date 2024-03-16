@@ -32,6 +32,7 @@ func CreateTicket(userId, eventId, eventTicketCode string, ticketRequestData mod
 		IsSam:           ticketRequestData.IsSam,
 		IsUsed:          ticketRequestData.IsUsed,
 		WasPurchased:    *ticketRequestData.WasPurchased,
+		PurchasedOnline: *ticketRequestData.PurchasedOnline,
 		UserId:          userIdOID,
 	}
 

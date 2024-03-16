@@ -2,6 +2,7 @@ import requests as rq
 from urllib.parse import urlencode
 import json
 import time
+from datetime import datetime
 
 
 class HelloAssoAPI:
@@ -38,7 +39,6 @@ class HelloAssoAPI:
             self.token = None
             raise ValueError("Problem with token : ", r, r.text)
 
-        print(r)
         self.token = r.json()
         self.token["expires_on"] = time.time() + self.token["expires_in"]
 
@@ -72,18 +72,33 @@ class HelloAssoAPI:
 
         return r.json()
 
+    def getCheckOutOrder(self, id: str) -> dict:
+        # récupération du token
+        self.getToken()
+
+        # préparation de la requête
+        headers = {"Authorization": f"Bearer {self.token['access_token']}"}
+        r = rq.get(
+            self.url + f"/v5/organizations/{self.slug}/checkout-intents/{id}",
+            headers=headers,
+        )
+
+        return r.json()
+
 
 class Payer:
-    def __init__(self, firstName: str, lastName: str, email: str):
+    def __init__(self, firstName: str, lastName: str, email: str, dob: datetime):
         self.firstName = firstName
         self.lastName = lastName
         self.email = email
+        self.dob = dob
 
     def to_dict(self) -> dict:
         return {
             "firstName": self.firstName,
             "lastName": self.lastName,
             "email": self.email,
+            "dateOfBirth": self.dob.strftime("%Y-%m-%d") + "T00:00",
         }
 
     def __repr__(self):

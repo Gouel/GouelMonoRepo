@@ -1,0 +1,67 @@
+{% extends 'base.j2' %}
+
+{% block title %}Mon Compte - Gouel{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    <div class="max-w-md mx-auto bg-gray-900 p-8 rounded-lg">
+        <h2 class="text-3xl font-bold mb-6 text-center">Mon Compte</h2>
+        <div class="mb-4">
+            <h3 class="text-xl font-semibold">Informations générales</h3>
+            <p>Nom : {{ user.LastName }}</p>
+            <p>Prénom : {{ user.FirstName }}</p>
+            <p>Email : {{ user.Email }}</p>
+        </div>
+
+        {% if user.role in ["SUPERADMIN", "API"] or user.events %}
+        <div class="mb-4">
+            <a href="{{ url_for('admin.dashboard') }}"
+                class="flex items-center gap-2 border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">
+                <span class="material-symbols-outlined" title="Administrateur">
+                    shield_person
+                </span>
+                Panel Administrateur
+            </a>
+        </div>
+        {% endif %}
+
+
+
+        <div class="mb-4">
+            <a href="{{ url_for('main.solde') }}"
+                class="flex items-center gap-2 border-b-4 bg-purple-700 border-purple-900 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded block mt-4">
+
+                <span class="material-symbols-outlined" title="Administrateur">
+                    payments
+                </span>
+
+                Mon solde & transactions
+            </a>
+        </div>
+        {# TODO : à ajouter #}
+        {# <div class="mb-4">
+            <a href="{{ url_for('main.index') }}"
+                class="flex items-center gap-2 border-b-4 bg-purple-700 border-purple-900 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded block mt-4">
+
+                <span class="material-symbols-outlined" title="Administrateur">
+                    confirmation_number
+                </span>
+
+                Mes tickets
+            </a>
+        </div> #}
+
+        <div class="mb-4">
+            <a href="{{ url_for('main.logout') }}"
+                class="flex items-center gap-2 border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">
+
+                <span class="material-symbols-outlined" title="Administrateur">
+                    logout
+                </span>
+
+                Se déconnecter
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

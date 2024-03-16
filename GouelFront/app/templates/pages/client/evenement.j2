@@ -9,9 +9,8 @@
 
     <div class="bg-gray-900 p-6 rounded-lg shadow-2xl">
         <h1 class="text-3xl font-bold mb-2">{{ event.Title }}</h1>
-        {# <img src="{{ url_for('static', filename='img/events/' + event.image_url) }}" alt="{{ event.name }}"
-            class="w-full object-cover rounded-lg mb-4" style="height: 400px; object-fit: cover;"> #}
-
+        <img src="{{ url_for('static', filename='img/events/' + event_id) }}" alt="{{ event.Title }}"
+            class="w-full h-32 sm:h-48 object-contain">
         <p class="text-lg mb-4">{{ event.Description }}</p>
 
         <div class="mb-4">
@@ -25,7 +24,7 @@
         </div>
 
         <div class="flex justify-center">
-            <a href="/acheter-billets/{{ event_id }}"
+            <a href="{{ url_for('main.billets', event_id=event.ID) }}"
                 class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">
                 Acheter vos billets
             </a>

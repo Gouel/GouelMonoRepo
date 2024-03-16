@@ -45,6 +45,7 @@ func Routes(router *gin.Engine, cfg config.Config) {
 	router.DELETE("/tickets/:ticket_id", middlewares.RoleAuthorizationMiddleware("API"), handlers.DeleteTicketHandler)
 
 	//Routes EVENTS
+	router.GET("/config/smtp", middlewares.RoleAuthorizationMiddleware("API", "SUPERADMIN"), handlers.GetSMTPConfiguration)
 	router.GET("/events/:event_id/smtp", middlewares.EventAccessMiddleware(), middlewares.EventAuthorizationMiddleware("caisse"), handlers.GetSMTPConfiguration)
 	router.GET("/events", handlers.GetAccessibleEventsHandler)
 	router.GET("/events/:event_id", middlewares.EventAccessMiddleware(), handlers.GetEventByIdHandler)

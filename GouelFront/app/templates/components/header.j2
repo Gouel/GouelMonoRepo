@@ -1,5 +1,5 @@
-<header class="bg-gray-700 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
+<header class="bg-gray-700 text-white p-4 sticky top-0 z-10">
+    <div class="container mx-auto flex justify-around items-center">
         <!-- Espace pour le logo -->
         <div class="logo">
             <a href="/">
@@ -13,10 +13,40 @@
             Gouel Front
         </div>
 
-        <!-- Icônes sociales -->
-        <div class="social-icons flex space-x-4">
-            <!-- Icône GitHub -->
-            <a href="http://gouel.fr" target="_blank" title="GitHub"><i class="iconoir-github"></i></a>
+
+
+        <!-- Menu Dropdown -->
+        <div class="menu-dropdown relative">
+            <button id="dropdownButton" class="flex items-center">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div id="dropdownMenu" style="transform: translateX(50%);"
+                class="hidden absolute right-0 mt-2 bg-gray-800 text-white rounded-md overflow-hidden shadow-xl z-10">
+                <a href="{{ url_for('main.index') }}" class="block px-4 py-2 hover:bg-gray-600">Accueil</a>
+                <a href="{{ url_for('main.events') }}" class="block px-4 py-2 hover:bg-gray-600">Événements</a>
+            </div>
+        </div>
+
+
+
+        <!-- Bouton compte ou connexion -->
+        <div class="account-or-login">
+            {% if "compte" in session %}
+            <a href="{{ url_for('main.compte') }}" class="flex items-center">
+                <span class="material-symbols-outlined mr-2">account_circle</span>Compte
+            </a>
+            {% else %}
+            <a href="{{ url_for('main.login') }}" class="flex items-center">
+                <span class="material-symbols-outlined mr-2">login</span>Connexion
+            </a>
+            {% endif %}
         </div>
     </div>
 </header>
+
+<script>
+    document.getElementById('dropdownButton').addEventListener('click', function () {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        dropdownMenu.classList.toggle('hidden');
+    });
+</script>
