@@ -3,17 +3,21 @@
 {% block title %}Tableau de Bord - Admin{% endblock %}
 
 {% block content %}
-<div class="flex flex-col items-center">
-    <!-- Sidebar Component -->
-    <button onclick="logout()"
-        class="w-4/5 border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">Se
-        déconnecter</button>
-    <button onclick="openModal('addEvent')"
-        class="w-4/5 border-b-4 bg-green-700 border-green-900 hover:bg-green-500 hover:border-green-700 text-white font-bold py-2 px-4 rounded block mt-4">Créer
-        un événement</button>
+<div class="flex flex-col items-center p-4">
 
+    <h1 class="text-4xl font-bold mb-4 text-white">Tableau de Bord</h1>
+
+    <!-- Sidebar Component -->
+    <div class="my-6 flex  justify-center flex-wrap gap-4">
+        <button onclick="openModal('addEvent')"
+            class=" border-b-4 bg-green-700 border-green-900 hover:bg-green-500 hover:border-green-700 text-white font-bold py-2 px-4 rounded block mt-4">Créer
+            un événement</button>
+        <button onclick="logout()"
+            class="border-b-4 bg-red-700 border-red-900 hover:bg-red-500 hover:border-red-700 text-white font-bold py-2 px-4 rounded block mt-4">Se
+            déconnecter</button>
+    </div>
     <!-- Contenu principal -->
-    <div class="w-3/4 p-4">
+    <div class="p-4">
         <div class="grid md:grid-cols-3 gap-4">
             {% if "SUPERADMIN" in user.role %}
             {% for event in all_events.values() %}

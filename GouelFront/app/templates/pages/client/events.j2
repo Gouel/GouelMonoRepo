@@ -1,0 +1,16 @@
+{% extends 'base.j2' %}
+
+{% block title %}Événements - Gouel Front{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 text-white">
+    <h2 class="text-2xl font-bold mb-4">Événements à Venir</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for event in events %}
+        {% with event_id = event.ID %}
+        {% include 'components/event_card.j2' %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

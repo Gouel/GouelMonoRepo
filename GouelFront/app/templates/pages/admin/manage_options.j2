@@ -7,7 +7,7 @@
     {% include "components/retour.j2" %}
     <h2 class="text-3xl font-bold mb-4">Gestion des Options</h2>
     <!-- Liens de Gestion transformés en boutons avec icônes -->
-    <div class="my-6 flex justify-start space-x-4">
+    <div class="my-6 flex flex-wrap gap-4">
         <button onclick="sauvegarder()"
             class="border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500  hover:border-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
             <span class="material-symbols-outlined mr-2">
@@ -54,6 +54,15 @@
         background-color: rgba(0, 0, 0, 0.1);
         box-shadow: 0px 4px 0px 0px #000;
     }
+
+    @media (max-width: 768px) {
+
+        .option>.option-value,
+        .option>.option-content {
+            margin-left: 0em !important;
+        }
+    }
+
 
     .option>.option-value,
     .option>.option-content {
