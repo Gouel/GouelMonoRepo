@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
@@ -51,7 +52,15 @@ func CreateTicket(userId, eventId, eventTicketCode string, ticketRequestData mod
 		if err != nil {
 			return "", err
 		}
-		solde := user.Solde + event.SamBonus
+
+		var samBonus float32
+		preSamBonus, err := strconv.ParseFloat(event.Options["SamBonus"].(string), 32)
+		if err != nil {
+			samBonus = float32(0)
+		}
+		samBonus = float32(preSamBonus)
+
+		solde := user.Solde + samBonus
 		err = UpdateUser(userId, bson.M{"Solde": solde})
 		if err != nil {
 			return "", err
@@ -116,13 +125,18 @@ func SetSAM(ticketId, eventId string, isSam bool) error {
 	}
 
 	var solde float32
-
+	var samBonus float32
+	preSamBonus, err := strconv.ParseFloat(event.Options["SamBonus"].(string), 32)
+	if err != nil {
+		samBonus = float32(0)
+	}
+	samBonus = float32(preSamBonus)
 	if isSam {
 		//On ajoute le SamBonus à l'utilisateur
-		solde = user.Solde + event.SamBonus
+		solde = user.Solde + samBonus
 	} else {
-		if user.Solde > event.SamBonus {
-			solde = user.Solde - event.SamBonus
+		if user.Solde > samBonus {
+			solde = user.Solde - samBonus
 		}
 	}
 

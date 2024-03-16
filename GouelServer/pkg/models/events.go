@@ -17,7 +17,6 @@ type Event struct {
 	Products     []Product          `bson:"Products,omitempty"`
 	Lockers      []Locker           `bson:"Lockers,omitempty"`
 	Options      bson.M             `bson:"Options,omitempty"`
-	SamBonus     float32            `bson:"SamBonus, omitempty"`
 }
 
 type EventTicket struct {
