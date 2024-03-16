@@ -63,9 +63,10 @@ def api_checkout(event_id):
         ):
             return jsonify({"error": "Date de naissance non conforme"}), 400
 
-        user = GouelHelper(get_ga()).get_user("", email=email)
-        if user is not None:
-            return jsonify({"error": f"Email déjà utilisée ({email})"}), 400
+        if "userId" not in ticket:
+            user = GouelHelper(get_ga()).get_user("", email=email)
+            if user is not None:
+                return jsonify({"error": f"Email déjà utilisée ({email})"}), 400
 
         totalAmount += tickets[ticket_id]["Price"]["Online"] + credit
 

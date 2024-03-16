@@ -300,8 +300,9 @@ def payment_recharge(ga):
     )
 
     # Ajout des crédits sur le compte
-    transaction = new_transaction(None, checkout_amount)
-    ga.add_transaction(None, user["ID"], transaction)
+    if checkout_amount > 0:
+        transaction = new_transaction(None, checkout_amount)
+        ga.add_transaction(None, user["ID"], transaction)
 
     # On vide la session
     session.pop("checkout")

@@ -213,13 +213,34 @@ def manage_volunteers(event_id: str):
                 flash("Les droits ont été modifiés.", "success")
             else:
                 flash("Les droits n'ont pas été modifiés.", "error")
-
         elif action == "delete":
             r = GouelHelper(g.uga).delete_volunteer(event_id, request.form["UserId"])
             if r:
                 flash("Le bénévole a été supprimé.", "success")
             else:
                 flash("Le bénévole n'a pas été supprimé.", "error")
+        elif action == "generate":
+            # On génère les tickets de tous les bénévoles
+            volunteers = g.event["Volunteers"]
+
+            for volunteer in volunteers:
+                ticket = {
+                    "UserId": volunteer["UserId"],
+                    "EventId": event_id,
+                    "WasPurchased": False,
+                }
+                try:
+                    event_ticket_code = g.event["EventTickets"][0]["EventTicketCode"]
+                except IndexError:
+                    flash("Aucun billet n'est disponible pour cet événement.", "error")
+                    return redirect(
+                        url_for("admin.manage_volunteers", event_id=event_id)
+                    )
+
+                r = GouelHelper(get_ga()).add_ticket(
+                    event_id, event_ticket_code, ticket
+                )
+
         if r:
             return redirect(url_for("admin.manage_volunteers", event_id=event_id))
 

@@ -10,8 +10,22 @@
 
     <div class="my-6 flex flex-wrap gap-4">
         <button onclick="openAddVolunteerModal()"
-            class="md:w-1/5 border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+            class="flex items-center gap-2 border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+
+            <span class="material-symbols-outlined mr-2">
+                add
+            </span>
+
             Ajouter un Bénévole
+        </button>
+        <button onclick="openTicketModal()"
+            class="flex items-center gap-2 border-b-4 bg-purple-600 border-purple-800 hover:bg-purple-500 hover:border-purple-700 text-white font-bold py-2 px-4 rounded">
+
+            <span class="material-symbols-outlined mr-2">
+                confirmation_number
+            </span>
+
+            Générer les tickets des bénévoles
         </button>
     </div>
 
@@ -391,6 +405,54 @@
     function closeDeleteVolunteerModal() {
         const form = document.getElementById('deleteVolunteerForm');
         document.getElementById('deleteVolunteerModal').classList.add('hidden');
+        form.reset();
+    }
+
+</script>
+
+<!-- Modal de génération des tickets des bénévoles -->
+<div id="generateTicketsModal"
+    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
+    <div class="container mx-auto h-full flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full md:w-auto md:max-w-xl p-5 md:p-10">
+            <div class="flex justify-end">
+                <button onclick="closeTicketModal()" class="text-black">
+                    <i class="material-symbols-outlined">close</i>
+                </button>
+            </div>
+            <form id="generateTicketsForm" action="" method="post">
+                <input type="hidden" name="action" value="generate">
+                <h2 class="text-2xl font-bold mb-4">Générer les tickets des bénévoles</h2>
+                <div class="mb-6">
+                    <label for="credit-amount" class="block text-black text-sm font-bold mb-2">Montant à Créditer
+                        sur leur
+                        Compte (en €):</label>
+                    <input type="number" id="credit-amount" name="credit" min="0" step="0.01"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-black" placeholder="0"
+                        value="0">
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button type="submit"
+                        class="border-b-4 bg-green-600 border-green-800 hover:bg-green-500 hover:border-green-700 text-white font-bold py-2 px-4 rounded mr-2">Générer</button>
+                    <button type="button" onclick="closeTicketModal()"
+                        class="border-b-4 bg-gray-600 border-gray-800 hover:bg-gray-500 hover:border-gray-700 text-white font-bold py-2 px-4 rounded">Annuler</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTicketModal() {
+        // Logique pour identifier le bénévole à supprimer et afficher le modal
+        const form = document.getElementById('generateTicketsForm');
+        document.getElementById('generateTicketsModal').classList.remove('hidden');
+    }
+
+    function closeTicketModal() {
+        const form = document.getElementById('generateTicketsForm');
+        document.getElementById('generateTicketsModal').classList.add('hidden');
         form.reset();
     }
 
