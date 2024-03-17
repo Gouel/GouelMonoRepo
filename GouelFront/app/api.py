@@ -13,8 +13,14 @@ from .gouel_server import GouelApi
 from .helper import GouelHelper
 import re
 from datetime import datetime
+import os
 
 api = Blueprint("api", __name__)
+
+
+def gen_external_url(url: str) -> str:
+    server_name = os.environ.get("SERVER_NAME")
+    return f"{server_name}{url}"
 
 
 @api.route("/checkout/<event_id>", methods=["POST"])
@@ -82,9 +88,9 @@ def api_checkout(event_id):
     chk = CheckoutOrder(
         totalAmount=totalAmount * 100,
         initialAmount=totalAmount * 100,
-        backUrl=url_for("main.billets", event_id=event_id, _external=True),
-        returnUrl=url_for("main.payment_response", action="payment", _external=True),
-        errorUrl=url_for("main.payment_response", action="error", _external=True),
+        backUrl=gen_external_url(url_for("main.billets", event_id=event_id)),
+        returnUrl=gen_external_url(url_for("main.payment_response", action="payment")),
+        errorUrl=gen_external_url(url_for("main.payment_response", action="error")),
         itemName=f"payment-event_{event_id}",
         meta={"panier": panier},
         payer=payer,
@@ -93,7 +99,7 @@ def api_checkout(event_id):
     session["checkout"] = ha.addCheckOutOrder(chk)
     session["checkout_event_id"] = event_id
     session["checkout_type"] = "new_billets"
-    session["backUrl"] = url_for("main.billets", event_id=event_id, _external=True)
+    session["backUrl"] = url_for("main.billets", event_id=event_id)
 
     # Sauvegarde du panier dans la session
     paniers = session.get("paniers", {})
@@ -127,9 +133,9 @@ def api_recharge():
     chk = CheckoutOrder(
         totalAmount=recharge.get("credit") * 100,
         initialAmount=recharge.get("credit") * 100,
-        backUrl=url_for("main.solde", _external=True),
-        returnUrl=url_for("main.payment_response", action="payment", _external=True),
-        errorUrl=url_for("main.payment_response", action="error", _external=True),
+        backUrl=gen_external_url(url_for("main.solde")),
+        returnUrl=gen_external_url(url_for("main.payment_response", action="payment")),
+        errorUrl=gen_external_url(url_for("main.payment_response", action="error")),
         itemName=f"payment-recharge_{user_id}",
         meta={"recharge": recharge},
         payer=payer,
@@ -140,7 +146,7 @@ def api_recharge():
     session["checkout_user_id"] = user_id
     session["checkout_amount"] = recharge.get("credit")
     session["checkout_type"] = "recharge"
-    session["backUrl"] = url_for("main.solde", user_id=user_id, _external=True)
+    session["backUrl"] = gen_external_url(url_for("main.solde"))
 
     return jsonify(session["checkout"])
 

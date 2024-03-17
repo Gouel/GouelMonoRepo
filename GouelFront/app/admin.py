@@ -174,7 +174,7 @@ def manage_volunteers(event_id: str):
                         url_for("admin.manage_volunteers", event_id=event_id)
                     )
                 mdp_link = MagicLink(
-                    "reset_password", {"UserId": r["UserId"]}, 24 * 60 * 60
+                    "reset_password", {"UserId": e["UserId"]}, 24 * 60 * 60
                 )
 
                 email_sender.send_email(
