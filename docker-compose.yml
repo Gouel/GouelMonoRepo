@@ -3,18 +3,71 @@ version: '3'
 services:
   redis:
     image: redis
-    ports:
-      - "6379:6379"
     volumes:
       - gouel-redis:/data
 
   mongodb:
     image: mongo
-    ports:
-      - "27017:27017"
     volumes:
       - gouel-mongo:/data/db
+    ports:
+      - "27017:27017"
+    
+  gouel-server:
+    build:
+      context: ./
+      dockerfile: ./release/server.dockerfile
+    ports:
+      - "5002:8080"
+    depends_on:
+      - mongodb
+    links:
+      - "mongodb:mongodb"
+    
+  gouel-front:
+    build:
+      context: ./
+      dockerfile: ./release/front.dockerfile
+    volumes:
+      - gouel-front:/code/app
+    depends_on:
+      - gouel-server
+      - redis
+    links:
+      - "gouel-server:gouel-server"
+      - "redis:redis"
+    ports:
+      - "5001:5001"
+  
+  webapp:
+    build:
+      context: ./
+      dockerfile: ./release/webapp.dockerfile
+    ports:
+      - "5003:80"
+  
+  nginx:
+    build:
+      context: ./
+      dockerfile: ./release/nginx.dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - webapp
+      - gouel-front
+      - gouel-server
+    links:
+      - "webapp:webapp"
+      - "gouel-front:gouel-front"
+      - "gouel-server:gouel-server"
+    volumes:
+      - "nginx:/etc/nginx"
+
+
 
 volumes:
   gouel-redis:
   gouel-mongo:
+  gouel-front:
+  nginx:
