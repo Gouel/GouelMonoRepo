@@ -41,7 +41,7 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 			c.Set("role", claims["role"])
 			c.Set("events", claims["events"])
 		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token invalide"})
 			return
 		}
 

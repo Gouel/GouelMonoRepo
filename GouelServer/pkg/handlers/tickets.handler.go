@@ -19,6 +19,8 @@ func CreateTicketHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, TicketRequestData)
+
 	if TicketRequestData.WasPurchased == nil {
 		TicketRequestData.WasPurchased = new(bool)
 		*TicketRequestData.WasPurchased = true
@@ -40,6 +42,7 @@ func CreateTicketHandler(c *gin.Context) {
 // DeleteTicketHandler supprime un ticket
 func DeleteTicketHandler(c *gin.Context) {
 	ticketId := c.Param("ticket_id")
+	database.LogAction(c, nil)
 
 	err := database.DeleteTicket(ticketId)
 	if err != nil {
@@ -54,6 +57,8 @@ func ValidateTicketHandler(c *gin.Context) {
 	var requestData struct {
 		TicketId string `json:"TicketId"`
 	}
+	database.LogAction(c, requestData)
+
 	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
@@ -83,6 +88,8 @@ func SetSamHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, requestData)
 
 	err := database.SetSAM(requestData.TicketId, eventId, requestData.IsSam)
 	if err != nil {
@@ -145,6 +152,8 @@ func ReturnEcoCupHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, requestData)
 
 	err := database.ReturnEcoCup(requestData.TicketId)
 	if err != nil {

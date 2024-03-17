@@ -137,6 +137,8 @@ func AddEventHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, newEvent)
+
 	eventId, err := database.AddEvent(newEvent)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -154,6 +156,8 @@ func AddTicketToEventHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, ticketData)
+
 	err := database.AddEventTicketToEvent(eventId, ticketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -169,6 +173,8 @@ func AddLockerToEventHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, lockerData)
 
 	err := database.AddLockerToEvent(eventId, lockerData)
 	if err != nil {
@@ -192,6 +198,8 @@ func AddRangeOfLockersHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, lockerRangeData)
+
 	lockers, err := database.AddRangeOfLockersToEvent(eventId, lockerRangeData.Start, lockerRangeData.End, lockerRangeData.Prefix, lockerRangeData.Suffix)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -209,6 +217,8 @@ func AddVolunteerToEventHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, volunteerData)
+
 	err := database.AddVolunteerToEvent(eventId, volunteerData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -225,6 +235,8 @@ func AddProductToEventHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, productData)
 
 	err := database.AddProductToEvent(eventId, productData)
 	if err != nil {
@@ -245,6 +257,8 @@ func UpdateEventHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, eventData)
+
 	err := database.UpdateEvent(eventId, eventData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -261,6 +275,8 @@ func UpdateLockerHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, lockerData)
 
 	err := database.UpdateLocker(eventId, lockerData)
 	if err != nil {
@@ -280,6 +296,8 @@ func UpdateProductHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, productData)
+
 	err := database.UpdateProduct(eventId, product_code, productData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -296,6 +314,9 @@ func UpdateVolunteerHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, volunteer)
+
 	err := database.UpdateVolunteer(eventId, volunteer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -314,6 +335,8 @@ func UpdateTicketHandler(c *gin.Context) {
 		return
 	}
 
+	database.LogAction(c, ticketData)
+
 	err := database.UpdateEventTicket(eventId, ticketCode, ticketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -326,17 +349,20 @@ func UpdateTicketHandler(c *gin.Context) {
 
 func DeleteEventHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
-
+	database.LogAction(c, nil)
 	err := database.DeleteEvent(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé avec succès"})
 }
 func DeleteEventTicketHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	ticketCode := c.Param("ticket_code")
+
+	database.LogAction(c, nil)
 
 	err := database.DeleteEventTicket(eventId, ticketCode)
 	if err != nil {
@@ -349,6 +375,8 @@ func DeleteLockerHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	lockerCode := c.Param("locker_code")
 
+	database.LogAction(c, nil)
+
 	err := database.DeleteLocker(eventId, lockerCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -358,6 +386,8 @@ func DeleteLockerHandler(c *gin.Context) {
 }
 func DeleteAllLockersHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
+
+	database.LogAction(c, nil)
 
 	err := database.DeleteAllLockers(eventId)
 	if err != nil {
@@ -369,6 +399,8 @@ func DeleteAllLockersHandler(c *gin.Context) {
 func DeleteVolunteerHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	userId := c.Param("user_id")
+
+	database.LogAction(c, nil)
 
 	err := database.DeleteVolunteer(eventId, userId)
 	if err != nil {
@@ -386,6 +418,8 @@ func DeleteVolunteerHandler(c *gin.Context) {
 func DeleteProductHandler(c *gin.Context) {
 	eventId := c.Param("event_id")
 	productCode := c.Param("product_code")
+
+	database.LogAction(c, nil)
 
 	err := database.DeleteProduct(eventId, productCode)
 	if err != nil {

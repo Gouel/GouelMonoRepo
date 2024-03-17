@@ -553,7 +553,7 @@ func DeleteVolunteer(eventId, userId string) error {
 		return err
 	}
 
-	userOid, err := primitive.ObjectIDFromHex(userId)
+	userOid, _ := primitive.ObjectIDFromHex(userId)
 
 	for _, volunteer := range event.Volunteers {
 		if volunteer.UserId == userOid && volunteer.IsAdmin {

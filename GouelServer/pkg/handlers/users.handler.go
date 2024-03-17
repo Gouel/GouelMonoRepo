@@ -59,6 +59,12 @@ func CreateUserHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	logData := newUser
+	if logData.Password != "" {
+		logData.Password = "********"
+	}
+	database.LogAction(c, logData)
+
 	userId, err := database.CreateUser(newUser)
 	if err != nil {
 		if err.Error() == "email already registered" {
@@ -81,6 +87,12 @@ func UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
+	logData := updateData
+	if updateData["Password"] != nil {
+		logData["Password"] = "********"
+	}
+	database.LogAction(c, logData)
+
 	// Mettre à jour l'utilisateur dans la base de données
 	err := database.UpdateUser(userId, updateData)
 	if err != nil {
@@ -98,6 +110,8 @@ func AddUserTransactionHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides"})
 		return
 	}
+
+	database.LogAction(c, transaction)
 
 	err := database.AddUserTransaction(userId, transaction)
 	if err != nil {
@@ -125,6 +139,8 @@ func UserPayHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données d'entrée invalides", "code": 0x01})
 		return
 	}
+
+	database.LogAction(c, purchaseItems)
 
 	ticket, err := database.GetTicketInfo(ticketId, &eventId)
 	if err != nil {
