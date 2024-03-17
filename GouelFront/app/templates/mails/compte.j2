@@ -27,6 +27,11 @@
         <p>Une fois le mot de passe enregistré vous pourrez vous connecter en utilisant votre Email et votre mot de
             passe</p>
         <p>Attention ce lien n'est actif que dans les 24h après la création du compte</p>
+
+        {% else %}
+        <p>Vous pouvez vous connecter en utilisant votre Email et votre mot de passe</p>
+        <a href="{{url_for('main.login', _external=True)}}" target="_blank" rel="noopener noreferrer">Se connecter sur
+            Gouel</a>
         {% endif %}
         <br>
         <p>Si vous n'avez pas demandé la création de ce compte, veuillez ignorer ce message.</p>

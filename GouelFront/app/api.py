@@ -189,3 +189,31 @@ def verify_name(name: str, key: str = "nom") -> tuple[bool, str]:
     # Si toutes les vérifications sont passées
     correct_name = True
     return correct_name, f"Le {key} est valide"
+
+
+def check_errors(
+    first_name, last_name, email, dob, check_user_email: bool = False
+) -> tuple[str, int]:
+    if first_name == last_name:
+        return "Nom et prénom ne doivent pas être identique", 400
+
+    res, err = verify_name(first_name, "prénom")
+    if not res:
+        return err, 400
+
+    res, err = verify_name(last_name, "nom")
+    if not res:
+        return err, 400
+
+    if not re.match(r"[^@]+@[^@]+\.[^@]+\b", email):
+        return "Email non conforme", 400
+
+    if not re.match(r"^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$", dob):
+        return "Date de naissance non conforme", 400
+
+    if check_user_email:
+        user = GouelHelper(get_ga()).get_user("", email=email)
+        if user is not None:
+            return f"Email déjà utilisée ({email})", 400
+
+    return "", 200

@@ -21,6 +21,8 @@ from .mail import EmailSender
 from .cache import MagicLink
 from .qrcode_gen import qrcode_total
 
+from .api import check_errors
+
 main = Blueprint("main", __name__)
 
 
@@ -153,6 +155,47 @@ def login():
 
 @main.route("/inscription", methods=["GET", "POST"])
 def signin():
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+        password_confirm = request.form["password_confirm"]
+        first_name = request.form["firstName"]
+        last_name = request.form["lastName"]
+        dob = request.form["age"]
+
+        pb = check_errors(first_name, last_name, email, dob)
+
+        if password != password_confirm:
+            flash("Les mots de passe ne correspondent pas.", "error")
+        elif password == "":
+            flash("Veuillez entrer un mot de passe.", "error")
+        elif pb[1] != 200:
+            flash(pb[0], "error")
+        else:
+            ok, userId = GouelHelper(get_ga()).add_user(
+                {
+                    "Email": email,
+                    "Password": password,
+                    "FirstName": first_name,
+                    "LastName": last_name,
+                    "DOB": dob,
+                }
+            )
+            if ok:
+                get_email_sender().send_email(
+                    "Création de votre compte Gouel",
+                    email,
+                    render_template("mails/compte.j2", user={"Email": email}),
+                )
+
+                flash("Votre compte a été créé avec succès.", "success")
+                return redirect(url_for("main.login"))
+            else:
+                flash(
+                    "Une erreur est survenue lors de la création de votre compte.",
+                    "error",
+                )
+
     return render_template("pages/client/auth/inscription.j2")
 
 
