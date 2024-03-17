@@ -20,7 +20,7 @@ class GouelHelper:
         return self.ga.get("/config/smtp").json()
 
     def get_events(self, to_dict: bool = False):
-        events = self.ga.get("/events").json()
+        events = self.ga.get("/events").json() or []
         if not to_dict:
             return events
 
