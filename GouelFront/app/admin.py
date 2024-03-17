@@ -14,6 +14,8 @@ from .helper import GouelHelper
 import json
 import os
 
+from .qrcode_gen import qrcode_total
+
 from .cache import MagicLink
 
 admin = Blueprint("admin", __name__)
@@ -171,9 +173,8 @@ def manage_volunteers(event_id: str):
                     return redirect(
                         url_for("admin.manage_volunteers", event_id=event_id)
                     )
-
                 mdp_link = MagicLink(
-                    "reset_password", {"UserId": user["ID"]}, 24 * 60 * 60
+                    "reset_password", {"UserId": r["UserId"]}, 24 * 60 * 60
                 )
 
                 email_sender.send_email(
@@ -239,6 +240,32 @@ def manage_volunteers(event_id: str):
 
                 r = GouelHelper(get_ga()).add_ticket(
                     event_id, event_ticket_code, ticket
+                )
+
+                qr = qrcode_total(r)
+
+                if "mailConf" not in session:
+                    session["mailConf"] = GouelHelper(get_ga()).get_conf_smtp()
+
+                smtp = session["mailConf"]
+                email_sender = EmailSender(
+                    smtp["SMTPServer"],
+                    smtp["SMTPPort"],
+                    smtp["Email"],
+                    smtp["EmailPassword"],
+                )
+                user = GouelHelper(get_ga()).get_user(volunteer["UserId"])
+                email_sender.send_email(
+                    "Confirmation de l'achat de votre billet",
+                    user["Email"],
+                    render_template(
+                        "mails/ticket.j2",
+                        qrcodeBase64=qr,
+                        user=user,
+                        ticketId=r,
+                        event_id=event_id,
+                        event_name=g.event["Title"],
+                    ),
                 )
 
         if r:

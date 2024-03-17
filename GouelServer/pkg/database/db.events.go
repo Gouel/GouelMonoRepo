@@ -28,8 +28,7 @@ func GetAccessibleEvents(userId, userRole string) ([]models.Event, error) {
 		oid, _ := primitive.ObjectIDFromHex(userId)
 		filter = bson.M{
 			"$or": []bson.M{
-				{"IsPublic": true},
-				{"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": oid, "IsAdmin": true}}},
+				{"Volunteers": bson.M{"$elemMatch": bson.M{"UserId": oid}}},
 			},
 		}
 	}

@@ -59,11 +59,6 @@ func CreateUserHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	logData := newUser
-	if logData.Password != "" {
-		logData.Password = "********"
-	}
-	database.LogAction(c, logData)
 
 	userId, err := database.CreateUser(newUser)
 	if err != nil {
@@ -74,6 +69,12 @@ func CreateUserHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	logData := newUser
+	if logData.Password != "" {
+		logData.Password = "********"
+	}
+	database.LogAction(c, logData)
 
 	c.JSON(http.StatusOK, gin.H{"UserId": userId})
 }
@@ -87,18 +88,19 @@ func UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	logData := updateData
-	if updateData["Password"] != nil {
-		logData["Password"] = "********"
-	}
-	database.LogAction(c, logData)
-
 	// Mettre à jour l'utilisateur dans la base de données
 	err := database.UpdateUser(userId, updateData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	logData := updateData
+	if updateData["Password"] != nil {
+		logData["Password"] = "********"
+	}
+	database.LogAction(c, logData)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Utilisateur mis à jour"})
 }
 
