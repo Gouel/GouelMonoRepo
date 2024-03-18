@@ -29,7 +29,8 @@ services:
       context: ./
       dockerfile: ./release/front.dockerfile
     volumes:
-      - gouel-front:/code/app
+      - ./GouelFront:/code/app
+      - "gouel-front:/code/app/app/static/img/events"
     depends_on:
       - gouel-server
       - redis

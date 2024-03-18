@@ -1,7 +1,6 @@
 FROM python:3.11
 WORKDIR /code/app
-COPY ./GouelFront ./
-COPY ./release/env/front.env .env
+COPY  ["./GouelFront", "/code/app/"]
 
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 

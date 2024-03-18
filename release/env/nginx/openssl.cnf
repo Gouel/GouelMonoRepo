@@ -1,0 +1,22 @@
+[ req ]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+req_extensions     = req_ext
+
+[ dn ]
+C=FR
+ST=YourState
+L=YourCity
+O=YourOrganization
+OU=YourOrganizationalUnit
+emailAddress=youremail@example.com
+CN = *.example.com
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = *.example.com
+DNS.2 = example.com
