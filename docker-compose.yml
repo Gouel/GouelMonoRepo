@@ -23,6 +23,8 @@ services:
       - mongodb
     links:
       - "mongodb:mongodb"
+    volumes:
+      - ./GouelServer:/usr/src/app
     
   gouel-front:
     build:

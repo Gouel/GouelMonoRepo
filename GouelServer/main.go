@@ -11,6 +11,7 @@ import (
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/database"
 	"github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/models"
 	routes "github.com/Gouel/GouelMonoRepo/tree/main/GouelServer/pkg/router"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,8 +26,8 @@ func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "--setup":
-			setupSuperAdmin(cfg)
-			setupAPI(cfg)
+			setupSuperAdmin()
+			setupAPI()
 		case "--secret":
 			// 64 bits peu sécurisé => 256bits OK
 			generateSecretKey(256)
@@ -85,6 +86,9 @@ func main() {
 	// Initialiser le framework Gin
 	router := gin.Default()
 
+	// Configurer Gin pour envoyer les rêquetes CORS
+	router.Use(cors.Default())
+
 	// Configurer Gin pour ne pas faire confiance à tous les proxies
 	router.SetTrustedProxies(cfg.TrustedProxies)
 
@@ -100,7 +104,7 @@ func main() {
 	fmt.Printf("Serveur lancé sur l'adresse %s\n", cfg.ServerHost+":"+cfg.ServerPort)
 }
 
-func setupSuperAdmin(cfg config.Config) {
+func setupSuperAdmin() {
 	password := os.Getenv("SUPERADMIN_PASSWORD")
 	email := os.Getenv("SUPERADMIN_EMAIL")
 	dob := os.Getenv("SUPERADMIN_DOB")
@@ -123,7 +127,7 @@ func setupSuperAdmin(cfg config.Config) {
 	log.Println("Super administrateur créé avec succès")
 }
 
-func setupAPI(cfg config.Config) {
+func setupAPI() {
 	password := os.Getenv("API_PASSWORD")
 	email := os.Getenv("API_EMAIL")
 	userAPI := models.User{

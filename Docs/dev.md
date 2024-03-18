@@ -29,7 +29,7 @@ bash gen_cert.sh
 
 ### Mise en places des environnements
 
-Il y a deux fichiers `.env` à créer / compléter : 
+Il y a deux fichiers `.env` à créer / compléter :
 
 - Pour le `front` : [exemple](https://github.com/Gouel/GouelMonoRepo/blob/main/GouelFront/.exemple.env)
   - Note : Pour pouvoir utiliser l'API d'HelloAsso, il faut forcément que le champs `SERVER_NAME` commence par `https://`
@@ -37,10 +37,6 @@ Il y a deux fichiers `.env` à créer / compléter :
   - Note: GouelFront à besoin d'un serveur mail (SMTP) pour envoyer les différents messages. Gouel ne fournit pas de configuration. C'est à vous de gérer.
 
 Le plus simple est de remplacer les `exemple.env` en `.env` dans leurs dossiers respectifs
-
-> [!WARNING]
-> Le build du server va copier le fichier `release/env/server.env` dans le container du GouelServer. Ce qui va remplacer le `.env` originel.
-> Il est donc conseillé d'avoir soit la même chose dans les deux, soit de faire un lien symbolique
 
 ### Lancement de la solution
 
@@ -55,12 +51,11 @@ docker-compose -p "release_gouel" up -d
 > Pour cela il faut lancer la commande suivante
 > `docker exec -ti <NOM_CONTAINER_GOUEL_SERVER|release_gouel-gouel-server-1> go run main.go --setup`
 
-
 Et voilà, votre serveur Gouel est prêt.
 
 ## Utilisation
 
-Une fois le docker-compose lancé, plusieurs pages seront disponibles : 
+Une fois le docker-compose lancé, plusieurs pages seront disponibles :
 
 - `https://www.<domain>` : GouelFront
 - `https://app.<domain>` : GouelApp (version webapp)
