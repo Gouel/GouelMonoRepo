@@ -9,60 +9,68 @@
 > - Git
 > - Une machine Linux ou MacOs (windows n'est pas encore pris en charge)
 
+### Récupération du projet à partir de git
+
 ```bash
     git clone https://github.com/Gouel/GouelMonoRepo.git
     cd ./GouelMonoRepo
-    docker-compose up -d
 ```
 
-Ces lignes vont cloner le repository de Gouel, puis installer et lancer les bases de données (Redis / MongoDB)
-
-```bash
-    cd ./GouelServer
-    ./build.sh
-    # Si besoin ajouter la permission d'execution
-    chmod u+x GouelServer
-```
-
-Ceci va générer le binaire du serveur Gouel (sous le nom GouelServer)
-
-Il faudra ensuite créer un fichier `.env` au même endroit que le fichier `GouelServer`. Un exemple de fichier est fourni [.example.env](https://github.com/Gouel/GouelMonoRepo/blob/main/GouelServer/.exemple.env)
-
-Pour vous aidez à générer un JWT_SECRET_KEY fort vous avez un outil directement intégré dans `GouelServer`
+### Création du certificat HTTPS
 
 > [!WARNING]
-> Il est possible que l'outil refuse de fonctionner si les champs liés à MongoDB ne sont pas remplis dans le `.env`
+> Il faut compléter le fichier `./release/env/nginx/openssl.cnf` avant de lancer le script bash
+> De plus il faut aussi changer la configuration de nginx [default.conf](https://github.com/Gouel/GouelMonoRepo/blob/main/release/env/nginx/default.conf) pour utiliser le même domaine que votre `openssl.cnf`
 
 ```bash
-    ./GouelServer --secret
+cd ./release/env/nginx
+bash gen_cert.sh
 ```
 
-Une fois le fichier `.env` complété. Il vous sera possible de instancier le serveur puis de le lancer.
+### Mise en places des environnements
+
+Il y a deux fichiers `.env` à créer / compléter : 
+
+- Pour le `front` : [exemple](https://github.com/Gouel/GouelMonoRepo/blob/main/GouelFront/.exemple.env)
+  - Note : Pour pouvoir utiliser l'API d'HelloAsso, il faut forcément que le champs `SERVER_NAME` commence par `https://`
+- Pour le `back` : [exemple](https://github.com/Gouel/GouelMonoRepo/blob/main/GouelServer/.exemple.env)
+  - Note: GouelFront à besoin d'un serveur mail (SMTP) pour envoyer les différents messages. Gouel ne fournit pas de configuration. C'est à vous de gérer.
+
+Le plus simple est de remplacer les `exemple.env` en `.env` dans leurs dossiers respectifs
+
+> [!WARNING]
+> Le build du server va copier le fichier `release/env/server.env` dans le container du GouelServer. Ce qui va remplacer le `.env` originel.
+> Il est donc conseillé d'avoir soit la même chose dans les deux, soit de faire un lien symbolique
+
+### Lancement de la solution
+
+Vous pouvez maintenant lancer le docker compose
 
 ```bash
-    ./GouelServer --setup
-    ./GouelServer
+docker-compose -p "release_gouel" up -d
 ```
 
-> [!NOTE]
-> Il est possible d'importer et d'exporter la base de données.
-> Dans le cas de l'importation, `--setup` n'est pas obligatoire
-> **Attention** : Ces arguments nécessite l'installation d'un packet externe [mongodb tools](https://www.mongodb.com/docs/database-tools/)
+> [!WARNING]
+> Au premier lancement, il faudra générer les comptes SUPERADMIN et API
+> Pour cela il faut lancer la commande suivante
+> `docker exec -ti <NOM_CONTAINER_GOUEL_SERVER|release_gouel-gouel-server-1> go run main.go --setup`
 
-```bash
-    ./GouelServer --export ./out.gz
-    ./GouelServer --import ./in.gz
-```
 
 Et voilà, votre serveur Gouel est prêt.
 
 ## Utilisation
 
-Une fois lancé, GouelServeur produit une API Rest sur le socket configuré (`.env`).
-Il n'y a pas encore de mapping des routes de l'API. Cependant plusieurs ressources existent:
+Une fois le docker-compose lancé, plusieurs pages seront disponibles : 
 
-- PostMan : [`Docs/gouel.postman.json`](https://github.com/Gouel/GouelMonoRepo/blob/main/Docs/gouel.postman.json)
-- Code source : [`GouelServer/pkg/router/routes.go`](https://github.com/Gouel/GouelMonoRepo/blob/main/GouelServer/pkg/router/routes.go)
+- `https://www.<domain>` : GouelFront
+- `https://app.<domain>` : GouelApp (version webapp)
+- `https://server.<domain>` : GouelServer (Api REST)
+- Sinon il est possible d'accéder aux différents services avec `<ip pc>:<port service>`. La liste des ports de chaque service est disponible dans le [docker-compose.yml](https://github.com/Gouel/GouelMonoRepo/blob/main/docker-compose.yml)
+
+> [!IMPORTANT]
+> L'application android Gouel ne supporte pas les certificats auto-signés. Il faudra donc rentrer `http://<ip pc>:5002` dans les paramètres de l'application
+
+Si vous avez un problème, faites une issue et j'essayerai de le résoudre / de vous aider.
 
 > [!TIP]
 > Vous pouvez aussi ajouter des données directement dans la base de donnée sans passer par le serveur.
